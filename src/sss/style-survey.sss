@@ -1,0 +1,113 @@
+@import '_variables.sss'
+@import '_variables_admin.sss'
+@import '_mixins.sss'
+
+.survey-print
+    h1,
+    h2,
+    p.center
+        text-align: center
+    td
+        vertical-align: top
+    .fix
+        @util clearfix
+    .fix-page
+        @util clearfix
+        page-break-after: always
+    h1
+        font-size: 5mm
+        margin-top: 1mm
+    h2
+        font-size: 4mm
+    h1,
+    h2
+        margin-bottom: 3mm
+    p,
+    ul
+        margin: 1mm
+    li
+        margin: 0
+    td
+        margin: 2mm 4mm
+    p,
+    td
+        font-size: 3mm
+        line-height: 3.2mm
+    ul
+        padding-left: 2mm
+    .split
+        width: 50%
+        float: left
+    .survey-underline-bold
+        font-weight: $bold
+        padding: 0 2mm
+        border-bottom: 0.1mm solid black
+        margin: 0 1mm
+    .survey-bold
+        font-weight: $bold
+    .signature-underline
+        font-weight: $bold
+        width: 90%
+        margin-top: 6mm
+        font-size: 4mm
+        border-bottom: 0.1mm solid black
+    .signature-underline-empty
+        font-weight: $bold
+        width: 90%
+        height: 1cm
+        border-bottom: 0.1mm solid black
+    .signature
+        width: 90%
+        text-align: center
+        font-size: 2.5mm
+        height: 2mm
+
+.hrs-title
+    position: relative
+    width: 98%
+    img
+        width: 100%
+
+.hrs-title-table
+    width: 100%
+    position: absolute
+    bottom: 0
+    table
+        font-size: 3.8mm
+        margin: auto
+
+.hrs-body
+    width: 98%
+    h1
+        text-align: center
+        font-size: 7mm
+    table.hrs-table-about,
+    table.hrs-footer
+        width: 100%
+        border-collapse: collapse
+        border: 1px solid black
+        td,
+        tr
+            border: 1px solid black
+        td
+            width: 20%
+    table.hrs-table-data
+        margin-top: 5mm
+        width: 100%
+        border: 1px solid black
+        border-collapse: collapse
+        td,
+        tr
+            border: 1px solid black
+    td
+        text-align: center
+        padding: 1mm
+        font-size: 3.5mm
+    .hrs-bold
+        font-weight: $bold
+    table.hrs-footer
+        margin-top: 5mm
+        page-break-after: always
+
+@page
+    margin: 5mm

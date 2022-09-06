@@ -1,0 +1,182 @@
+div#calendar
+    margin: 0 auto 0
+    padding: 0
+    width: 20vw
+    font-family: Helvetica, "Times New Roman", Times, serif
+    @media (--mobile)
+        margin: 12vw auto 0
+        width: 95vw
+
+div#calendar div.box
+    position: relative
+    top: 0
+    left: 0
+    width: 100%
+    height: 1.8vw
+    background-color: $color-title
+    @media (--mobile)
+        width: 100%
+        height: 8.55vw
+
+div#calendar div.header
+    line-height: 1.8vw
+    vertical-align: middle
+    position: absolute
+    left: 1vw
+    top: 0
+    width: 18vw
+    height: 1.8vw
+    text-align: center
+    @media (--mobile)
+        line-height: 8.55vw
+        left: 4.75vw
+        width: 85.5vw
+        height: 8.55vw
+
+div#calendar div.header a.rkg-cal-prev,
+div#calendar div.header a.rkg-cal-next
+    position: absolute
+    top: 0
+    height: 1vw
+    display: block
+    cursor: pointer
+    text-decoration: none
+    color: #fff
+    @media (--mobile)
+        top: 1.9vw
+        height: 4.75vw
+
+div#calendar div.header span.title
+    color: #fff
+    font-size: 1.2vw
+    @media (--mobile)
+        font-size: 14px
+
+div#calendar div.header a.rkg-cal-prev
+    left: 0
+
+div#calendar div.header a.rkg-cal-next
+    right: 0
+
+div#calendar div.box-content
+    border: 1px solid #787878
+    border-top: none
+
+div#calendar ul.label
+    float: left
+    margin: 0
+    padding: 0
+    margin-top: 0.2vw
+    margin-left: 0.2vw
+    @media (--mobile)
+        margin-top: 0.95vw
+        margin-left: 0.95vw
+
+div#calendar ul.label li
+    margin: 0
+    padding: 0
+    margin-right: 0.2vw
+    float: left
+    list-style-type: none
+    width: 2.6vw
+    height: 2.5vw
+    line-height: 2.6vw
+    vertical-align: middle
+    text-align: center
+    color: #000
+    font-size: 0.9vw
+    background-color: transparent
+    @media (--mobile)
+        margin-right: 0.95vw
+        width: 12.35vw
+        height: 11.875vw
+        line-height: 12.35vw
+        font-size: 14px
+
+div#calendar ul.dates
+    float: left
+    margin: 0
+    padding: 0
+    margin-left: 0.2vw
+    margin-bottom: 0.2vw
+    @media (--mobile)
+        margin-left: 0.95vw
+        margin-bottom: 0.95vw
+
+/** overall width = width+padding-right**/
+
+div#calendar ul.dates li
+    position: relative
+    margin: 0
+    padding: 0
+    margin-right: 0.2vw
+    margin-top: 0.2vw
+    line-height: 2.6vw
+    vertical-align: middle
+    float: left
+    list-style-type: none
+    width: 2.6vw
+    height: 2.6vw
+    font-size: 1.5vw
+    background-color: #ddd
+    color: #000
+    text-align: center
+    @media (--mobile)
+        margin-right: 0.95vw
+        margin-top: 0.95vw
+        line-height: 12.35vw
+        width: 12.35vw
+        height: 12.35vw
+        font-size: 14px
+
+div#calendar ul.dates li.single
+    cursor: pointer
+    background-color: color($color-title tint(50%))
+    color: white
+
+div#calendar ul.dates li.multiple
+    cursor: pointer
+    background-color: $color-title
+    color: white
+
+div#calendar ul.dates li div.date-excursions
+    @util position(absolute, 100% 0 null null)
+    display: none
+    box-shadow: 0 4px 8px 0 color(black a(50%)), 0 6px 20px 0 color(black a(49%))
+    background: white
+    color: $color-main
+    font-weight: $regular
+    font-size: 0.9vw
+    padding: 0.5vw
+    text-align: center
+    cursor: auto
+    z-index: 900
+    text-transform: none
+    line-height: normal
+    min-width: 10vw
+    white-space: nowrap
+    @media (--mobile)
+        @util position(fixed, 0 0 0 0)
+        font-size: 14px
+        z-index: 1005
+        .date-excursions-flex
+            @util position(absolute, 0 0 0 0)
+            display: flex
+            flex-direction: column
+            align-items: center
+            justify-content: center
+    a
+        font-size: 0.9vw
+        color: $color-title
+        font-weight: $regular
+        text-decoration: none
+        text-transform: none
+        @media (--mobile)
+            font-size: 18px
+            margin: 2vw
+            display: block
+    div:not(:first-child)
+        margin-top: 0.5vw
+
+div.clear
+    clear: both

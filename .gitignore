@@ -1,6 +1,9 @@
 # Application
 web/app/plugins/*
 !web/app/plugins/.gitkeep
+!web/app/plugins/rkg-plugin
+!web/app/plugins/rkg-gallery
+!web/app/plugins/rkg-divelog
 web/app/mu-plugins/*/
 web/app/themes/twentytwentytwo/
 web/app/upgrade

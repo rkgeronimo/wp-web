@@ -1,0 +1,2163 @@
+/*!
+ * Theme Name RK Geronimo theme
+ * Description Starter Theme to use with Timber
+ * Author Upstatement and YOU!
+ */
+
+@import '_variables.sss'
+@import '_mixins.sss'
+@import '_icons.sss'
+@import '_calendar.sss'
+
+*
+    font-family: 'Montserrat', sans-serif
+
+body
+    margin: 0
+    padding: 0
+    color: $color-main
+    font-weight: $light
+    font-size: 1.6vw
+    &.modal-open
+        /* overflow: hidden */
+    @media (--mobile)
+        /* line-height: 1500% */
+        font-size: 14px
+
+main
+    margin: 0
+    padding: 0
+
+
+.only-desktop
+    @media (--mobile)
+        display: none
+
+.only-mobile
+    @media (--desktop)
+        display: none
+
+article
+    @util clearfix
+
+input[type=submit],
+button
+    background: white
+    cursor: pointer
+
+.button
+    cursor: pointer
+
+.rkg-meni-background
+    @util position(fixed, 0 0 0 0)
+    z-index: 1009
+    display: none
+    background-color: black
+    opacity: 0.95
+
+.rkg-modal-background
+    @util position(fixed, 0 0 0 0)
+    z-index: 1010
+    display: none
+    background-color: black
+    opacity: 0.5
+
+.modal-dob-container
+    margin: auto
+    width: 22vw
+    display: flex
+    justify-content: space-between
+    @media (--mobile)
+        width: 68vw
+
+.modal-dob
+    font-size: 0.9vw
+    border-radius: none
+    padding: 1vw
+    border: 1px solid color($color-main tint(50%))
+    @media (--mobile)
+        font-size: 14px
+        padding: 4vw
+
+.rkg-modal
+    @util position(fixed, 37.5% null null 50%)
+    transform: translate(-50%, -50%)
+    z-index: 1020
+    display: none
+    padding: 3vw 10vw
+    background: white
+    text-align: center
+    min-width: 30vw
+    transition: width 0.5s, height 0.2s
+    .form-horizontal
+        max-height: 75vh
+        overflow-y: auto
+    .form-hide
+        display: none
+    p
+        margin-bottom: 1vw
+        font-size: 0.9vw
+        &:first-child
+            color: $color-title
+            font-size: 1.6vw
+        .rkg-modal-link
+            color: $color-title
+            cursor: pointer
+    a
+        color: $color-title
+        text-decoration: none
+    input
+        font-size: 0.9vw
+        padding: 1vw
+        width: 20vw
+        border: 1px solid color($color-main tint(50%))
+        &::placeholder
+            color: $color-main
+            font-weight: $medium
+        &[type=submit]
+            margin-top: 1vw
+            width: 10vw
+            border: 1px solid $color-title
+            border-radius: 5vw
+            &:hover
+                background: $color-title
+                color: white
+                font-weight: $medium
+            &:active
+                background: color($color-title tint(15%))
+    .rkg-button
+        display: inline-block
+        color: $color-main
+    button,
+    .rkg-button
+        font-size: 0.9vw
+        padding: 1vw
+        margin-top: 1vw
+        width: 10vw
+        border: 1px solid $color-title
+        border-radius: 5vw
+        &:hover
+            background: $color-title
+            color: white
+            font-weight: $medium
+        &:active
+            background: color($color-title tint(15%))
+    input[type="checkbox"]
+        width: auto
+        margin: 0
+    .rkg-input-size
+        text-align: left
+        display: inline-block
+        width: 22vw
+    .rkg-modal-status
+        display: block
+        height: 2vw
+        &.error
+            color: $color-title-negative
+        &.ok
+            color: $color-title
+    @media (--mobile)
+        @mixin center-vertical
+        width: 100vw
+        box-sizing: border-box
+        padding: 0
+        @util position(fixed, 0 0 0 0)
+        transform: none
+        p
+            margin-bottom: 3vw
+            font-size: 14px
+            &:first-child
+                font-size: 23px
+        input
+            font-size: 14px
+            padding: 4vw
+            width: 60vw
+            &[type=submit]
+                margin-top: 2vw
+                width: 40vw
+                border: 1px solid $color-title
+                border-radius: 10vw
+        button
+            font-size: 14px
+            padding: 2vw
+            margin-top: 2vw
+            width: 30vw
+            border: 1px solid $color-title
+            border-radius: 10vw
+        input[type="checkbox"]
+            width: auto
+        .rkg-input-size
+            display: inline-block
+            width: 64vw
+        form
+            width: 98%
+
+.rkg-modal-close
+    @mixin x $color-main, 1.5vw
+    @util position(absolute, 1vw 1vw null null)
+    @media (--mobile)
+        @mixin x $color-main, 7vw, 0.5vw
+        @util position(absolute, 5vw 5vw null null)
+
+.rkg-info-close
+    display: none
+    @media (--mobile)
+        display: block
+        @mixin x $color-main, 7vw, 0.5vw
+        @util position(absolute, 5vw 5vw null null)
+
+.rkg-modal-logo
+    display: none
+    @media (--mobile)
+        display: block
+        @util position(absolute, 0 null null 0)
+
+.rkg-modal-flex
+    @media (--mobile)
+        height: 100%
+        width: 100%
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+
+.indicator
+    display: none
+
+.rkg-meni
+    @util position(fixed, -50% 0 50% 0)
+    z-index: 1010
+    display: none
+    overflow: hidden
+    color: $color-header
+
+.rkg-meni-title
+    display: block
+    margin: 8vw auto 6vw
+    color: $color-header
+    text-align: center
+    text-decoration: none
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 2.2vw
+    @media (--mobile)
+        margin: 20vw auto
+        font-size: 23px
+
+.rkg-meni-external
+    @util position(absolute, null null 2.5vw null)
+    width: 100%
+    text-align: center
+    font-size: 3.5vw
+    a
+        margin: 0 1.2vw
+        color: $color-header
+        &:hover
+            color: color($color-header a(80%))
+    @media (--mobile)
+        margin-bottom: 4vh
+        a
+            margin: 0 5vw
+            font-size: 30px
+
+.rkg-profile-meni
+    @util position(fixed, 6vw 5vw null null)
+    z-index: 1020
+    display: none
+    width: 15vw
+    background: white
+    box-shadow: 0 4px 8px 0 color(black a(50%)), 0 6px 20px 0 color(black a(49%))
+    > div,
+    a
+        padding: 1vw
+        border-bottom: 1px solid $color-main
+        font-size: 0.9vw
+    ul
+        list-style: none
+        display: none
+        margin: 0
+        padding: 0
+        border-bottom: 1px solid $color-main
+    li
+        a
+            padding-left: 3vw
+    div
+        p:first-child
+            color: $color-title
+            font-weight: $medium
+    a
+        display: block
+        color: $color-title
+        text-decoration: none
+        font-weight: $medium
+        &:last-child
+            border-bottom: none
+        &:hover
+            background: color(white shade(15%))
+        &:active
+            background: color(white shade(25%))
+        &::before
+            padding-right: 0.5vw
+    .rkg-profile-meni-controls
+        display: none
+    > .rkg-profile-meni-item-group
+        padding: 0
+    @media (--mobile)
+        box-shadow: none
+        @util position(fixed, 0 null 0 -90vw)
+        display: block
+        padding-top: 18vw
+        width: 90vw
+        overflow-y: auto
+        transition: left 0.2s
+        > div,
+        a
+            padding: 2vh
+            font-size: 14px
+        a::before
+            padding-right: 6vw
+        .rkg-profile-meni-controls
+            display: block
+            @util position(absolute, 0 0 null 0)
+            border: none
+            padding: 0
+            a
+                padding: 0
+            .rkg-profile-meni-close
+                @mixin x $color-main, 7vw, 0.5vw
+                @util position(absolute, 5vw 5vw null null)
+        li
+            a
+                padding-left: 12vw
+        > .rkg-profile-meni-item-group
+            padding: 1
+            margin-bottom: 10vh
+        .rkg-profile-meni-messages
+            min-height: 53vh
+
+.rkg-profile-meni-item
+    .hover
+        display: none
+    &:hover
+        .no-hover
+            display: none
+        .hover
+            display: inline
+
+.rkg-profile-meni-item-fixed
+    @media (--mobile)
+        @util position(fixed, null 0 0 0)
+        background: white
+        &::before
+            @util position(absolute, -7.1vh 0 null 0)
+            height: 7vh
+            background: linear-gradient(to bottom, color(white a(0)) 0%, color(white a(100%)) 100%)
+            border-bottom: 1px solid $color-main
+            content: ''
+            pointer-events: none
+
+.dashicons-before::before
+    width: 1.1vw !important
+    height: 1.1vw !important
+    font-size: 1.1vw !important
+    @media (--mobile)
+        width: 3vh !important
+        height: 3vh !important
+        font-size: 14px !important
+
+.power
+    @mixin power $color-title, 1.1vw, 0.15vw
+    display: inline-block
+    padding: 0 0.5vw 0 0
+    @media (--mobile)
+        @mixin power $color-title, 4.5vw, 0.5vw
+        padding: 0 6vw 0 0
+
+#nav-main
+    ul
+        margin: 0
+        padding: 0
+        list-style: none
+        li
+            margin-bottom: 1.3vw
+            list-style: none
+            text-align: center
+            a
+                color: $color-header
+                text-decoration: none
+                font-weight: $regular
+                font-size: 2.2vw
+                &:hover
+                    color: color($color-header a(80%))
+            @media (--mobile)
+                margin-bottom: 2vh
+                a
+                    font-size: 23px
+
+.rkg-header
+    position: relative
+    overflow: hidden
+    max-height: 100vh
+    width: 100%
+    height: 100vh
+    background-image: url('assets/img/hero.jpg')
+    background-position: center top
+    background-size: cover
+    color: $color-header
+    @media (--mobile)
+        background-image: url('assets/img/hero-mobile.jpg')
+        background-position: center bottom
+
+.rkg-header-gradient
+    @util position(absolute, 0 0 0 0)
+    background: linear-gradient(to bottom, color(black a(0)) 99%, color(black a(50%)) 100%)
+
+.rkg-footer
+    margin-top: 15vw
+    width: 100%
+    background-position: center center
+    background-size: cover
+    color: $color-header
+    text-align: center
+
+.rkg-footer-gradient
+    @util size(100%)
+    background: linear-gradient(to bottom, color(black a(50%)) 0, color(black a(0)) 2%)
+
+.rkg-footer-title
+    margin-bottom: 4vw
+    padding-top: 6vw
+    text-transform: uppercase
+    font-weight: $regular
+    font-size: 3vw
+    @media (--mobile)
+        margin-bottom: 6vh
+        padding-top: 35vh
+        font-size: 6vw
+        p
+            margin-bottom: 3.5vh
+
+.rkg-footer-text
+    margin-bottom: 4vw
+    font-weight: $regular
+    font-size: 1.2vw
+    @media (--mobile)
+        margin-bottom: 6vh
+        font-size: 2.3vw
+
+.rkg-footer-external
+    margin-bottom: 3vw
+    a
+        margin: 0 2.5vw
+        color: $color-header
+        font-size: 3vw
+        opacity: 0.5
+        &:hover
+            color: color($color-header a(50%))
+    @media (--mobile)
+        margin-bottom: 7vh
+        a
+            margin: 0 5vw
+            font-size: 8vw
+
+.rkg-footer-copy
+    padding-bottom: 0.5vw
+    font-weight: $light
+    font-size: 0.9vw
+    opacity: 0.5
+    @media (--mobile)
+        padding-bottom: 3vh
+        font-size: 1.8vw
+
+.rkg-top-stick
+    position: relative
+    z-index: 1005
+    height: 8vw
+    pointer-events: none
+    *
+        pointer-events: auto
+    @media (--mobile)
+        height: 18vw
+        background: white
+
+.sticky
+    @util position(fixed, 0 0 null 0)
+
+.sticky + #content
+    padding-top: 8vw
+    @media (--mobile)
+        padding-top: 18vw
+
+.rkg-front-hide
+    display: none
+
+.rkg-top-logo
+    margin-left: 2.5vw
+    height: 8vw
+    @media (--mobile)
+        height: 18vw
+
+#rkg-top-meni
+    @util position(absolute, 2.5vw 2.5vw null null)
+    i
+        margin-left: 2.5vw
+        color: $color-title
+        font-size: 2.5vw
+        cursor: pointer
+        &:hover
+            color: color($color-title a(80%))
+    .rkg-meni-open
+        margin-left: 2.5vw
+    @media (--mobile)
+        top: 5vw
+        right: 5vw
+        i
+            font-size: 7vw
+
+.rkg-header-meni
+    @util position(absolute, 2.5vw 2.5vw null null)
+    i
+        margin-left: 2.5vw
+        font-size: 2.5vw
+        cursor: pointer
+        &:hover
+            color: color(white a(80%))
+    .rkg-meni-open
+        margin-left: 2.5vw
+    .rkg-meni-close
+        @mixin x white
+    @media (--mobile)
+        top: 5vw
+        right: 5vw
+        i
+            font-size: 7vw
+        .rkg-meni-close
+            @mixin x white, 7vw, 0.5vw
+
+.rkg-header-content
+    @util position(absolute, 23vh 0 0 0)
+    @util size(64vw 22vw)
+    margin: 0 auto
+    @media (--mobile)
+        @util position(absolute, 11vh 0 0 0)
+        @util size(76vw auto)
+
+.rkg-header-logo
+    display: inline-block
+    width: 22vw
+    img
+        width: 22vw
+        opacity: 0.3
+    @media (--mobile)
+        display: block
+        margin: auto
+        width: 55vw
+        img
+            width: 55vw
+
+.rkg-header-title
+    float: right
+    margin-top: 2.1vw
+    margin-left: 2.5vw
+    width: 39.5vw
+    @media (--mobile)
+        float: initial
+        margin-top: 25vh
+        margin-left: initial
+        width: initial
+
+.rkg-header-s1
+    display: inline-block
+    margin-bottom: 1.1vw
+    font-weight: $bold
+    font-size: 1.8vw
+    @media (--mobile)
+        display: block
+        margin-bottom: 3vw
+        font-size: 3.2vw
+
+.rkg-header-s2
+    display: inline-block
+    margin-bottom: 1.5vw
+    font-weight: $medium
+    font-size: 3.8vw
+    @media (--mobile)
+        display: block
+        margin-bottom: 5vw
+        font-size: 6vw
+
+.button-title
+    @util size(13vw, 3.8vw)
+    padding: 0.5vw
+    border: 0.15vw solid white
+    border-radius: 1.9vw
+    background: none
+    color: white
+    font-weight: $semi-bold
+    font-size: 1.5vw
+    cursor: pointer
+    &:first-of-type
+        margin-right: 5vw
+    &:hover
+        background: white
+        color: $color-title
+    &:active
+        border-color: color(white shade(15%))
+        background: color(white shade(15%))
+        color: $color-title
+    @media (--mobile)
+        @util size(35vw, 10vw)
+        padding: 0.5vw
+        border: 0.4vw solid white
+        border-radius: 5vw
+        font-size: 4vw
+        &:first-of-type
+            margin-right: 6vw
+
+#rkg-header-arrow-container
+    @util position(absolute, null null 1.5vw null)
+    @util size(2.5vw)
+    left: 50vw
+    margin-left: -1.125vw
+    @media (--mobile)
+        @util size(7vw)
+        bottom: 4vw
+        margin-left: -3.5vw
+
+.rkg-header-arrow
+    @mixin arrow bottom, white
+    @media (--mobile)
+        @mixin arrow bottom, white, 7vw, 0.5vw
+
+#content
+    width: 100%
+
+.article-content
+    > .article-body > *,
+    > .rkg-article-meta
+        margin: 0 auto 2vw
+        width: 75vw
+        @media (--mobile)
+            margin-bottom: 4vw
+            width: 95vw
+    > .article-h1
+        margin: 7vw auto 4.5vw
+        width: 75vw
+        @media (--mobile)
+            width: 95vw
+            margin-top: 18vw
+            margin-bottom: 4vw
+    > .article-body > h2
+        margin-top: 17vw
+        @media (--mobile)
+            margin-top: 18vw
+    > .article-body > h2#rkg-whoarewe
+        margin-top: 7vw
+    > .article-body > h4
+        margin-bottom: 1vw
+    p
+        line-height: 2vw
+        @media (--mobile)
+            color: $color-main-mobile
+            line-height: 150%
+    .rkg-map-container
+        position: relative
+        margin: 0 auto 4.5vw
+        width: 100%
+        @media (--mobile)
+            width: 100%
+            margin-bottom: 4vw
+    > .article-body > .rkg-ancor
+        display: block
+        margin: 12vw 0 0 0
+        height: 1px
+        @media (--mobile)
+            margin: 0 0 18vw 0
+    > .article-body > .rkg-ancor + h2
+        margin-top: 5vw
+    > .article-body a.rkg-button,
+    > .article-body button.rkg-button
+        font-weight: $medium
+        color: $color-main
+        font-size: 0.9vw
+        padding: 1vw
+        cursor: pointer
+        margin: 1vw 1vw 0 1vw
+        width: 10vw
+        border: 1px solid $color-title
+        border-radius: 5vw
+        &:hover
+            background: $color-title
+            color: white
+        &:active
+            background: color($color-title tint(15%))
+        @media (--mobile)
+            @util size(35vw, 10vw)
+            font-size: 14px
+            padding: 1vh 0.5vw
+            border: 0.4vw solid $color-title
+            border-radius: 5vw
+            display: inline-block
+            cursor: pointer
+            box-sizing: border-box
+    input,
+    select
+        font-size: 0.9vw
+        padding: 1vw
+        width: 20vw
+        border: 1px solid color($color-main tint(50%))
+        &::placeholder
+            color: $color-main
+            font-weight: $medium
+        @media (--mobile)
+            font-size: 14px
+    option:disabled
+        color: $color-main
+
+.article-content-narrow
+    > .article-body > *,
+    > .rkg-article-meta,
+    > .article-h1
+        margin: 0 40vw 4.5vw 12.5vw
+        width: 47vw
+        @media (--mobile)
+            margin: 0 auto 12vw
+            width: 95vw
+    @media (--mobile)
+        display: flex
+        flex-direction: column
+        > .article-body
+            order: 3
+    > .article-body > h2
+        margin-top: 7vw
+        @media (--mobile)
+            margin-top: 18vw
+    > .article-body > h4
+        margin-bottom: 1vw
+    > .rkg-map-container
+        margin: 0 auto 4.5vw
+        width: 100%
+        @media (--mobile)
+            width: 100%
+            margin-bottom: 4vw
+
+.article-h1
+    text-transform: uppercase
+    color: $color-title
+    font-weight: $regular
+    font-size: 3vw
+    @media (--mobile)
+        order: 1
+        font-size: 23px
+
+.article-body
+    > h2
+        color: $color-title
+        font-weight: $regular
+        font-size: 3vw
+        text-transform: uppercase
+        @media (--mobile)
+            font-size: 23px
+    a
+        color: $color-title
+        text-decoration: none
+
+.rkg-button
+    font-weight: $medium
+    color: $color-main
+    font-size: 0.9vw
+    padding: 1vw
+    cursor: pointer
+    margin: 1vw 1vw 0 1vw
+    width: 10vw
+    border: 1px solid $color-title
+    border-radius: 5vw
+    &:hover
+        background: $color-title
+        color: white
+    &:active
+        background: color($color-title tint(15%))
+    @media (--mobile)
+        @util size(35vw, 10vw)
+            font-size: 14px
+        padding: 1vh 0.5vw
+        border: 0.4vw solid $color-title
+        border-radius: 5vw
+        display: inline-block
+        cursor: pointer
+        box-sizing: border-box
+
+.rkg-side
+    float: right
+    margin-right: 12.5vw
+    margin-bottom: 2vw
+    width: 21vw
+    @util clearfix
+    ul.menu
+        list-style: none
+    ul
+        margin-top: 0
+        margin-bottom: 1vw
+        li
+            display: block
+            min-height: 1.2vw
+            font-size: 1.1vw
+            a
+                display: block
+                margin-bottom: 0.5vw
+                color: black
+                text-decoration: none
+                text-transform: uppercase
+                font-weight: $bold
+                &:hover
+                    color: color(black tint(30%))
+            ul
+                list-style: none
+                padding-left: 0
+                li
+                    a
+                        margin-bottom: 0.5vw
+                        color: $color-main
+                        text-transform: none
+                        font-weight: $semi-bold
+                        &:hover
+                            color: color($color-main tint(30%))
+    h2
+        margin-bottom: 1vw
+        color: black
+        text-transform: uppercase
+        font-weight: $bold
+        font-size: 1.2vw
+    p
+        margin-bottom: 1vw
+        line-height: 1.5vw
+        font-size: 1.2vw
+        select,
+        input
+            width: 100%
+            box-sizing: border-box
+            @media (--mobile)
+                padding: 4vw
+    a
+        color: $color-title
+        text-decoration: none
+        font-size: 1.2vw
+    .rkg-user
+        line-height: 1.5vw
+        font-size: 1.2vw
+        white-space: nowrap
+        @media (--mobile)
+            margin-top: 14px
+            line-height: 18px
+            font-size: 14px
+    .excursion-prevnext-prev,
+    .excursion-prevnext-next
+        display: block
+        .dashicons
+            font-size: 4vw
+        @media (--mobile)
+            .dashicons
+                font-size: 48px
+    &::after
+        clear: both
+    @media (--mobile)
+        order: 2
+        float: none
+        margin: 0 auto 12vw
+        width: 95vw
+        ul
+            padding-left: 0
+            li
+                margin-bottom: 2vw
+                min-height: 2.6vw
+                font-size: 14px
+        h2,
+        p,
+        a
+            line-height: normal
+            font-size: 14px
+
+.excursion-prevnext-prev
+    float: left
+
+.excursion-prevnext-next
+    float: right
+
+.excursion-prevnext
+    margin-bottom: 24vw
+
+.wp-block-image
+    text-align: center
+
+.course-block-container
+    box-sizing: border-box
+    padding: 0 2vw 0 0
+    @media (--mobile)
+        padding: 0 12.5vw
+
+.course-block-h
+    margin-top: 1vw
+    color: $color-title
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 0.9vw
+    @media (--mobile)
+        margin-bottom: 1vw
+        font-size: 14px
+
+.course-block-h2
+    margin-bottom: 1vw
+    color: $color-title
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 0.9vw
+    @media (--mobile)
+        margin-bottom: 3vw
+        font-size: 14px
+
+.course-block-date
+    color: $color-title
+    font-weight: $regular
+    font-size: 8vw
+    text-align: center
+    .dashicons
+        font-size: 7vw
+        width: 100%
+        height: 7vw
+        margin-top: 1vw
+    img
+        width: 8vw
+        height: 8vw
+        margin: 0.8vw auto
+        display: block
+    @media (--mobile)
+        margin-bottom: 1vw
+        font-size: 90px
+        .dashicons
+            font-size: 90px
+        img
+            width: 90px
+            height: 90px
+
+.course-block-p
+    position: relative
+    overflow: hidden
+    margin-bottom: 1vw
+    height: 3.5vw
+    color: $color-main
+    line-height: 1.2vw
+    font-weight: $light
+    font-size: 0.9vw
+    &::after
+        @util position(absolute, 2.5vw 0 0 0)
+        background: linear-gradient(to bottom, color(white a(0)) 0%, color(white a(100%)) 100%)
+        content: ''
+    @media (--mobile)
+        color: $color-main-mobile
+        line-height: 150%
+    a
+        color: $color-main
+    @media (--mobile)
+        height: 16vw
+        line-height: normal
+        font-size: 14px
+
+.course-block-t,
+.course-block-t a
+    width: 100%
+    color: $color-title
+    font-weight: $bold
+    font-size: 0.9vw
+    @media (--mobile)
+        font-size: 14px
+
+.course-block-t a:hover
+    color: color($color-title a(80%))
+
+.course-block-t
+    display: block
+    text-align: left
+    tbody
+        display: block
+        width: 100%
+        tr
+            display: flex
+            width: 100%
+            justify-content: space-between
+            td
+                display: inline-block
+            td.only-desktop
+                @media (--mobile)
+                    display: none
+
+.course-block-select-container
+    position: relative
+
+.course-block-terms
+    @util position(absolute, null -1vw 1.5vw)
+    display: none
+    box-shadow: 0 4px 8px 0 color(black a(50%)), 0 6px 20px 0 color(black a(49%))
+    background: white
+    font-weight: $regular
+    padding: 0.5vw
+    max-height: 15vw
+    overflow-y: auto
+    text-align: center
+
+.course-block-term
+    cursor: pointer
+    &:hover
+        color: color($color-main a(80%))
+    &:not(:last-child)
+        padding-bottom: 0.5vw
+
+.now-div-icon
+    border-radius: 50%
+    background: $color-title
+    position: relative
+    &::before
+        content: " "
+        transform: scaleY(0.4) rotate(-45deg)
+        @util position(absolute, -1px -1px -1px -1px)
+        display: block
+        background: $color-title
+    &::after
+        content: " "
+        transform: scaleX(0.4) rotate(45deg)
+        @util position(absolute, -1px -1px -1px -1px)
+        display: block
+        background: $color-title
+
+.new-div-icon
+    border-radius: 50%
+    background: $color-title
+
+.old-div-icon
+    border-radius: 50%
+    background: $color-title-negative
+
+.now-div-icon-active
+    border-radius: 50%
+    background: color($color-title shade(15%))
+    &::before
+        content: " "
+        transform: scaleY(0.4) rotate(-45deg)
+        @util position(absolute, -2px -2px -2px -2px)
+        display: block
+        background: $color-title
+    &::after
+        content: " "
+        transform: scaleX(0.4) rotate(45deg)
+        @util position(absolute, -2px -2px -2px -2px)
+        display: block
+        background: $color-title
+
+.new-div-icon-active
+    border-radius: 50%
+    background: color($color-title shade(15%))
+
+.old-div-icon-active
+    border-radius: 50%
+    background: color($color-title-negative shade(15%))
+
+#rkg-map
+    height: 33vw
+    @media (--mobile)
+        height: 55vh
+
+#rkg-excursion-map
+    height: 33vw
+    width: 100%
+    @media (--mobile)
+        height: 75vw
+        width: 100%
+
+#rkg-excursion-page-search,
+.rkg-excursion-search-up
+    display: none
+
+#excursion-contorl-search,
+#excursion-contorl-calendar
+    cursor: pointer
+
+.rkg-map-gradient
+    @util position(absolute, 0 0 null)
+    z-index: 800
+    height: 33vw
+    background: linear-gradient(to bottom, color(black a(30%)) 0, color(black a(0)) 2%, color(black a(0)) 98%, color(black a(30%)) 100%)
+    pointer-events: none
+    @media (--mobile)
+        height: 55vh
+
+.rkg-show-map-container
+    display: none
+    @media (--mobile)
+        display: block
+        position: relative
+        font-size: 18px
+        font-weight: $medium
+        width: 50vw !important
+        margin-left: 47.5vw !important
+        margin-top: 4vh !important
+        text-align: right
+        z-index: 1002
+
+.rkg-show-map
+    position: relative
+    font-weight: $medium
+    color: $color-main
+    font-size: 0.9vw
+    cursor: pointer
+    margin: auto
+    border: 2px solid $color-title
+    border-radius: 5vw
+    display: none
+    vertical-align: middle
+    @media (--mobile)
+        font-size: 14px
+        display: inline-block
+        width: 10vw !important
+        height: 5vw
+    .rkg-show-map-switch
+        width: 5vw
+        height: 5vw
+        border-radius: 5vw
+        border: 2px solid $color-title
+        background: white
+
+.rkg-show-map.off
+    background: color($color-main tint(70%))
+    .rkg-show-map-switch
+        @util position(absolute, -2px null null -2px)
+
+.rkg-show-map.on
+    background: $color-title
+    .rkg-show-map-switch
+        @util position(absolute, -2px -2px null null)
+
+#excursions
+    @util position(absolute, -5vw 12.5vw null null)
+    z-index: 1001
+    width: 23vw
+    background-color: $color-title
+    @media (--desktop)
+        box-shadow: 0 4px 8px 0 color(black a(50%)), 0 6px 20px 0 color(black a(49%))
+        border-bottom: solid 2vw $color-title
+    &.excursions-old
+        background-color: $color-title-negative
+        border-bottom: solid 2vw $color-title-negative
+        @media (--mobile)
+            background-color: white
+            border-bottom: none
+    @media (--mobile)
+        @util position(relative, 0 0 null null)
+        margin: 14vw auto 0
+        width: 100vw
+        transition: margin 700ms
+        background-color: white
+
+#excursions.excursions-map-off
+    @media (--mobile)
+        margin-top: -61vh
+
+.excursion-title
+    font-weight: $bold
+
+.excursion-new-container
+    position: relative
+    overflow: auto
+    height: 36vw
+    @media (--mobile)
+        height: 70vh
+        .excursion-title
+            color: $color-title
+        a:first-of-type
+            .excursion
+                padding-top: 2vh
+                border-top: 1px solid $color-main
+
+.excursion
+    @media (--mobile)
+        border-bottom: 1px solid $color-main
+        padding-bottom: 2vh
+        margin-bottom: 2vh !important
+
+.excursion-new,
+.excursion-now
+    .dashicons
+        display: block
+        float: right
+        font-size: 4vw
+        margin-right: 2vw
+        color: color($color-title shade(15%))
+        @media (--mobile)
+            color: $color-title
+    .dashicons-controls-pause
+        font-size: 3.8vw
+    &:hover
+        .dashicons
+            color: $color-title
+    &:hover,
+    &.active
+        background: color($color-title shade(15%))
+        @media (--mobile)
+            background: white
+    @media (--mobile)
+        .dashicons
+            margin-right: 30px
+            font-size: 56px
+        .dashicons-controls-pause
+            font-size: 40px
+
+.excursion-old-container
+    position: relative
+    display: none
+    overflow: auto
+    height: 36vw
+    @media (--mobile)
+        height: 70vh
+        .excursion-title
+            color: $color-title-negative
+    .excursion-block-btn,
+    .excursion-block-search-btn
+        display: block
+        margin: 1.2vw auto 0
+        padding: 1vw
+        width: 10vw
+        background: $color-title-negative
+        border: 0.15vw solid white
+        border-radius: 5vw
+        color: white
+        cursor: pointer
+        font-weight: $semi-bold
+        font-size: 0.9vw
+        &:hover
+            background: color($color-title-negative shade(15%))
+        &:active
+            background: color($color-title-negative shade(15%))
+        @media (--mobile)
+            padding: 2vw
+            margin-top: 4.8vw
+            width: 40vw
+            border: 1px solid white
+            border-radius: 10vw
+            font-size: 14px
+            background: white
+            border: 0.15vw solid $color-title-negative
+            color: $color-title-negative
+            &:hover,
+            &:active
+                color: white
+    .excursion-block-search-btn
+        display: none
+    select
+        padding: 0.5vw
+        margin: auto
+        width: 100%
+    input
+        padding: 0.5vw
+        margin: auto
+        width: 19vw
+        @media (--mobile)
+            width: 88vw
+
+.excursion-block-search
+    width: 20vw
+    display: none
+    @media (--mobile)
+        width: 88vw
+        border-bottom: none
+
+.excursion-old-container-list,
+.excursion-old-container-list-serarch
+    @media (--mobile)
+        a:first-of-type
+            .excursion
+                padding-top: 2vh
+                border-top: 1px solid $color-main
+
+.excursion-old-container-list-serarch
+    display: none
+
+.excursion-old
+    .dashicons
+        display: block
+        float: right
+        font-size: 4vw
+        margin-right: 2vw
+        color: color($color-title-negative shade(15%))
+        @media (--mobile)
+            color: $color-title-negative
+    .dashicons-controls-pause
+        font-size: 3.8vw
+    &:hover
+        .dashicons
+            color: $color-title-negative
+    &:hover,
+    &.active
+        background: color($color-title-negative shade(15%))
+        @media (--mobile)
+            background: white
+    @media (--mobile)
+        .dashicons
+            margin-right: 30px
+            font-size: 56px
+        .dashicons-controls-pause
+            font-size: 40px
+
+.excursion-gradient
+    @util position(absolute, 3vw 0 0 0)
+    z-index: 800
+    background: linear-gradient(to bottom, color($color-title a(100%)) 0, color($color-title a(0)) 2%, color($color-title a(0)) 98%, color($color-title a(100%)) 100%)
+    pointer-events: none
+    @media (--mobile)
+        top: 60px
+        display: none
+
+.excursion-gradient.old
+    background: linear-gradient(to bottom, color($color-title-negative a(100%)) 0, color($color-title-negative a(0)) 2%, color($color-title-negative a(0)) 98%, color($color-title-negative a(100%)) 100%)
+    @media (--mobile)
+        display: none
+
+.excursions-title
+    padding: 0
+    text-align: center
+    @media (--mobile)
+        width: 95vw
+        margin: 0 auto 2vh
+        text-align: left
+
+.excursion-title-container
+    background: black
+    width: 50%
+    float: left
+    padding: 0
+
+.button-excursion
+    display: inline-block
+    @util size(50%, 3vw)
+    box-sizing: border-box
+    margin: 0
+    padding: 0
+    border: none
+    background: none
+    color: $color-header
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 0.9vw
+    cursor: pointer
+    &:hover
+        color: color(white shade(20%))
+    &:active
+        color: color(white shade(20%))
+    @media (--mobile)
+        display: none
+
+.button-excursion-new,
+.button-excursion-now
+    background: $color-title
+    &:not(.active)
+        box-shadow: inset -5px -5px 6px 0 color(black a(50%))
+
+.button-excursion-old
+    background: $color-title-negative
+    &:not(.active)
+        box-shadow: inset 5px -5px 6px 0 color(black a(50%))
+
+.buton-excursion-mobile
+    display: none
+    @media (--mobile)
+        @util size(35vw, 10vw)
+        padding: 0.5vw
+        border: 0.4vw solid white
+        border-radius: 5vw
+        font-size: 4vw
+        display: inline-block
+        cursor: pointer
+        position: relative
+        z-index: 1003
+
+.buton-excursion-mobile.old
+    color: $color-title-negative
+    border: 0.4vw solid $color-title-negative
+    &:hover
+        color: white
+        background-color: $color-title-negative
+    .span-excursion-new
+        display: none
+
+.buton-excursion-mobile.new
+    color: $color-title
+    border: 0.4vw solid $color-title
+    &:hover
+        color: white
+        background-color: $color-title
+    .span-excursion-old
+        display: none
+
+.excursion
+    margin: 0.5vw
+    padding: 0.5vw
+    color: $color-header
+    font-size: 0.9vw
+    @media (--mobile)
+        margin: 2.5vw
+        font-size: 14px
+        color: $color-main
+
+
+.excursion-signout-waiting,
+.excursion-signup-waiting
+    cursor: pointer
+    font-size: 1.2vw
+    display: block
+    width: 100%
+    text-align: center
+    @media (--mobile)
+        font-size: 14px
+
+.article-h1-course
+    margin: 0 40vw 1.5vw 12.5vw
+    width: 45vw
+    color: $color-title
+    text-transform: uppercase
+    font-weight: $regular
+    font-size: 3vw
+    @media (--mobile)
+        margin: 0 auto 3vw
+        width: 95vw
+        font-size: 23px
+
+.course-category
+    margin-bottom: 2vw !important
+    color: black
+    font-size: 1.6vw
+    text-transform: uppercase
+    @media (--mobile)
+        margin-top: 8vw !important
+        font-size: 14px
+
+.course-instructor
+    text-transform: uppercase
+    margin-bottom: 2vw !important
+
+.course-instructor-name
+    text-transform: none
+    color: black
+
+.course-date
+    margin-bottom: 2vw !important
+    color: $color-title
+    font-weight: 400
+    font-size: 7.2vw
+    @media (--mobile)
+        margin-bottom: 4vw !important
+        font-size: 55px
+
+.course-disabled-button
+    margin-bottom: 2vw !important
+    padding: 1.5vw
+    width: 100%
+    border: none
+    border-radius: 3vw
+    background-color: color($color-main tint(75%))
+    color: white
+    text-align: center
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 1.2vw
+    @media (--mobile)
+        display: block
+        width: auto
+        margin: 30px auto !important
+        font-size: 14px
+        padding: 30px 100px
+        border-radius: 39px
+
+.course-signup-button,
+.course-signout-button
+    margin-bottom: 2vw !important
+    padding: 1.5vw
+    width: 100%
+    border: none
+    border-radius: 3vw
+    background-color: $color-title-negative
+    color: white
+    text-align: center
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 1.2vw
+    cursor: pointer
+    &:hover
+        background-color: color($color-title-negative tint(25%))
+    &:active
+        background-color: color($color-title-negative tint(35%))
+    @media (--mobile)
+        display: block
+        width: auto
+        margin: 30px auto !important
+        font-size: 14px
+        padding: 30px 100px
+        border-radius: 39px
+
+.course-signout-button
+    color: white
+    background-color: $color-main
+    &:hover
+        background-color: $color-title
+    &:active
+        background-color: $color-title
+
+.course-terms-control
+    cursor: pointer
+
+.course-terms,
+.course-terms-up
+    display: none
+
+.course-page-link
+    @media (--mobile)
+        display: inline-block
+        margin: 7px 0
+
+.brevet-preview
+    position: relative
+    display: inline-block
+    margin: 0
+    vertical-align: top
+    img
+        display: inline-block
+        margin: 0
+        vertical-align: top
+
+.brevet-preview-mask
+    @util position(absolute, 0 0 0 0)
+    cursor: pointer
+    .brevet-preview-background
+        @util position(absolute, 0 0 0 0)
+        background: black
+        opacity: 0
+        transition: opacity 0.5s ease-in-out
+    .brevet-preview-text
+        @util center
+        color: white
+        opacity: 0
+        padding: 3vw
+        text-align: center
+        font-size: 1.2vw
+        transition: opacity 0.5s ease-in-out
+    &:hover
+        .brevet-preview-background
+            opacity: 0.5
+        .brevet-preview-text
+            opacity: 1
+
+.row
+    margin-right: -2% !important
+    margin-left: -2% !important
+    @util clearfix
+    @media (--mobile)
+        margin-right: 0 !important
+        margin-left: 0 !important
+
+.col-2
+    float: left
+    margin: 0 1%
+    width: 48%
+    h3
+        font-weight: $bold
+        font-size: 0.9vw
+        text-transform: uppercase
+    p
+        font-weight: $light
+        font-size: 0.9vw
+        line-height: 1.2vw
+    @media (--mobile)
+        float: none
+        margin: 0 0 5vw
+        width: 100%
+        h3
+            line-height: normal
+            font-size: 14px
+        p
+            display: none
+
+.col-3
+    float: left
+    margin: 0 1.6%
+    width: 30%
+    h3
+        font-weight: $bold
+        font-size: 0.9vw
+        text-transform: uppercase
+    p
+        font-weight: $light
+        font-size: 0.9vw
+        line-height: 1.2vw
+    @media (--mobile)
+        float: none
+        margin: 0 0 5vw
+        width: 100%
+        h3
+            line-height: normal
+            font-size: 14px
+        p
+            display: none
+
+.col-3-2
+    float: left
+    margin: 0 1.6%
+    width: 30%
+    @media (--mobile)
+        margin: 0 0 5vw
+        width: 45%
+        &:nth-child(odd)
+            margin-right: 10%
+
+.rkg-course-block
+    position: relative
+    margin: 0 auto 4.5vw !important
+    width: 75vw !important
+    @media (--mobile)
+        width: 100vw !important
+
+.rkg-course-gradient-right
+    @media (--mobile)
+        @util position(absolute, 0 0 0 null)
+        width: 15vw
+        background: linear-gradient(to right, color(white a(0)) 0, color(white a(100%)) 100%)
+
+.rkg-course-gradient-left
+    @media (--mobile)
+        @util position(absolute, 0 null 0 0)
+        width: 12.5vw
+        background: linear-gradient(to left, color(white a(0)) 0, color(white a(100%)) 100%)
+
+.rkg-course-left
+    @util position(absolute, 8vw null null -10vw)
+    @util size(6vw, 6vw)
+    z-index: 700
+    @media (--mobile)
+        @util size(10vw, 10vw)
+        top: 110px
+        left: 0
+
+.rkg-course-right
+    @util position(absolute, 8vw -10vw null null)
+    @util size(6vw, 6vw)
+    z-index: 700
+    @media (--mobile)
+        @util size(10vw, 10vw)
+        top: 110px
+        right: 0
+
+.rkg-course-chevron-left
+    @mixin arrow left, color($color-main tint(40%)), 6vw, 0.3vw
+    @media (--mobile)
+        @mixin arrow left, color($color-main tint(40%)), 10vw, 0.8vw
+
+.rkg-course-chevron-right
+    @mixin arrow right, color($color-main tint(40%)), 6vw, 0.3vw
+    @media (--mobile)
+        @mixin arrow right, color($color-main tint(40%)), 10vw, 0.8vw
+
+.rkg-excursion-left
+    @mixin arrow left, $color-title, 3vw, 0.2vw
+    @media (--mobile)
+        @mixin arrow left, $color-title, 5vw, 0.4vw
+
+.rkg-excursion-right
+    @mixin arrow right, $color-title, 3vw, 0.2vw
+    @media (--mobile)
+        @mixin arrow right, $color-title, 5vw, 0.4vw
+
+.tepm-gray
+    margin-bottom: 3.2%
+    height: 16vw
+    background: $color-main
+    @media (--mobile)
+        height: 32vw
+
+.courses-terms-control-header:not(:first-child)
+    margin-top: 2vw
+
+.courses-terms-control
+    margin-top: 1.5vw
+
+h2.courses-terms-control
+    color: $color-main
+    font-weight: $semi-bold
+    cursor: pointer
+    margin-bottom: 0.5vw
+    margin-top: 0.5vw
+    text-transform: none
+
+.courses-terms
+    display: none
+
+.courses-terms-up
+    display: none
+
+#rkg-scroll-ancor
+    position: absolute
+    top: 1px
+    height: 1px
+
+.leaflet-left .leaflet-control
+    margin-left: 5px
+
+.leaflet-top .leaflet-control
+    margin-top: 40px
+
+.left-align
+    text-align: left
+
+.rkg-nopas
+    text-align: center
+    margin-top: 5vw
+
+.rkg-moddal-gallery
+    @util position(fixed, 0 0 0 0)
+    z-index: 1020
+    display: none
+
+.rkg-moddal-gallery-slick
+    @util center
+    width: 75vw
+    height: 75vh
+    .rkg-moddal-gallery-slide
+        position: relative
+        height: 75vh
+        img
+            @util center
+            object-fit: scale-down
+            max-width: 100%
+            max-height: 100%
+    @media (--mobile)
+        width: 95vw
+
+.rkg-moddal-gallery-close
+    @mixin x white
+    @util position(absolute, 1vw 1vw null null)
+
+.rkg-moddal-gallery-left
+    @util position(absolute, 50% null null 2vw)
+    transform: translateY(-50%)
+    @media (--mobile)
+        @util size(10vw, 10vw)
+        top: 16vw
+
+.rkg-moddal-gallery-right
+    @util position(absolute, 50% 2vw null null)
+        transform: translateY(-50%)
+    @media (--mobile)
+        @util size(10vw, 10vw)
+        top: 16vw
+
+.rkg-moddal-gallery-chevron-left
+    @mixin arrow left, white
+    @media (--mobile)
+        @mixin arrow left, white
+
+.rkg-moddal-gallery-chevron-right
+    @mixin arrow right, white
+    @media (--mobile)
+        @mixin arrow right, white
+
+#rkg-members-table-container
+    margin-top: 1vw
+    height: 30vh
+    overflow-y: auto
+    @media (--mobile)
+        margin-top: 3vh
+
+.rkg-members-table,
+.rkg-members-table-mobile,
+.rkg-gear-table,
+.rkg-modal-table
+    margin: auto
+    td,
+    th
+        text-align: left
+        padding: 0.5vw
+        font-size: 0.9vw
+        white-space: nowrap
+        input
+            width: 5vw
+            padding: 0.5vw
+        @media (--mobile)
+            font-size: 14px
+    @media (--mobile)
+        td
+            white-space: normal
+
+.rkg-members-table
+    @media (--mobile)
+        display: none
+
+.rkg-members-table-mobile
+    border-collapse: collapse
+    tbody
+        border-top: 1px solid $color-main
+        border-bottom: 1px solid $color-main
+        tr:first-child
+            th,
+            td
+                padding-top: 1vh
+        tr:last-child
+            th,
+            td
+                padding-bottom: 1vh
+    @media (--desktop)
+        display: none
+
+.rkg-user
+    display: inline-Block
+    position: relative
+    cursor: pointer
+
+.rkg-user-details
+    @util position(absolute, 100% null null null)
+    display: none
+    box-shadow: 0 4px 8px 0 color(black a(50%)), 0 6px 20px 0 color(black a(49%))
+    background: white
+    color: $color-main
+    font-weight: $regular
+    font-size: 0.9vw
+    padding: 0.5vw
+    text-align: center
+    cursor: auto
+    z-index: 900
+    text-transform: none
+    @media (--mobile)
+        @util position(fixed, 0 0 0 0)
+        font-size: 14px
+        z-index: 1020
+        .rkg-user-details-flex
+            @util position(absolute, 0 0 0 0)
+            display: flex
+            flex-direction: column
+            align-items: center
+            justify-content: center
+    a
+        font-size: 0.9vw
+        color: $color-title
+        text-decoration: none
+        @media (--mobile)
+            font-size: 18px
+            margin: 2vw
+            display: block
+    div:not(:first-child)
+        margin-top: 0.5vw
+
+.page-excursion-container
+    border: 0.2vw solid white
+    h3
+        margin: 0.2vw
+    p
+        margin: 0.2vw
+    .page-excursion-p2
+        font-size: 1.2vw
+    .dashicons
+        display: block
+        float: right
+        font-size: 4vw
+        margin-right: 2vw
+        color: $color-title
+        @media (--mobile)
+            margin-right: 5vw
+            font-size: 48px
+    .dashicons.expired
+        color: $color-title-negative
+
+.page-excursion-container.canceled
+    opacity: 0.5
+
+.excursion-block-date
+    margin-bottom: 0.2vw
+    color: $color-main
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 0.9vw
+    @media (--mobile)
+        margin-bottom: 1vw
+        font-size: 14px
+
+input.excursion-btn
+    display: block
+    margin: 1.2vw auto 0
+    width: 10vw
+    border: 1px solid $color-title
+    border-radius: 5vw
+    &:hover
+        background: $color-title
+        color: white
+        font-weight: $medium
+    &:active
+        background: color($color-title tint(15%))
+    @media (--mobile)
+        padding: 2vw
+        margin-top: 4.8vw
+        width: 40vw
+        border: 1px solid $color-title
+        border-radius: 10vw
+
+.excursion-search-count
+    text-align: center
+    margin-top: 1vw
+    margin-bottom: 1vw
+    color: white
+    font-size: 0.9vw
+    @media (--mobile)
+        margin: 2vh auto
+        font-size: 14px
+        color: $color-main
+
+.excursion-block-p
+    margin-bottom: 0.2vw
+    color: $color-main
+    line-height: 1.2vw
+    font-weight: $light
+    font-size: 0.9vw
+    @media (--mobile)
+        color: $color-main-mobile
+        line-height: 150%
+        font-size: 14px
+
+.excursion-block-h
+    margin-top: 1vw
+    margin-bottom: 0.2vw
+    color: $color-title
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 1.2vw
+    @media (--mobile)
+        margin-bottom: 1vw
+        font-size: 18px
+
+.excursion-block-h.expired
+    color: $color-title-negative
+
+.excursion-block-h2
+    margin-bottom: 0.2vw
+    color: $color-main
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 0.9vw
+    @media (--mobile)
+        margin-bottom: 1vw
+        font-size: 14px
+
+.excursion-block-t,
+.excursion-block-t a
+    width: 20%
+    color: $color-title
+    font-weight: $bold
+    font-size: 0.9vw
+    @media (--mobile)
+        width: 50%
+        font-size: 14px
+
+.excursion-td-span
+    text-transform: uppercase
+    font-weight: $bold
+
+.news-block
+    margin-bottom: 3vw
+
+.rkg-news-category-select
+    @media (--desktop)
+        display: none
+    @media (--mobile)
+        .rkg-news-category-select-arrow
+            @mixin arrow bottom, $color-main, 14px, 1px
+        .rkg-news-category-select-arrow.up
+            @mixin arrow top, $color-main, 14px, 1px
+
+.rkg-news-category,
+a.rkg-news-category-link
+    color: $color-main
+    cursor: pointer
+    &:hover
+        color: color($color-main a(80%))
+    &.active
+        color: $color-title
+    @media (--mobile)
+        margin-top: 14px
+        display: none
+
+.rkg-category-container
+    display: flex
+    justify-content: space-between
+    width: 60vw !important
+    @media (--mobile)
+        flex-direction: column
+        text-align: center
+
+.news-block-item
+    width: 100%
+    height: 0
+    padding-top: 60%
+    display: block
+    position: relative
+    margin-bottom: 3.2vw
+    background-position: center
+    background-repeat: no-repeat
+    background-size: cover
+    border-radius: 1.9vw
+    transition: background-size 0.2s ease-in
+    @media (--mobile)
+        margin-bottom: 12vw
+    &:hover
+        background-size: 120%
+
+.news-block-category
+    @util position(absolute, 1.5vw null null 1vw)
+    color: white
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 0.9vw
+    text-shadow: 0 0 1px black, 0 0 1px black
+    @media (--mobile)
+        top: 20px
+        font-size: 14px
+
+.news-block-title
+    @util position(absolute, null null 0.5vw 1vw)
+    color: white
+    text-transform: uppercase
+    font-weight: $bold
+    font-size: 0.9vw
+    text-shadow: 0 0 1px black, 0 0 1px black
+    @media (--mobile)
+        font-size: 14px
+        bottom: 0
+
+.news-block-date
+    @util position(absolute, null null -1.2vw 1vw)
+    color: $color-main
+    font-weight: $bold
+    font-size: 0.9vw
+    @media (--mobile)
+        bottom: -20px
+        font-size: 14px
+
+.news-block-filter
+    @util position(absolute, 0 0 0 0)
+    background: $color-title
+    border-radius: 1.9vw
+    opacity: 0.1
+
+.salvattore[data-columns]
+    @util clearfix
+    margin-right: -2% !important
+    margin-left: -2% !important
+    &::before
+        content: '3 .column.size-1of3'
+
+.column
+    float: left
+
+.size-1of3
+    width: 30%
+    margin: 0 1.6%
+
+#brevet
+    display: none
+
+.rkg-croppie-container
+    @util size(320px, 363px)
+    margin: 0 auto 100px
+    input
+        width: 200px
+    @media (--mobile)
+        margin: 0 auto 32px
+        input
+            border: none
+            padding: 5px
+            width: 250px
+        .cr-slider-wrap
+            margin: 5px auto
+
+.croppie-rotate
+    cursor: pointer
+    margin: 0 8vw
+    @media (--mobile)
+        font-size: 32px
+        margin: 1vh 8vh 3vh
+
+form#helth-survey,
+form#responsibility-survey
+    padding: 0.5vw
+    h2
+        text-align: center
+        font-weight: $semi-bold
+        font-size: 1.6vw
+        color: $color-title
+    h3
+        text-align: center
+        font-weight: $regular
+        font-size: 1.6vw
+        color: $color-title
+    p
+        text-align: left
+        font-size: 0.9vw
+        color: $color-main
+    p.center
+        text-align: center
+    td
+        text-align: left
+        font-size: 0.9vw
+        color: $color-main
+        padding-bottom: 1vw
+        vertical-align: top
+        &:first-child
+            padding-right: 1vw
+    ul
+        li
+            text-align: left
+            font-size: 0.9vw
+            color: $color-main
+    @media (--mobile)
+        h2,
+        h3
+            font-size: 18px
+        p,
+        td
+            font-size: 14px
+        ul
+            li
+                font-size: 14px
+
+
+.leaflet-popup-bold-now,
+.leaflet-popup-bold-new
+    color: $color-title
+
+.leaflet-popup-bold-old
+    color: $color-title-negative
+
+.mobile-drop
+    @media (--mobile)
+        display: none
+
+.rkg-nowrap
+    white-space: nowrap
+
+.rkg-toggler
+    display: none
+    @media (--mobile)
+        display: block
+        cursor: pointer
+
+.rkg-toggler-title
+    span
+        display: none
+    @media (--mobile)
+        cursor: pointer
+        span
+            display: inline
+
+.rkg-hidder
+    @media (--mobile)
+        display: none
