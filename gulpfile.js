@@ -22,7 +22,7 @@ const path            = require('path');
 gulp.task('clean', () => del([
     'web/app/themes/rkg-theme/style.css',
     'web/app/themes/rkg-theme/static/site.js',
-    'web/app/plugins/rkgeronimo/js/script.js',
+    'web/app/plugins/rkg-plugin/js/script.js',
 ]));
 
 gulp.task('postclean', () => del(['css']));
@@ -36,7 +36,7 @@ gulp.task('scriptsPlugin', () => gulp.src('src/js/plugin/*.js')
     .pipe(concat('script.js'))
     .pipe(uglify())
     .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('web/app/plugins/rkgeronimo/js')));
+    .pipe(gulp.dest('web/app/plugins/rkg-plugin/js')));
 
 gulp.task('scriptsTheme', () => gulp.src('src/js/theme/site.js')
     .pipe(sourcemaps.init())
