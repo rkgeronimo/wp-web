@@ -593,6 +593,7 @@ jQuery(document).ready(($) => {
             height: 'toggle',
             opacity: 'toggle',
         }, 'fast');
+        window.location = link;
     });
 
     $('body').on('change', '#file', (e) => {
