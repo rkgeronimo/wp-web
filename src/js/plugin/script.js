@@ -685,6 +685,10 @@ jQuery(document).ready(($) => {
     });
     $('label[for=role]').parent().parent().remove();
 
+    if ($('#guest_meta_check').prop('checked') == true) {
+        $('#guest_count_row').show();
+    }
+
     $('#guest_meta_check').on('change', (e) => {
         if ($(e.currentTarget).prop('checked') == true) {
             $('#guest_count_row').show();
