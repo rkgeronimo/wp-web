@@ -689,7 +689,7 @@ $('.guest-uninvite').click((e) => {
 
 $('form#excursion-guest-remove-form').on('submit', (e) => {
     e.preventDefault();
-    const formData  = new FormData($('#excursion-guest-form').get(0));
+    const formData  = new FormData($('#excursion-guest-remove-form').get(0));
     formData.append('action', 'guest_uninvite');
 
     jQuery.ajax({
