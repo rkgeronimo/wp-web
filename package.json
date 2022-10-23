@@ -47,7 +47,6 @@
   },
   "dependencies": {},
   "napa": {
-    "pdf417": "bkuzmic/pdf417-js",
-    "generator-barkoda-uplatnica": "Bikonja/generator-barkoda-uplatnica"
+    "pdf417": "https://github.com/bkuzmic/pdf417-js"
   }
 }

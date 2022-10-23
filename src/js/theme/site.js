@@ -1,12 +1,10 @@
 /* global rkgTheme Croppie */
 
 jQuery(document).ready(($) => {
-    //= include ../../../node_modules/pdf417/bcmath-min.js
-    //= include ../../../node_modules/pdf417/pdf417.js
-    let BarcodePayment;
+    //=require ../../../node_modules/pdf417/bcmath-min.js
+    //=require ../../../node_modules/pdf417/pdf417.js
     let sequence;
     let codewords;
-    //= include ../../../node_modules/generator-barkoda-uplatnica/BarcodePayment.js
 
     function modalStatusClass(s = 'na') {
         $('.rkg-modal-status').removeClass('error ok');

@@ -1,4 +1,4 @@
-/* global rkgTheme loginStatus Croppie rkgScript PDF417 BarcodePayment modalStatusClass */
+/* global rkgTheme loginStatus Croppie rkgScript PDF417 modalStatusClass */
 let modalShow     = false;
 let signup        = null;
 
@@ -34,8 +34,6 @@ const modalOpen = (modal, callback) => {
 $('.ShowPayModal').click((e) => {
     e.preventDefault();
     const textToEncode = $(e.currentTarget).data('barcode_text');
-    console.log(textToEncode);
-
     PDF417.init(textToEncode);
 
     const barcode = PDF417.getBarcodeArray();
