@@ -741,6 +741,17 @@ button
             width: 100%
             margin-bottom: 4vw
 
+.article-body > p
+    margin-bottom: 1vw !important
+    font-size: 1.4vw
+
+.article-body > figure
+    display: inline-block
+    margin-right: 5vw !important
+    @media (--mobile)
+        margin-right: auto !important
+        display: block
+
 .article-h1
     text-transform: uppercase
     color: $color-title
@@ -1418,7 +1429,7 @@ button
 
 .article-h1-course
     margin: 0 40vw 1.5vw 12.5vw
-    width: 45vw
+    width: 50vw
     color: $color-title
     text-transform: uppercase
     font-weight: $regular
@@ -1444,15 +1455,6 @@ button
 .course-instructor-name
     text-transform: none
     color: black
-
-.course-date
-    margin-bottom: 2vw !important
-    color: $color-title
-    font-weight: 400
-    font-size: 7.2vw
-    @media (--mobile)
-        margin-bottom: 4vw !important
-        font-size: 55px
 
 .course-disabled-button
     margin-bottom: 2vw !important
@@ -1843,6 +1845,8 @@ h2.courses-terms-control
         font-size: 0.9vw
         color: $color-title
         text-decoration: none
+        &.guest-uninvite
+            color: $color-main !important
         @media (--mobile)
             font-size: 18px
             margin: 2vw
