@@ -743,7 +743,10 @@ button
 
 .article-body > p
     margin-bottom: 1vw !important
-    font-size: 1.4vw
+    font-size: 0.9em
+    @media (--mobile)
+        font-size: 1.5em 
+        line-height: 1.6em
 
 .article-body > figure
     display: inline-block
@@ -885,8 +888,8 @@ button
         h2,
         p,
         a
-            line-height: normal
-            font-size: 14px
+            font-size: 1.2em
+            line-height: 1.5em
 
 .excursion-prevnext-prev
     float: left
