@@ -85,11 +85,11 @@ $('.ShowPayModal').click((e) => {
     $('#payment-opis_placanja').html(opisPlacanja);
     $('#payment-iznos').html(iznos);
 
-    // $('.rkg-profile-meni').hide()
-    // .promise()
-    // .done(() => {
-    // modalOpen('#payment-modal');
-    // });
+    $('.rkg-profile-meni').hide()
+        .promise()
+        .done(() => {
+            modalOpen('#payment-modal');
+        }); 
 });
 
 $('.rkg-modal-close, rkg-info-close').click((e) => {
