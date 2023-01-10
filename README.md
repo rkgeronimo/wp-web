@@ -1,6 +1,6 @@
 # RK Geronimo Wordpress App
 
-This repository contains Wordpress app, initially created using [https://github.com/roots/bedrock/](Bedrock) stack.
+This repository contains Wordpress app, initially created using [Bedrock](https://github.com/roots/bedrock/) stack.
 It depends on multiple other repositories like plugins and theme that are added as submodules (no need to download them separately).
 
 ## Requirements
@@ -21,7 +21,7 @@ To install and setup everything, run the following commands:
 3. `./node_modules/.bin/gulp` - Builds static files (js, css)
 4. `cp .env.example .env` - Create environment file and define variables (below explained)
 5. Make sure all Wordpress permissions are allright, there could be an issue with `uploads` directory. If so, run `chmod -R 755 web/app/uploads` and make sure it's owned by the right group e.g. `chown -R www-data:www-data web/app/uploads`
-6. Import app database [geronimo_basic.sql](eronimo_basic.sql) to your newly created MySQL database
+6. Import app database [geronimo_basic.sql](geronimo_basic.sql) to your newly created MySQL database
 7. Install plugin `wp-mail-smtp`, manually or using WP CLI `wp plugin install wp-mail-smtp --activate`
 8. Setup Apache virtual host `http://local.rkgeronimo` the document root on the webserver to the `web` folder: `/path/to/site/web/`
 9. Map the hostname by editing your local `/etc/hosts` file and adding entry for the domain (http://local.rkgeronimo) next to localhost.
@@ -62,5 +62,7 @@ Environment variables in the `.env` file. Wrap values that may contain non-alpha
 
 - JavaScript / CSS changes (watcher and build)
 - Plugin building
+- Folder structure
+- Git submodules management
 
 TBD
