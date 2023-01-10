@@ -19,13 +19,12 @@ To install and setup everything, run the following commands:
 1. `yarn` - Installs NPM requirements from the `package.json` file
 2. `composer install` - Installs PHP requirements from  the`composer.json` file
 3. `./node_modules/.bin/gulp` - Builds static files (js, css)
-4. Build additional custom plugins - `cd web/app/plugins/rkg-gallery && yarn install && yarn build` *(this part should be automated in the future)*
-5. `cp .env.example .env` - Create environment file and define variables (below explained)
-6. Make sure all Wordpress permissions are allright, there could be an issue with `uploads` directory. If so, run `chmod -R 755 web/app/uploads` and make sure it's owned by the right group e.g. `chown -R www-data:www-data web/app/uploads`
-7. Import app database [geronimo_basic.sql](eronimo_basic.sql) to your newly created MySQL database
-8. Install plugin `wp-mail-smtp`, manually or using WP CLI `wp plugin install wp-mail-smtp --activate`
-9. Setup Apache virtual host `http://local.rkgeronimo` the document root on the webserver to the `web` folder: `/path/to/site/web/`
-10. Map the hostname by editing your local `/etc/hosts` file and adding entry for the domain (http://local.rkgeronimo) next to localhost.
+4. `cp .env.example .env` - Create environment file and define variables (below explained)
+5. Make sure all Wordpress permissions are allright, there could be an issue with `uploads` directory. If so, run `chmod -R 755 web/app/uploads` and make sure it's owned by the right group e.g. `chown -R www-data:www-data web/app/uploads`
+6. Import app database [geronimo_basic.sql](eronimo_basic.sql) to your newly created MySQL database
+7. Install plugin `wp-mail-smtp`, manually or using WP CLI `wp plugin install wp-mail-smtp --activate`
+8. Setup Apache virtual host `http://local.rkgeronimo` the document root on the webserver to the `web` folder: `/path/to/site/web/`
+9. Map the hostname by editing your local `/etc/hosts` file and adding entry for the domain (http://local.rkgeronimo) next to localhost.
 
 
 Note: If you are using other virual host and other domain, then domain replacements in the database should be made. This can be easily done through [WP-CLI](https://wp-cli.org): `wp search-replace 'http://local.rkgeronimo' 'new'`. WP-CLI plugin can be used for similar data updates e.g. user password changing.
