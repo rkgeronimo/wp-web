@@ -10,6 +10,3 @@
 [submodule "web/app/plugins/rkg-gallery"]
 	path = web/app/plugins/rkg-gallery
 	url = git@github.com:rkgeronimo/rkg-gallery
-[submodule "web/app/plugins/rkg-divelog"]
-	path = web/app/plugins/rkg-divelog
-	url = git@github.com:rkgeronimo/rkg-divelog
