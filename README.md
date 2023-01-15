@@ -66,3 +66,5 @@ Environment variables in the `.env` file. Wrap values that may contain non-alpha
 - Git submodules management
 
 TBD
+
+&copy; RK Geronimo, Zagreb
