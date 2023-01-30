@@ -1,6 +1,3 @@
-[submodule "scripts"]
-	path = scripts
-	url = git@github.com:rkgeronimo/rkg-scripts
 [submodule "web/app/themes/rkg-theme"]
 	path = web/app/themes/rkg-theme
 	url = git@github.com:rkgeronimo/rkg-theme
