@@ -727,4 +727,43 @@ jQuery(document).ready(($) => {
             $(`#${toggle}`).toggle();
         }
     });
+
+
+    // Equipment reservations / Inventory
+    $('.reservation-save').click((e) => {
+        const reservationId = e.target.getAttribute("data-id");
+        const data = new FormData();
+        data.append('reservation', reservationId);
+
+        const reservationEl = $(e.target).parent().parent();
+        data.append('user_id', reservationEl.children('.column-user_id').text());
+        const definitions = ['mask', 'regulator', 'suit', 'boots', 'gloves', 'fins', 'bcd', 'lead'];
+        definitions.forEach(item => {
+            const itemEl = reservationEl.find('.column-'+item+' input');
+            if (itemEl.is(":visible")) {
+                // Write new input value
+                data.append(item, itemEl.val());
+            } else {
+                // Write return status 
+                const statusEl = reservationEl.find('.column-'+item+' select');
+                data.append(item+'_returned', statusEl.val());
+            }
+        });
+
+        const comment = reservationEl.find('.column-comment textarea');;
+        data.append('other', comment.val());
+
+        jQuery.ajax({
+            url: "admin.php?page=reservations",
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            data,
+            success(response) {
+                console.log(response);
+            }
+        });
+        location.reload();
+    });
 });

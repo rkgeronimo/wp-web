@@ -533,6 +533,10 @@ div#wp-responsive-toggle a::before
     padding: 0.2vw
     display: none
 
+    @media (--mobile)
+        display: block
+        position: relative
+
 .rkg-popover-control
     cursor: pointer
 
@@ -565,3 +569,11 @@ div#wp-responsive-toggle a::before
 .rkg-admin-delete
     color: #a00
 
+td select.value-1
+    color: gray
+
+td select.value-0
+    color: darkgreen
+
+td select.value-3
+    color: burlywood
