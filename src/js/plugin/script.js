@@ -733,8 +733,9 @@ jQuery(document).ready(($) => {
         const comment = reservationEl.find('.column-comment textarea');;
         data.append('other', comment.val());
 
+        data.append('action', 'edit_reservation');
         jQuery.ajax({
-            url: "admin.php?page=reservations",
+            url: rkgScript.ajaxUrl,
             type: 'POST',
             contentType: false,
             processData: false,
