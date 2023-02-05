@@ -748,6 +748,30 @@ jQuery(document).ready(($) => {
         location.reload();
     });
 
+    $('#custom-new-reservation').on('submit', (e) => {
+        e.preventDefault();
+
+        if (!inventoryHasValidationErrors) {
+            $('input.button').attr('disabled', true);
+
+            const form = (e.currentTarget);
+            const formData = new FormData(form);
+            formData.append('action', 'add_custom_reservation');
+
+            jQuery.ajax({
+                url: rkgScript.ajaxUrl,
+                type: 'POST',
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                data: formData,
+                success() {
+                    window.location.href="/wp/wp-admin/admin.php?page=reservations";
+                }
+            });
+        }
+    });
+
     if ($('#guest_meta_check').prop('checked') == true) {
         $('#guest_count_row').show();
     }
