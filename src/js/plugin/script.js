@@ -678,6 +678,10 @@ jQuery(document).ready(($) => {
         }
 
         const type = $(e.currentTarget).attr('name');
+        if (type === "lead") {
+            return;
+        }
+
         $.ajax({
             type: 'POST',
             dataType: 'json',
@@ -741,7 +745,7 @@ jQuery(document).ready(($) => {
             processData: false,
             dataType: 'json',
             data,
-            success() {
+            complete: () => {
                 location.reload();
             }
         });
