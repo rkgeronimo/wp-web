@@ -741,11 +741,10 @@ jQuery(document).ready(($) => {
             processData: false,
             dataType: 'json',
             data,
-            success(response) {
-                console.log(response);
+            success() {
+                location.reload();
             }
         });
-        location.reload();
     });
 
     $('#custom-new-reservation').on('submit', (e) => {
