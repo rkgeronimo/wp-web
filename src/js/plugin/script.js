@@ -657,16 +657,27 @@ jQuery(document).ready(($) => {
 
     $('#rkg_excursion_data_metabox, #rkg_course_data_metabox').detach().appendTo('#prenormal-sortables');
 
+    //// ***** Reservation / Inventory
+
     $('.new-inventory-icon').click((e) => {
         $(e.currentTarget).hide();
         $(e.currentTarget).next().show();
     });
 
-    $('.reservation-resolve input[type=text]').focus((e) => {
-        $(e.currentTarget).removeClass('ok no');
+    // Reservation and inventory validation
+    let inventoryHasValidationErrors = false;
+
+    $('.reservations-blocklet input[type=text]').focus((e) => {
+        $(e.currentTarget).removeClass('hasErrors');
+        $(e.currentTarget).removeClass('noErrors');
     }).blur((e) => {
         const id = $(e.currentTarget).val();
-        console.log(id);
+        if (id.trim().length === 0) {
+            // User probably misclicked, string is empty
+            return;
+        }
+
+        const type = $(e.currentTarget).attr('name');
         $.ajax({
             type: 'POST',
             dataType: 'json',
@@ -674,9 +685,17 @@ jQuery(document).ready(($) => {
             data: {
                 action: 'check_inventory',
                 id,
+                type,
             },
             success: (data) => {
-                $(e.currentTarget).addClass(data);
+                if (data !== "ok") {
+                    inventoryHasValidationErrors = true;
+                    $(e.currentTarget).addClass('hasErrors');
+                } else {
+                    $(e.currentTarget).removeClass('hasErrors'); 
+                    $(e.currentTarget).addClass('noErrors');
+                    inventoryHasValidationErrors = false;
+                }
             },
             error(error) {
                 console.log(error);
@@ -684,6 +703,49 @@ jQuery(document).ready(($) => {
         });
     });
     $('label[for=role]').parent().parent().remove();
+
+    // Saving equipment reservations
+    $('.reservation-save').click((e) => {
+        if (inventoryHasValidationErrors) {
+            return;
+        }
+        e.target.disabled = true;
+
+        const reservationId = e.target.getAttribute("data-id");
+        const data = new FormData();
+        data.append('reservation', reservationId);
+
+        const reservationEl = $(e.target).parent().parent();
+        data.append('user_id', reservationEl.children('.column-user_id').text());
+        const definitions = ['mask', 'regulator', 'suit', 'boots', 'gloves', 'fins', 'bcd', 'lead'];
+        definitions.forEach(item => {
+            const itemEl = reservationEl.find('.column-'+item+' input');
+            if (itemEl.is(":visible")) {
+                // Write new input value
+                data.append(item, itemEl.val());
+            } else {
+                // Write return status 
+                const statusEl = reservationEl.find('.column-'+item+' select');
+                data.append(item+'_returned', statusEl.val());
+            }
+        });
+
+        const comment = reservationEl.find('.column-comment textarea');;
+        data.append('other', comment.val());
+
+        jQuery.ajax({
+            url: "admin.php?page=reservations",
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            data,
+            success(response) {
+                console.log(response);
+            }
+        });
+        location.reload();
+    });
 
     if ($('#guest_meta_check').prop('checked') == true) {
         $('#guest_count_row').show();
@@ -726,44 +788,5 @@ jQuery(document).ready(($) => {
             );
             $(`#${toggle}`).toggle();
         }
-    });
-
-
-    // Equipment reservations / Inventory
-    $('.reservation-save').click((e) => {
-        const reservationId = e.target.getAttribute("data-id");
-        const data = new FormData();
-        data.append('reservation', reservationId);
-
-        const reservationEl = $(e.target).parent().parent();
-        data.append('user_id', reservationEl.children('.column-user_id').text());
-        const definitions = ['mask', 'regulator', 'suit', 'boots', 'gloves', 'fins', 'bcd', 'lead'];
-        definitions.forEach(item => {
-            const itemEl = reservationEl.find('.column-'+item+' input');
-            if (itemEl.is(":visible")) {
-                // Write new input value
-                data.append(item, itemEl.val());
-            } else {
-                // Write return status 
-                const statusEl = reservationEl.find('.column-'+item+' select');
-                data.append(item+'_returned', statusEl.val());
-            }
-        });
-
-        const comment = reservationEl.find('.column-comment textarea');;
-        data.append('other', comment.val());
-
-        jQuery.ajax({
-            url: "admin.php?page=reservations",
-            type: 'POST',
-            contentType: false,
-            processData: false,
-            dataType: 'json',
-            data,
-            success(response) {
-                console.log(response);
-            }
-        });
-        location.reload();
     });
 });
