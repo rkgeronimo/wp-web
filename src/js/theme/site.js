@@ -16,7 +16,7 @@ jQuery(document).ready(($) => {
     }
 
     const loginStatus = {action: 'is_user_logged_in'};
-    $('.rkg-meni-open').click(() => {
+    $('.rkg-meni-open').on('click', () => {
         $('body').addClass('modal-open');
         $('.rkg-meni-background').fadeIn(200, () => {
             $('.rkg-meni').fadeIn({queue: false, duration: 200})
@@ -26,7 +26,7 @@ jQuery(document).ready(($) => {
         $('#rkg-header-meni').fadeOut('fast');
     });
 
-    $('.rkg-meni-close, #nav-main a').click(() => {
+    $('.rkg-meni-close, #nav-main a').on('click', () => {
         $('body').removeClass('modal-open');
         $('.rkg-meni').fadeOut({queue: false, duration: 200})
             .animate({bottom: '50%', top: '-50%'}, 200, () => {
@@ -39,7 +39,7 @@ jQuery(document).ready(($) => {
     //= include modal.js
     //= include cookie.js
 
-    // $(document).mouseup((e) => {
+    // $(document).on('mouseup', (e) => {
     // if ($('.rkg-profile-meni').css('display') === 'block'
     // && !$('.rkg-profile-meni').is(e.target)
     // && !$('.rkg-profile-meni-switch').is(e.target)
@@ -51,7 +51,7 @@ jQuery(document).ready(($) => {
     // }
     // });
 
-    $('.rkg-profile-meni-switch').click(() => {
+    $('.rkg-profile-meni-switch').on('click', () => {
         if (($(window).width() <= 1080) && (window.devicePixelRatio > 1.5)) {
             $('.rkg-profile-meni').css('left', '0vw');
             return;
@@ -62,7 +62,7 @@ jQuery(document).ready(($) => {
         }, 'fast');
     });
 
-    $('.rkg-profile-meni-close').click(() => {
+    $('.rkg-profile-meni-close').on('click', () => {
         if (($(window).width() <= 1080) && (window.devicePixelRatio > 1.5)) {
             $('.rkg-profile-meni').css('left', '-90vw');
             return;
@@ -73,7 +73,7 @@ jQuery(document).ready(($) => {
         }, 'fast');
     });
 
-    // $(document).mouseup((e) => {
+    // $(document).on('mouseup', (e) => {
     // if (!$('.rkg-profile-meni').is(e.target)
     // && $('.rkg-profile-meni').has(e.target).length === 0) {
     // $('.rkg-profile-meni').css('left', '-90vw');
@@ -94,19 +94,19 @@ jQuery(document).ready(($) => {
 
     window.onscroll = () => rkgStick();
 
-    $('#rkg-header-arrow-container, #rkg-ancor-1-go').click(() => {
+    $('#rkg-header-arrow-container, #rkg-ancor-1-go').on('click', () => {
         document.getElementById('rkg-scroll-ancor')
             .scrollIntoView({behavior: 'smooth', block: 'start'});
     });
-    $('#rkg-ancor-2-go').click(() => {
+    $('#rkg-ancor-2-go').on('click', () => {
         document.getElementById('rkg-ancor-2')
             .scrollIntoView({behavior: 'smooth', block: 'start'});
     });
-    $('#rkg-ancor-3-go').click(() => {
+    $('#rkg-ancor-3-go').on('click', () => {
         document.getElementById('rkg-ancor-3')
             .scrollIntoView({behavior: 'smooth', block: 'start'});
     });
-    $('#rkg-ancor-4-go').click(() => {
+    $('#rkg-ancor-4-go').on('click', () => {
         document.getElementById('rkg-ancor-4')
             .scrollIntoView({behavior: 'smooth', block: 'start'});
     });
@@ -153,7 +153,7 @@ jQuery(document).ready(($) => {
         });
     });
 
-    $('.courses-terms-control').click((e) => {
+    $('.courses-terms-control').on('click', (e) => {
         const cat = $(e.currentTarget).data('cat');
         const state = $(e.currentTarget).data('state');
         if (state === 'off') {
@@ -173,7 +173,7 @@ jQuery(document).ready(($) => {
         }
     });
 
-    $('.rkg-excursion-signout-close').click(() => {
+    $('.rkg-excursion-signout-close').on('click', () => {
         $('.rkg-excursion-signout').fadeOut({queue: false, duration: 'fast'})
             .animate({top: '25%'}, () => {
                 $('.rkg-modal-background').fadeOut(
@@ -191,7 +191,7 @@ jQuery(document).ready(($) => {
         nextArrow: $('.rkg-moddal-gallery-chevron-right'),
     });
 
-    $('.gallery-item').click((e) => {
+    $('.gallery-item').on('click', (e) => {
         const gallery = $(e.currentTarget).parent();
         $('.rkg-meni-background').fadeIn('fast').promise().done(() => {
             $('.rkg-moddal-gallery')
@@ -208,7 +208,7 @@ jQuery(document).ready(($) => {
         });
     });
 
-    $('.rkg-moddal-gallery-close').click(() => {
+    $('.rkg-moddal-gallery-close').on('click', () => {
         $('.rkg-moddal-gallery').fadeOut('fast').promise().done(() => {
             $('.rkg-moddal-gallery-slick').slick('slickRemove', null, null, true);
             $('.rkg-meni-background')
@@ -225,7 +225,7 @@ jQuery(document).ready(($) => {
         });
     }
 
-    $('.rkg-user').click((e) => {
+    $('.rkg-user').on('click', (e) => {
         const target = $(e.currentTarget).find('.rkg-user-details');
         $('.rkg-user-details').not(target).hide();
         target.animate({
@@ -234,7 +234,7 @@ jQuery(document).ready(($) => {
         }, 'fast');
     });
 
-    $(document).mouseup((e) => {
+    $(document).on('mouseup', (e) => {
         if (!$('.rkg-user').is(e.target)
             && $('.rkg-user-details').has(e.target).length === 0) {
             $('.rkg-user-details').hide();
@@ -250,7 +250,7 @@ jQuery(document).ready(($) => {
         }, 'fast');
     });
 
-    $(document).mouseup((e) => {
+    $(document).on('mouseup', (e) => {
         if (!$('.calendar-excursion').is(e.target)
             && $('.date-excursions').has(e.target).length === 0) {
             $('.date-excursions').hide();
@@ -261,7 +261,7 @@ jQuery(document).ready(($) => {
         $('.rkg-user-details').hide();
     });
 
-    $('.rkg-profile-meni-toggle').click((e) => {
+    $('.rkg-profile-meni-toggle').on('click', (e) => {
         e.preventDefault();
         $(e.currentTarget).next().slideToggle();
     });
@@ -294,7 +294,7 @@ jQuery(document).ready(($) => {
         });
     });
 
-    $('#excursion-contorl-search').click(() => {
+    $('#excursion-contorl-search').on('click', () => {
         $('#rkg-excursion-page-search').toggle();
         $('.rkg-excursion-search-down').toggle();
         $('.rkg-excursion-search-up').toggle();

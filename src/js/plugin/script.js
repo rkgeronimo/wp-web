@@ -271,7 +271,7 @@ jQuery(document).ready(($) => {
                 },
             );
 
-            $('.excursion-block-btn').click((e) => {
+            $('.excursion-block-btn').on('click', (e) => {
                 $(e.currentTarget).hide();
                 $('.excursion-block-search-btn').css('display', 'block');
                 $('.excursion-block-search').animate({
@@ -492,7 +492,7 @@ jQuery(document).ready(($) => {
         mapExcursion.addLayer(marker);
     }
 
-    $('#rkg_category').change(() => {
+    $('#rkg_category').on('change', () => {
         $('#title-prompt-text').hide();
         const template = $('#rkg_category option:selected').data('template');
         const category = $('#rkg_category option:selected').val();
@@ -520,7 +520,7 @@ jQuery(document).ready(($) => {
         $('#instructor-none').attr('selected', 'selected');
     });
 
-    $('.course-terms-control').click(() => {
+    $('.course-terms-control').on('click', () => {
         $('.course-terms').toggle();
         $('.course-terms-up').toggle();
         $('.course-terms-down').toggle();
@@ -545,12 +545,12 @@ jQuery(document).ready(($) => {
         ],
     });
 
-    $('#rkg-starttime').change((e) => {
+    $('#rkg-starttime').on('change', (e) => {
         const min = $(e.currentTarget).val();
         $('#rkg-endtime').attr('min', min);
     });
 
-    $('.course-block-select').click((e) => {
+    $('.course-block-select').on('click', (e) => {
         e.preventDefault();
         const target = $(e.currentTarget).data('target');
         $('.course-block-terms').not(`#course-block-terms-${target}`).hide();
@@ -560,14 +560,14 @@ jQuery(document).ready(($) => {
         }, 'fast');
     });
 
-    $(document).mouseup((e) => {
+    $(document).on('mouseup', (e) => {
         if (!$('.course-block-select').is(e.target)
             && $('.course-block-terms').has(e.target).length === 0) {
             $('.course-block-terms').hide();
         }
     });
 
-    $('.course-block-term').click((e) => {
+    $('.course-block-term').on('click', (e) => {
         e.preventDefault();
         const target = $(e.currentTarget).data('target');
         const id = $(e.currentTarget).data('id');
@@ -659,7 +659,7 @@ jQuery(document).ready(($) => {
 
     //// ***** Reservation / Inventory
 
-    $('.new-inventory-icon').click((e) => {
+    $('.new-inventory-icon').on('click', (e) => {
         $(e.currentTarget).hide();
         $(e.currentTarget).next().show();
     });
@@ -667,10 +667,10 @@ jQuery(document).ready(($) => {
     // Reservation and inventory validation
     let inventoryHasValidationErrors = false;
 
-    $('.reservations-blocklet input[type=text]').focus((e) => {
+    $('.reservations-blocklet input[type=text]').on('focus', (e) => {
         $(e.currentTarget).removeClass('hasErrors');
         $(e.currentTarget).removeClass('noErrors');
-    }).blur((e) => {
+    }).on('blur', (e) => {
         const id = $(e.currentTarget).val();
         if (id.trim().length === 0) {
             // User probably misclicked, string is empty
@@ -709,7 +709,7 @@ jQuery(document).ready(($) => {
     $('label[for=role]').parent().parent().remove();
 
     // Saving equipment reservations
-    $('.reservation-save').click((e) => {
+    $('.reservation-save').on('click', (e) => {
         if (inventoryHasValidationErrors) {
             return;
         }
@@ -787,14 +787,14 @@ jQuery(document).ready(($) => {
         }
     });
 
-    $('.rkg-popover-control').click((e) => {
+    $('.rkg-popover-control').on('click', (e) => {
         $('.rkg-popover').not($(e.currentTarget).next()).hide();
         $(e.currentTarget).next().toggle();
     });
 
     $('#niid, .preSignupSelect').select2();
 
-    $('.rkg-admin-switch').click((e) => {
+    $('.rkg-admin-switch').on('click', (e) => {
         const id = $(e.currentTarget).attr('id');
         $(e.currentTarget).toggleClass(
             'dashicons-arrow-down-alt2 dashicons-arrow-up-alt2',
@@ -802,13 +802,13 @@ jQuery(document).ready(($) => {
         $(`#${id}-block`).toggle();
     });
 
-    $('.rkg-show-map').click((e) => {
+    $('.rkg-show-map').on('click', (e) => {
         e.preventDefault();
         $(e.currentTarget).toggleClass('on off');
         $('#excursions').toggleClass('excursions-map-off');
     });
 
-    $('.rkg-toggler, .rkg-toggler-title').click((e) => {
+    $('.rkg-toggler, .rkg-toggler-title').on('click', (e) => {
         if ($(e.currentTarget).css('cursor') === 'pointer') {
             const toggle = $(e.currentTarget).data('toggle');
             $(e.currentTarget).find('i').toggleClass(

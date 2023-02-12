@@ -31,7 +31,7 @@ const modalOpen = (modal, callback) => {
     });
 };
 
-$('.ShowPayModal').click((e) => {
+$('.ShowPayModal').on('click', (e) => {
     e.preventDefault();
     const textToEncode = $(e.currentTarget).data('barcode_text');
     PDF417.init(textToEncode);
@@ -92,7 +92,7 @@ $('.ShowPayModal').click((e) => {
         }); 
 });
 
-$('.rkg-modal-close, rkg-info-close').click((e) => {
+$('.rkg-modal-close, rkg-info-close').on('click', (e) => {
     modalShow = false;
     e.preventDefault();
     modalStatusClass();
@@ -118,7 +118,7 @@ $('.rkg-modal-close, rkg-info-close').click((e) => {
         });
 });
 
-$('.course-signup-ok-close').click((e) => {
+$('.course-signup-ok-close').on('click', (e) => {
     modalShow = false;
     e.preventDefault();
     modalStatusClass();
@@ -159,19 +159,19 @@ if ($('#no-required-user').length !== 0) {
     modalOpen('#registration');
 }
 
-$('.rkg-login-button, .rkg-login-show').click(() => {
+$('.rkg-login-button, .rkg-login-show').on('click', () => {
     modalOpen('#login');
 });
 
-$('.rkg-registration-show').click(() => {
+$('.rkg-registration-show').on('click', () => {
     modalOpen('#registration');
 });
 
-$('.rkg-lost-password-show').click(() => {
+$('.rkg-lost-password-show').on('click', () => {
     modalOpen('#lost-password');
 });
 
-$('#rkg-members-button').click(() => {
+$('#rkg-members-button').on('click', () => {
     if ($('#rkg-members-table-container').is(':empty')) {
         $.ajax({
             type: 'POST',
@@ -328,7 +328,7 @@ $('form#additional-details-form').on('submit', (e) => {
     e.preventDefault();
 });
 
-$('.rkg-course-signup-close').click(() => {
+$('.rkg-course-signup-close').on('click', () => {
     $('.rkg-course-signup').fadeOut({queue: false, duration: 'fast'})
         .animate({top: '25%'}, () => {
             $('.rkg-modal-background').fadeOut(
@@ -364,17 +364,17 @@ $('.course-signout').on('click', (e) => {
     modalOpen('#course-signout-form');
 });
 
-$('#course-signup-ok-pay, #course-signup-show-pay').click((e) => {
+$('#course-signup-ok-pay, #course-signup-show-pay').on('click', (e) => {
     modalOpen('#course-signup-pay');
     e.preventDefault();
 });
 
-$('#helth-survey-link').click((e) => {
+$('#helth-survey-link').on('click', (e) => {
     modalOpen('#helth-survey');
     e.preventDefault();
 });
 
-$('#responsibility-survey-link').click((e) => {
+$('#responsibility-survey-link').on('click', (e) => {
     modalOpen('#responsibility-survey');
     e.preventDefault();
 });
@@ -446,7 +446,7 @@ function readURL(input) {
     }
 }
 
-$('#brevet').change(function () {
+$('#brevet').on('change', function () {
     if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
         alert('The File APIs are not fully supported in this browser.');
         return;
@@ -454,7 +454,7 @@ $('#brevet').change(function () {
     readURL(this);
 });
 
-$('#brevet-link').click((e) => {
+$('#brevet-link').on('click', (e) => {
     e.preventDefault();
     $('#brevet').click();
 });
@@ -499,7 +499,7 @@ $('form#responsibility-survey').on('submit', (e) => {
     });
 });
 
-$('.excursion-signup').click((e) => {
+$('.excursion-signup').on('click', (e) => {
     e.preventDefault();
     const signupId = $(e.currentTarget).data('post');
 
@@ -520,12 +520,12 @@ $('.excursion-signup').click((e) => {
     });
 });
 
-$('#excursion-signup-ok-gear, #excursion-signup-gear').click((e) => {
+$('#excursion-signup-ok-gear, #excursion-signup-gear').on('click', (e) => {
     e.preventDefault();
     modalOpen('#gear-form');
 });
 
-$('.excursion-signout').click((e) => {
+$('.excursion-signout').on('click', (e) => {
     e.preventDefault();
     signup = 'course';
     const signupId = $(e.currentTarget).data('post');
@@ -539,7 +539,7 @@ $('.excursion-signout').click((e) => {
     });
 });
 
-$('.excursion-signup-waiting').click((e) => {
+$('.excursion-signup-waiting').on('click', (e) => {
     e.preventDefault();
     const signupId = $(e.currentTarget).data('post');
 
@@ -560,7 +560,7 @@ $('.excursion-signup-waiting').click((e) => {
     });
 });
 
-$('.excursion-signout-waiting').click((e) => {
+$('.excursion-signout-waiting').on('click', (e) => {
     e.preventDefault();
     signup = 'course';
     const signupId = $(e.currentTarget).data('post');
@@ -632,7 +632,7 @@ $('form#gear-form').on('submit', (e) => {
     });
 });
 
-$('#no-gear').click((e) => {
+$('#no-gear').on('click', (e) => {
     e.preventDefault();
     const gearId = $(e.currentTarget).data('post');
     $.ajax({
@@ -649,7 +649,7 @@ $('#no-gear').click((e) => {
     });
 });
 
-$('#excursion-signup-guest').click((e) => {
+$('#excursion-signup-guest').on('click', (e) => {
     modalOpen('#excursion-guest-form');
     e.preventDefault();
 });
@@ -674,7 +674,7 @@ $('form#excursion-guest-form').on('submit', (e) => {
     });
 });
 
-$('.guest-uninvite').click((e) => {
+$('.guest-uninvite').on('click', (e) => {
     e.preventDefault();
     const name = $(e.currentTarget).data('name');
     const email = $(e.currentTarget).data('email');
@@ -703,7 +703,7 @@ $('form#excursion-guest-remove-form').on('submit', (e) => {
     });
 });
 
-$('.course-interested').click((e) => {
+$('.course-interested').on('click', (e) => {
     e.preventDefault();
     const course = $(e.currentTarget).data('course');
     $.ajax({
@@ -723,7 +723,7 @@ $('.course-interested').click((e) => {
     });
 });
 
-$('.course-not-interested').click((e) => {
+$('.course-not-interested').on('click', (e) => {
     e.preventDefault();
     const course = $(e.currentTarget).data('course');
     $.ajax({
