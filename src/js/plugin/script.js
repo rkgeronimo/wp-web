@@ -745,8 +745,16 @@ jQuery(document).ready(($) => {
             processData: false,
             dataType: 'json',
             data,
-            complete: () => {
+            success: () => {
                 location.reload();
+            },
+            error(response) {
+                if (response != "ok") {
+                    $('#error-message').removeClass("hidden");
+                    $('#error-text').append(response.responseText);
+                    $('#error-text').removeClass("hidden");
+                    $('input.button').attr('disabled', false);   
+                }
             }
         });
     });
@@ -770,6 +778,12 @@ jQuery(document).ready(($) => {
                 data: formData,
                 success() {
                     window.location.href="/wp/wp-admin/admin.php?page=reservations";
+                },
+                error(response) {
+                    $('#error-message').removeClass("hidden");
+                    $('#error-text').append(response.responseText);
+                    $('#error-text').removeClass("hidden");
+                    $('input.button').attr('disabled', false);
                 }
             });
         }
