@@ -384,7 +384,6 @@ const resize = new Croppie(document.getElementById('brevet-crop'), {
     boundary: {width: 320, height: 363},
     showZoomer: true,
     enableOrientation: true,
-    url: 'http://lorempixel.com/500/400/',
 });
 
 $('.croppie-rotate').on('click', (e) => {
@@ -398,7 +397,6 @@ function readURL(input) {
             // $('.croppie-container').html('');
             // $('#brevet-crop')[0].croppie('destroy');
             modalOpen('#rkg-moddal-brevet', () => {
-                console.log(e);
                 resize.bind({
                     url: e.target.result,
                 });
@@ -464,7 +462,6 @@ $('#brevet-link').click((e) => {
 $('form#helth-survey').on('submit', (e) => {
     e.preventDefault();
     const formData  = new FormData($('#helth-survey').get(0));
-    console.log(rkgTheme.ajaxurl);
     formData.append('action', 'health_survey');
 
     jQuery.ajax({
@@ -485,7 +482,6 @@ $('form#helth-survey').on('submit', (e) => {
 $('form#responsibility-survey').on('submit', (e) => {
     e.preventDefault();
     const formData  = new FormData($('#responsibility-survey').get(0));
-    console.log(rkgTheme.ajaxurl);
     formData.append('action', 'responsibility_survey');
 
     jQuery.ajax({
