@@ -37,7 +37,6 @@ jQuery(document).ready(($) => {
     });
 
     //= include modal.js
-    //= include cookie.js
 
     // $(document).on('mouseup', (e) => {
     // if ($('.rkg-profile-meni').css('display') === 'block'
