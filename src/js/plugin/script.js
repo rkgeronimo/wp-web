@@ -27,7 +27,6 @@ jQuery(document).ready(($) => {
     let zoom = 7.5;
     if (typeof rkgScript !== 'undefined') {
         const response = document.body.classList.contains('logged-in');
-        console.log(response);
         if (response === true) {
             coordinates = [44.30, 16.5];
         } else {
@@ -428,7 +427,7 @@ jQuery(document).ready(($) => {
             ).addTo(mapAdmin);
             mapAdmin.addLayer(marker);
         } else {
-            mapAdmin = L.map('rkg-admin-map').setView([44.7, 16], 6);
+            mapAdmin = L.map('rkg-admin-map').setView([44.7, 15], 6);
             mapAdmin.addLayer(layer);
         }
 
@@ -459,6 +458,9 @@ jQuery(document).ready(($) => {
             $('input[name=latitude]').val(e.latlng.lat);
             $('input[name=longitude]').val(e.latlng.lng);
         });
+
+        mapAdmin.setMinZoom(3);
+        mapAdmin.setZoom(8);
     }
 
     if ($('#rkg-excursion-map').length) {
