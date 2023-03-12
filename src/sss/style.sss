@@ -726,7 +726,7 @@ button
         width: 47vw
         @media (--mobile)
             margin: 0 auto 12vw
-            width: 90vw
+            width: 90vw !important
     @media (--mobile)
         display: flex
         flex-direction: column
@@ -745,9 +745,11 @@ button
             width: 100%
             margin-bottom: 4vw
 
-.article-body > p
+.article-body > p,
+.article-body > ul li
+    color: $color-reading-font
     margin-bottom: 1vw !important
-    font-size: 0.7em
+    font-size: 0.8em
     line-height: 1.6em
     @media (--mobile)
         font-size: 1.35em 
