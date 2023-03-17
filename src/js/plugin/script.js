@@ -112,7 +112,7 @@ jQuery(document).ready(($) => {
                     markers[excursionsNow[i].id].bindPopup(
                         `<b class="leaflet-popup-bold-now">${excursionsNow[i].post_title}</b><br>
                 ${croDate(excursionsNow[i].starttime)} - ${croDate(excursionsNow[i].endtime)}<br>
-                Organizator: ${excursionsNow[i].display_name}<br>
+                Izlet organizira: ${excursionsNow[i].display_name}<br>
                 Planirano osoba: ${excursionsNow[i].limitation}`,
                     ).on('mouseover', () => {
                         markers[excursionsNow[i].id].setIcon(nowIconActive);
@@ -139,7 +139,7 @@ jQuery(document).ready(($) => {
                     markers[excursionsNew[i].id].bindPopup(
                         `<b class="leaflet-popup-bold-new">${excursionsNew[i].post_title}</b><br>
                 ${croDate(excursionsNew[i].starttime)} - ${croDate(excursionsNew[i].endtime)}<br>
-                Organizator: ${excursionsNew[i].display_name}<br>
+                Izlet organizira: ${excursionsNew[i].display_name}<br>
                 Planirano osoba: ${excursionsNew[i].limitation}`,
                     ).on('mouseover', () => {
                         markers[excursionsNew[i].id].setIcon(newIconActive);
@@ -166,7 +166,7 @@ jQuery(document).ready(($) => {
                     markers[excursionsOld[i].id].bindPopup(
                         `<b class="leaflet-popup-bold-old">${excursionsOld[i].post_title}</b><br>
                 ${croDate(excursionsOld[i].starttime)} - ${croDate(excursionsOld[i].endtime)}<br>
-                Organizator: ${excursionsOld[i].display_name}<br>
+                Izlet organizira: ${excursionsOld[i].display_name}<br>
                 Planirano osoba: ${excursionsOld[i].limitation}`,
                     ).on('mouseover', () => {
                         markers[excursionsOld[i].id].setIcon(oldIconActive);
@@ -315,7 +315,7 @@ jQuery(document).ready(($) => {
                             markers[response.cords[i].id].bindPopup(
                                 `<b class="leaflet-popup-bold-old">${response.cords[i].post_title}</b><br>
                 ${croDate(response.cords[i].starttime)} - ${croDate(response.cords[i].endtime)}<br>
-                Organizator: ${response.cords[i].display_name}<br>
+                Izlet organizira: ${response.cords[i].display_name}<br>
                 Planirano osoba: ${response.cords[i].limitation}`,
                             ).on('mouseover', () => {
                                 markers[response.cords[i].id].setIcon(oldIconActive);
