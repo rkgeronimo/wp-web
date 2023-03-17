@@ -552,7 +552,7 @@ $('.excursion-signup-waiting').on('click', (e) => {
             post: signupId,
         },
         success: () => {
-            modalOpen('#excursion-signup-ok');
+            modalOpen('#excursion-signup-waiting-ok');
         },
         error: (error) => {
             console.log(error);
