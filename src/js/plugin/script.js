@@ -98,60 +98,6 @@ jQuery(document).ready(($) => {
                     },
                 });
 
-                for (let i = 0; i < excursionsNow.length; i++) {
-                    if ((excursionsNow[i].longitude !== '')
-                        && (excursionsNow[i].longitude !== '0')
-                    ) {
-                        markers[excursionsNow[i].id] = L.marker(
-                            [excursionsNow[i].latitude, excursionsNow[i].longitude],
-                            {
-                                icon: nowIcon,
-                                id: excursionsNow[i].id,
-                                old: false,
-                                now: true,
-                            },
-                        );
-                        markers[excursionsNow[i].id].bindPopup(
-                            `<b class="leaflet-popup-bold-now">${excursionsNow[i].post_title}</b><br>
-                    ${croDate(excursionsNow[i].starttime)} - ${croDate(excursionsNow[i].endtime)}<br>
-                    Izlet organizira: ${excursionsNow[i].display_name}<br>
-                    Planirano osoba: ${excursionsNow[i].limitation}`,
-                        ).on('mouseover', () => {
-                            markers[excursionsNow[i].id].setIcon(nowIconActive);
-                        }).on('mouseout', () => {
-                            markers[excursionsNow[i].id].setIcon(nowIcon);
-                        });
-                        nowLayer.addLayer(markers[excursionsNow[i].id]);
-                    }
-                }
-                nowLayer.addTo(map);
-                for (let i = 0; i < excursionsNew.length; i++) {
-                    if ((excursionsNew[i].longitude !== '')
-                        && (excursionsNew[i].longitude !== '0')
-                    ) {
-                        markers[excursionsNew[i].id] = L.marker(
-                            [excursionsNew[i].latitude, excursionsNew[i].longitude],
-                            {
-                                icon: newIcon,
-                                id: excursionsNew[i].id,
-                                old: false,
-                                now: false,
-                            },
-                        );
-                        markers[excursionsNew[i].id].bindPopup(
-                            `<b class="leaflet-popup-bold-new">${excursionsNew[i].post_title}</b><br>
-                    ${croDate(excursionsNew[i].starttime)} - ${croDate(excursionsNew[i].endtime)}<br>
-                    Izlet organizira: ${excursionsNew[i].display_name}<br>
-                    Planirano osoba: ${excursionsNew[i].limitation}`,
-                        ).on('mouseover', () => {
-                            markers[excursionsNew[i].id].setIcon(newIconActive);
-                        }).on('mouseout', () => {
-                            markers[excursionsNew[i].id].setIcon(newIcon);
-                        });
-                        newLayer.addLayer(markers[excursionsNew[i].id]);
-                    }
-                }
-                newLayer.addTo(map);
                 for (let i = 0; i < excursionsOld.length; i++) {
                     if ((excursionsOld[i].longitude !== '')
                         && (excursionsOld[i].longitude !== '0')
@@ -179,6 +125,62 @@ jQuery(document).ready(($) => {
                     }
                 }
                 oldLayer.addTo(map);
+
+                for (let i = 0; i < excursionsNow.length; i++) {
+                    if ((excursionsNow[i].longitude !== '')
+                        && (excursionsNow[i].longitude !== '0')
+                    ) {
+                        markers[excursionsNow[i].id] = L.marker(
+                            [excursionsNow[i].latitude, excursionsNow[i].longitude],
+                            {
+                                icon: nowIcon,
+                                id: excursionsNow[i].id,
+                                old: false,
+                                now: true,
+                            },
+                        );
+                        markers[excursionsNow[i].id].bindPopup(
+                            `<b class="leaflet-popup-bold-now">${excursionsNow[i].post_title}</b><br>
+                    ${croDate(excursionsNow[i].starttime)} - ${croDate(excursionsNow[i].endtime)}<br>
+                    Izlet organizira: ${excursionsNow[i].display_name}<br>
+                    Planirano osoba: ${excursionsNow[i].limitation}`,
+                        ).on('mouseover', () => {
+                            markers[excursionsNow[i].id].setIcon(nowIconActive);
+                        }).on('mouseout', () => {
+                            markers[excursionsNow[i].id].setIcon(nowIcon);
+                        });
+                        nowLayer.addLayer(markers[excursionsNow[i].id]);
+                    }
+                }
+                nowLayer.addTo(map);
+                
+                for (let i = 0; i < excursionsNew.length; i++) {
+                    if ((excursionsNew[i].longitude !== '')
+                        && (excursionsNew[i].longitude !== '0')
+                    ) {
+                        markers[excursionsNew[i].id] = L.marker(
+                            [excursionsNew[i].latitude, excursionsNew[i].longitude],
+                            {
+                                icon: newIcon,
+                                id: excursionsNew[i].id,
+                                old: false,
+                                now: false,
+                            },
+                        );
+                        markers[excursionsNew[i].id].bindPopup(
+                            `<b class="leaflet-popup-bold-new">${excursionsNew[i].post_title}</b><br>
+                    ${croDate(excursionsNew[i].starttime)} - ${croDate(excursionsNew[i].endtime)}<br>
+                    Izlet organizira: ${excursionsNew[i].display_name}<br>
+                    Planirano osoba: ${excursionsNew[i].limitation}`,
+                        ).on('mouseover', () => {
+                            markers[excursionsNew[i].id].setIcon(newIconActive);
+                        }).on('mouseout', () => {
+                            markers[excursionsNew[i].id].setIcon(newIcon);
+                        });
+                        newLayer.addLayer(markers[excursionsNew[i].id]);
+                    }
+                }
+                newLayer.addTo(map);
                 const eOffset = $('#excursions').offset();
 
                 bounds = map.getSize();
