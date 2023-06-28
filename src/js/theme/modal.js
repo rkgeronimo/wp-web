@@ -156,7 +156,7 @@ $('.course-signup-ok-close').on('click', (e) => {
 });
 
 if ($('#no-required-user').length !== 0) {
-    modalOpen('#registration');
+    modalOpen('#login');
 }
 
 $('.rkg-login-button, .rkg-login-show').on('click', () => {
