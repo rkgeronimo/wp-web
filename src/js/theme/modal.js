@@ -208,6 +208,12 @@ $('.course-signup').on('click', (e) => {
     signup = 'course';
     const signupId = $(e.currentTarget).data('course');
     const signupName = $(e.currentTarget).data('name');
+    if (signupName !== "Početni ronilački tečaj") {
+        $('.additional-r1-info').hide();
+        $('input[name="height"]').removeAttr('required');
+        $('input[name="weight"]').removeAttr('required');
+        $('input[name="shoe_size"]').removeAttr('required');
+    }
     const signupDate = $(e.currentTarget).data('date');
     const link = $(e.currentTarget).data('link');
     $('input[name="signup-course"]').val(signupId);
