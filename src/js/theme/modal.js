@@ -216,14 +216,7 @@ $('.course-signup').on('click', (e) => {
     $('#course-signup-modal-link').attr('href', link);
     jQuery.post(rkgTheme.ajaxurl, loginStatus, (response) => {
         if (response === 'yes') {
-            const dob = $('#dob').val();
-            const oib = $('#oib').val();
-            const tel = $('#tel').val();
-            if ((dob.length === 0) || (oib.length === 0) || (tel.length === 0)) {
-                modalOpen('#additional-details-form');
-            } else {
-                $('#additional-details-form').submit();
-            }
+            modalOpen('#additional-details-form');
         } else {
             modalOpen('#registration');
         }
@@ -318,6 +311,9 @@ $('form#additional-details-form').on('submit', (e) => {
             dob: $('form#additional-details-form #dob').val(),
             oib: $('form#additional-details-form #oib').val(),
             tel: $('form#additional-details-form #tel').val(),
+            height: $('form#additional-details-form #height').val(),
+            weight: $('form#additional-details-form #weight').val(),
+            shoe_size: $('form#additional-details-form #shoe_size').val(),
             course: $('form#additional-details-form #signup-course').val(),
         },
         success: (data) => {
