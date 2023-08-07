@@ -16,7 +16,7 @@ Before running the commands make sure to install all the requirements mentioned 
 
 To install and setup everything, run the following commands:
 
-1. `yarn` - Installs NPM requirements from the `package.json` file
+1. Inside `wp-web` directory run `yarn` - Installs NPM requirements from the `package.json` file
 2. `composer install` - Installs PHP requirements from  the`composer.json` file
 3. `./node_modules/.bin/gulp` - Builds static files (js, css)
 4. `cp .env.example .env` - Create environment file and define variables (below explained)
@@ -25,6 +25,7 @@ To install and setup everything, run the following commands:
 7. Install plugin `wp-mail-smtp`, manually or using WP CLI `wp plugin install wp-mail-smtp --activate`
 8. Setup Apache virtual host `http://local.rkgeronimo` the document root on the webserver to the `web` folder: `/path/to/site/web/`
 9. Map the hostname by editing your local `/etc/hosts` file and adding entry for the domain (http://local.rkgeronimo) next to localhost.
+10. (optional) Make sure `php-zip` extension is enabled if you want to use feature to download all photos from applicants in a course. Extension can be installed using `sudo apt-get install php7.4-zip`. This is not necessary for anything else and app will work without it, just not the part with ZipArchive.
 
 
 Note: If you are using other virual host and other domain, then domain replacements in the database should be made. This can be easily done through [WP-CLI](https://wp-cli.org): `wp search-replace 'http://local.rkgeronimo' 'new'`. WP-CLI plugin can be used for similar data updates e.g. user password changing.
