@@ -840,4 +840,20 @@ jQuery(document).ready(($) => {
             $(`#${toggle}`).toggle();
         }
     });
+
+    let submittedReport = false;
+    $('#generate-report').on('submit', (e) => {
+        $('#HRS-loader').show();
+        $('#HRS-loader').css('padding', '2em 2em');
+        $('#HRS-loader').addClass('rotating-object');
+        
+        setTimeout(() => {
+            submittedReport = true;
+            $('#generate-report').submit();
+        }, 2000);
+
+        if (!submittedReport) {
+            e.preventDefault();
+        }
+    });
 });

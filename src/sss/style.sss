@@ -2191,3 +2191,13 @@ form#responsibility-survey
 .rkg-hidder
     @media (--mobile)
         display: none
+
+@keyframes rotate
+    from
+        transform: rotate(0deg)
+
+    to
+        transform: rotate(360deg)
+
+.rotating-object
+    animation: rotate 2s linear infinite
