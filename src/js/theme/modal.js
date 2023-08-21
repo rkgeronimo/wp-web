@@ -313,7 +313,6 @@ $('form#additional-details-form').on('submit', (e) => {
         data: {
             action: 'rkg_user_additional_details',
             pob: $('form#additional-details-form #pob').val(),
-            address: $('form#additional-details-form #address').val(),
             dob: $('form#additional-details-form #dob').val(),
             oib: $('form#additional-details-form #oib').val(),
             tel: $('form#additional-details-form #tel').val(),
