@@ -303,7 +303,21 @@ $('form#registration').on('submit', (e) => {
     e.preventDefault();
 });
 
+function isValidCourseRegistration() {
+    const oib = $('form#additional-details-form #oib').val();
+    if (!isOibValid(oib)) {
+        $('.input-error').text("Nevažeći OIB.");
+        return false;
+    }
+    return true;
+}
+
 $('form#additional-details-form').on('submit', (e) => {
+    if (!isValidCourseRegistration()) {
+        e.preventDefault();
+        return;
+    }
+
     modalStatusClass();
     $('.rkg-modal-status').text(rkgTheme.loadingmessage);
     $.ajax({
