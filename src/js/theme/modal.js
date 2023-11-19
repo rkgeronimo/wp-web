@@ -517,6 +517,7 @@ $('form#responsibility-survey').on('submit', (e) => {
 
 $('.excursion-signup').on('click', (e) => {
     e.preventDefault();
+    $(".excursion-signup").prop("disabled", true);
     const signupId = $(e.currentTarget).data('post');
 
     $.ajax({
@@ -591,6 +592,8 @@ $('.excursion-signout-waiting').on('click', (e) => {
 });
 
 $('form#excursion-signout-form').on('submit', (e) => {
+    e.preventDefault();
+    $('#btn-signout-excursion').prop("disabled", true);
     $('form#excursion-signout-form p.status').show()
         .text('Odjava u tijeku...');
     $.ajax({
@@ -606,7 +609,6 @@ $('form#excursion-signout-form').on('submit', (e) => {
             window.location.reload();
         },
     });
-    e.preventDefault();
 });
 
 $('form#excursion-signout-waiting-form').on('submit', (e) => {
