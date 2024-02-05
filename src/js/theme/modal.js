@@ -208,7 +208,7 @@ $('.course-signup').on('click', (e) => {
     signup = 'course';
     const signupId = $(e.currentTarget).data('course');
     const signupName = $(e.currentTarget).data('name');
-    if (signupName !== "Početni ronilački tečaj") {
+    if (signupName.toUpperCase().indexOf('R1') === -1) {
         $('.additional-r1-info').hide();
         $('input[name="height"]').removeAttr('required');
         $('input[name="weight"]').removeAttr('required');
