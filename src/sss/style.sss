@@ -104,6 +104,10 @@ button
         .rkg-modal-link
             color: $color-title
             cursor: pointer
+
+        &.small
+            display: inline-flex
+            max-width: 22vw
     a
         color: $color-title
         text-decoration: none
@@ -126,6 +130,11 @@ button
                 font-weight: $medium
             &:active
                 background: color($color-title tint(15%))
+        
+        &.small
+            width: 50%
+            &:first-child
+                margin-right: 1vw
     .rkg-button
         display: inline-block
         color: $color-main
@@ -169,6 +178,9 @@ button
             font-size: 14px
             &:first-child
                 font-size: 23px
+            &.small
+                display: inline-flex
+                max-width: 70vw
         input
             font-size: 14px
             padding: 4vw
@@ -178,6 +190,10 @@ button
                 width: 40vw
                 border: 1px solid $color-title
                 border-radius: 10vw
+            &.small
+                width: 50%
+                &:first-child
+                    margin-right: 1vw
         button
             font-size: 14px
             padding: 2vw
