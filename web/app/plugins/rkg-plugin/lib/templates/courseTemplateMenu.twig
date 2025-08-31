@@ -1,0 +1,111 @@
+{% block content %}
+<h1>RK Geronimo predlošci tečajeva</h1>
+{% if rkgForm  == 'added' %}
+    <p>Predložak uspješno dodan</p>
+{% elseif rkgForm  == 'updated' %}
+    <p>Predložak uspješno promijenjen</p>
+{% elseif rkgForm  == 'deleted' %}
+    <p>Predložak uspješno izbrisan</p>
+{% endif %}
+<fieldset>
+    <legend>Dodaj predložak</legend>
+    <form method="post" action="">
+        <table class="form-table">
+            <tbody>
+                <tr>
+                    <th><label>Kategorija</label></th>
+                    <td><input type="text" name="category" value="{{ rkgEdit.category }}" /></td>
+                </tr>
+                <tr>
+                    <th><label>Prioritet za prikaz</label></th>
+                    <td><input type="number" name="priority" value="{{ rkgEdit.priority }}" /></td>
+                </tr>
+                <tr>
+                    <th><label>Naziv</label></th>
+                    <td><input type="text" name="name" value="{{ rkgEdit.name }}" /></td>
+                </tr>
+                <tr>
+                    <th><label>Lokacija</label></th>
+                    <td><textarea name="location" rows="5" cols="20">{{ rkgEdit.location }}</textarea></td>
+                </tr>
+                <tr>
+                    <th><label>Termini</label></th>
+                    <td><textarea id="terms" name="terms" rows="5" cols="20">{{ rkgEdit.terms }}</textarea></td>
+                </tr>
+                <tr>
+                    <th><label>Cijena</label></th>
+                    <td><input type="text" name="price" value="{{ rkgEdit.price }}" /></td>
+                </tr>
+                <tr>
+                    <th><label>Broj polaznika</label></th>
+                    <td><input type="number" name="limitation" value="{{ rkgEdit.limitation }}"/></td>
+                </tr>
+                <tr>
+                    <th><label>Tečaj je za specijalnost</label></th>
+                    <td><input type="checkbox" name="special" {{ rkgEdit.special ? ' checked' }}/></td>
+                </tr>
+                <tr>
+                    <th><label>Privremena kategorija</label></th>
+                    <td><input type="text" name="temp_categorie" value="{{ rkgEdit.temp_categorie }}"/></td>
+                </tr>
+                <tr>
+                    <th><label>Završena kategorija</label></th>
+                    <td><input type="text" name="finish_categorie" value="{{ rkgEdit.finish_categorie }}"/></td>
+                </tr>
+                <tr>
+                    <th><label>Opis plaćanja</label></th>
+                    <td><input type="text" name="payment_desc" value="{{ rkgEdit.payment_desc }}"/></td>
+                </tr>
+                <tr>
+                    <th><label>Iznos za plaćanje (00,00)</label></th>
+                    <td><input type="text" name="payment_price" value="{{ rkgEdit.payment_price }}" /></td>
+                </tr>
+            </tbody>
+        </table>
+        <input type="hidden" name="id" value="{{ rkgEdit.id }}"/>
+        {{ function('wp_editor', rkgEdit.description, 'description') }}
+        <p><input type="submit" value="Save" class="button button-primary" name="submit" /></p>
+    </form>
+</fieldset>
+<table class="wp-list-table widefat fixed striped users">
+    <thead>
+        <tr>
+            <th>Kategorija</th>
+            <th>Prioritet</th>
+            <th>Naziv</th>
+            <th>Lokacija</th>
+            <th>Termini</th>
+            <th>Cijena</th>
+            <th>Polaznika</th>
+            <th>Administracija</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ct in rkgCT %}
+            <tr>
+                <td>{{ ct.category }}</td>
+                <td>{{ ct.priority }}</td>
+                <td>{{ ct.name }}</td>
+                <td>{{ ct.location|nl2br }}</td>
+                <td>{{ ct.terms|nl2br }}</td>
+                <td>{{ ct.price }}</td>
+                <td>{{ ct.limitation }}</td>
+                <td>
+                    <form method="post" action="">
+                        <input type="hidden" name="id" value="{{ ct.id }}" checked='checked' />
+                        <p><input type="submit" value="Edit" class="button button-secondary" name="submit" /></p>
+                    </form>
+                    <form method="post" action="">
+                        <input type="hidden" name="id" value="{{ ct.id }}" checked='checked' />
+                        <p><input type="submit" value="Repeat" class="button button-secondary" name="submit" /></p>
+                    </form>
+                    <form method="post" action="">
+                        <input type="hidden" name="id" value="{{ ct.id }}" checked='checked' />
+                        <p><input type="submit" value="Delete" class="button delete" name="submit" /></p>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

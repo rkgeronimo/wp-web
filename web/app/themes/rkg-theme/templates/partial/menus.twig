@@ -1,0 +1,88 @@
+{% if user is not empty %}
+    <div class="rkg-profile-meni">
+        <div class="rkg-profile-meni-controls">
+            <div class="rkg-profile-meni-close"></div>
+            <a class="rkg-modal-logo" href="{{ function('home_url') }}"><img class="rkg-top-logo" src="{{ site.theme.link }}/assets/img/logo.png" /></a>
+        </div>
+        <div class="rkg-profile-meni-messages">
+            <p>Bok {{ user.first_name }}!</p>
+            <br>
+            {#<p>- Trebaš ispuniti <span style="color: #0046aa">obrazac</span> za prijavu na tečaj</p>#}
+            {#<br>#}
+            {#<p>- Za 13 dana ti počinje <span style="color: #0046aa">R1 tečaj</span></p>#}
+            {#<br>#}
+
+            {% if memberDebth is not empty %}
+            <p><a href="#" class="ShowPayModal"
+                    data-title="Plaćanje članarine za {{ memberDebth }}."
+                    data-barcode_text="HRVHUB30
+EUR
+000000000006000
+{{ user.display_name }}
+
+
+RK GERONIMO
+Trg Krešimira Ćosića 10
+10000 Zagreb
+HR2524840081102706472
+HR67
+{{ user.oib ? user.oib : "OIB" }}
+
+{{ user.display_name }} - Članarina za {{ memberDebth }}."
+                    data-iznos="60 EUR"
+                    data-primatelj="RK GERONIMO, Trg Krešimira Ćosića 10, Zagreb"
+                    data-iban="HR2524840081102706472"
+                    data-model_placanja="HR67"
+                    data-poziv_na_broj="{{ user.oib ? user.oib : "OIB" }}"
+                    data-opis_placanja="{{ user.display_name }} - članarina za {{ memberDebth }}."
+                    >Članarina nije plaćena za {{ memberDebth }}. godinu</a></p>
+            {% endif %}
+        </div>
+        {# <div class="rkg-profile-meni-item-group"> #}
+        {% if actual_courses|length == 1 %}
+            <a href="{{ actual_courses[0].post.guid }}" class="dashicons-before dashicons-welcome-learn-more rkg-profile-meni-item">Prijavljeni tečaj</a>
+        {% elseif actual_courses|length > 1 %}
+            <a href="#" class="dashicons-before dashicons-welcome-learn-more rkg-profile-meni-item rkg-profile-meni-toggle">Prijavljeni tečajevi</a>
+            <ul>
+                {% for actual_course in actual_courses %}
+                    <li>
+                        <a href="{{ actual_course.post.guid }}" class="rkg-profile-meni-item">{{ actual_course.post.post_title }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {%endif %}
+        {% if actual_excursions|length == 1 %}
+            <a href="{{ actual_excursions[0].post.guid }}" class="dashicons-before dashicons-palmtree rkg-profile-meni-item">Prijavljeni izlet</a>
+        {% elseif actual_excursions|length > 1 %}
+            <a href="#" class="dashicons-before dashicons-palmtree rkg-profile-meni-item rkg-profile-meni-toggle">Prijavljeni izleti</a>
+            <ul>
+                {% for actual_excursion in actual_excursions %}
+                    <li>
+                        <a href="{{ actual_excursion.post.guid }}" class="rkg-profile-meni-item">{{ actual_excursion.post.post_title }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {%endif %}
+        <a href="{{ http_host }}/wp/wp-admin/profile.php" class="dashicons-before dashicons-admin-tools rkg-profile-meni-item">Postavke profila</a>
+        {% if user.can('edit_rkgPosts') %}
+            <a href="{{ http_host }}/wp/wp-admin/edit.php?post_type=rkg-post" class="dashicons-before dashicons-edit rkg-profile-meni-item">Pisanje objava</a>
+        {% endif %}
+        {% if user.can('manage_equipment') %}
+            <a href="{{ http_host }}/wp/wp-admin/admin.php?page=reservations" class="dashicons-before dashicons-sos rkg-profile-meni-item">Izdavanje opreme</a>
+        {% endif %}
+        {% if user.can('member_access') %}
+            <a href="#" id="rkg-members-button" class="dashicons-before dashicons-groups rkg-profile-meni-item">Popis članova</a>
+        {% endif %}
+        {% if user.can('edit_excursions') %}
+            <a href="{{ http_host }}/wp/wp-admin/edit.php?post_type=excursion" class="dashicons-before dashicons-calendar-alt rkg-profile-meni-item">Organizacija izleta</a>
+        {% endif %}
+        {% if user.can('edit_courses') %}
+            <a href="{{ http_host }}/wp/wp-admin/edit.php?post_type=course" class="dashicons-before dashicons-clipboard rkg-profile-meni-item">Organizacija tečajeva</a>
+        {% endif %}
+        {% if user.can('create_users') %}
+            <a href="{{ http_host }}/wp/wp-admin/users.php" class="dashicons-before dashicons-admin-users rkg-profile-meni-item">Administracija korisnika</a>
+        {% endif %}
+        <a href="{{ function('wp_logout_url', function('home_url')) }}"><div class="power"></div>Odjava</a>
+        {# </div> #}
+    </div>
+{% endif %}

@@ -1,0 +1,62 @@
+{% block content %}
+    <div class="wrap">
+        <h1 id="add-new-inventory" class="wp-heading-inline">Stanje opreme</h1>
+        {% if request.post is not empty %}
+            <div id="message" class="updated notice is-dismissible"><p>Promjene su spremljene.</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Isključi ovu napomenu.</span></button></div>
+        {% endif %}
+        <form method="post" name="createuser" id="createuser" class="validate" novalidate="novalidate">
+            <input name="action" type="hidden" value="createInventoryItem">
+            <input name="id" type="hidden" value="{{ itemEdit.id }}">
+            <table class="form-table">
+                <tbody>
+                    <tr class="form-field">
+                        <th scope="row"><label for="id">Šifra opreme</label></th>
+                        <td>{{ itemEdit.id }}</td>
+                    </tr>
+                    <tr class="form-field">
+                        <th scope="row"><label for="type">Vrsta opreme</label></th>
+                        <td><select name="type" id="type">
+                                {% for key, type in typeTranslation %}
+                                    <option value="{{ key }}" {{ (key == itemEdit.type) ? 'selected' : '' }}>{{ type }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr class="form-field">
+                        <th scope="row"><label for="size">Veličina</th>
+                        <td><input name="size" type="text" id="size" value="{{ itemEdit.size }}" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60"></td>
+                    </tr>
+                    <tr class="form-field">
+                        <th scope="row"><label for="status">Status</label></th>
+                        <td><select name="status" id="status">
+                                {% for key, state in stateTranslation %}
+                                    <option value="{{ key }}" {{ (key == itemEdit.state) ? 'selected' : '' }}>{{ state }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr class="form-field">
+                        <th scope="row"><label for="note">Napomena<label></th>
+                        <td><textarea name="note">{{ itemEdit.note }}</textarea></td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+            <p class="submit"><input type="submit" name="createinventoryitem" id="createinventoryitem" class="button button-primary" value="Spremi promjene"></p>
+        </form>
+        <h2>Posljednja zaduživanja</h2>
+        <table>
+            {% for lenter in lenters %}
+            <tr>
+                <td>
+                    {{ lenter.display_name }}
+                </td>
+                <td>
+                    {{ lenter.date_updated|date('j.m.Y') }}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

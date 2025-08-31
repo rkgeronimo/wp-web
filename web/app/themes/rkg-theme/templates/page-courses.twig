@@ -1,0 +1,49 @@
+{% extends "base.twig" %}
+
+{% block content %}
+	<div class="content-wrapper">
+		<article class="post-type-{{post.post_type}}" id="post-{{post.ID}}">
+			<section class="article-content article-content-narrow">
+				<h1 class="article-h1">{{post.title}}</h1>
+                {% if courses is not empty %}
+                <div class="rkg-side">
+                    <h2 class="rkg-toggler" data-toggle="rkg-course-menu">NAVIGACIJA
+                        <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
+                    </h2>
+                    <div class="rkg-hidder" id="rkg-course-menu">
+                    {% set cat = null %}
+                    {% set category = "Tečajevi" %}
+                    <hr class="wp-block-separator only-mobile">
+                    <h2 class="courses-terms-control-header">Tečajevi</h2>
+                    {% for course in courses %}
+                        {% if course.cat != cat %}
+                            {% set cat = course.cat %}
+                            {% if course.priority > 99 and category == "Tečajevi" %}
+                                {% set category = "Specijalnosti" %}
+                                <h2 class="courses-terms-control-header">Specijalnosti</h2>
+                            {% endif %}
+                            {% if course.priority > 99 %}
+                                <h2 class="courses-terms-control" data-cat="{{ course.cat }}" data-state="off">- {{ course.name }}&nbsp;
+                                    <span><i class="fas fa-chevron-down courses-terms-down courses-terms-down-{{ course.cat }}"></i></span>
+                                    <span><i class="fas fa-chevron-up courses-terms-up courses-terms-up-{{ course.cat }}"></i></span>
+                                </h2>
+                            {% else %}
+                                <h2 class="courses-terms-control" data-cat="{{ course.cat }}" data-state="off">- {{ course.category }}&nbsp;
+                                    <span><i class="fas fa-chevron-down courses-terms-down courses-terms-down-{{ course.cat }}"></i></span>
+                                    <span><i class="fas fa-chevron-up courses-terms-up courses-terms-up-{{ course.cat }}"></i></span>
+                                </h2>
+                            {% endif %}
+                        {% endif %}
+                        <a class="courses-terms courses-terms-{{ course.cat }}" href="{{ course.link }}">{{ course.starttime|date('d.m.') }} - {{ course.endtime|date('d.m.Y.') }}</a>
+                    {% endfor%}
+                    <hr class="wp-block-separator only-mobile">
+                    </div>
+                </div>
+                {% endif %}
+				<div class="article-body">
+					{{post.content}}
+				</div>
+			</section>
+		</article>
+	</div><!-- /content-wrapper -->
+{% endblock %}

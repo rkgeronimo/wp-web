@@ -1,0 +1,54 @@
+{% extends "base.twig" %}
+{% block content %}
+	<div class="content-wrapper">
+		<article class="post-type-{{ post.post_type }}" id="post-{{ post.ID }}">
+			{# <img src="{{ post.thumbnail.src|resize(1200, 300) }}"> #}
+			<section class="article-content article-content-narrow">
+                <div class="rkg-article-meta course-category">{{ coursePlaceholder.category }}</div>
+				<h1 class="article-h1-course">{{ coursePlaceholder.name }}</h1>
+                <div class="rkg-side">
+                    {% if interested %}
+                        <button class="course-not-interested course-signout-button"
+                                data-course="{{ request.get['id'] }}"
+                                data-name="{{ coursePlaceholder.name }}">Ne zanima me</button>
+                    {% else %}
+                        <button class="course-interested course-signup-button"
+                                data-course="{{ request.get['id'] }}"
+                                data-name="{{ post.title }}"
+                                data-date="{{ meta.starttime|date('d.m.Y.') }}">Zanima me</button>
+                    {% endif %}
+                    <h2>Gdje</h2>
+                    <p>{{ coursePlaceholder.location|nl2br }}</p>
+                    <h2>kada</h2>
+                    <p>{{ coursePlaceholder.terms|nl2br }}</p>
+                    <h2>Cijena</h2>
+                    <p>{{ coursePlaceholder.price }}</p>
+                    {% if user.can('edit_courses') %}
+                        <h2 class="rkg-toggler-title" data-toggle="rkg-signups">Zainteresirani za tečaj
+                            <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
+                        </h2>
+                        <div class="rkg-hidder" id="rkg-signups">
+                            <a href='mailto:
+                            {%- for student in students -%}
+                            {%- if loop.index0 > 0 -%}
+                            ;
+                            {%- endif -%}
+                            {{ student.user_email }}
+                    {% endfor%}
+                    '>Pošalji e-mail prijavljenima</a>
+                            {%- for student in students -%}
+                            <div>
+                                {% include 'partial/user.twig'  with {'userDetail': student} %}
+                            </div>
+{% endfor%}
+                        </div>
+{% endif %}
+<hr class="wp-block-separator only-mobile">
+                </div>
+                <div class="article-body">
+                    {{ function('wpautop', coursePlaceholder.description) }}
+                </div>
+            </section>
+        </article>
+    </div><!-- /content-wrapper -->
+{% endblock %}

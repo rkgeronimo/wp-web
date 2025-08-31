@@ -1,0 +1,25 @@
+{% if given is empty %}
+    <div class="reservations-blocklet">
+        {% if hidden %}
+            <span class="dashicons dashicons-plus new-inventory-icon"></span>
+            <input class="new-inventory iid" name="{{ item }}" type="text" placeholder="Šifra" style="width: 70%"/>
+        {% else %}
+
+            <div>
+                {{ size }}
+            </div>
+            <div>
+                <input type="text" name="{{ item }}" style="width: 80%" placeholder="Šifra" />
+            </div>
+        {% endif %}
+    </div>
+
+{% else %}
+<div>({{ given }})</div>
+
+<select class="value-{{status}}" name="{{ item }}_returned" style="width: 95%">
+    <option value="1" {{ status == "1" ? 'selected' : '' }}>Izdano</option>
+    <option value="0" {{ status == "0" ? 'selected' : '' }}>Vraćeno</option>
+    <option value="3" {{ status == "3" ? 'selected' : '' }}>Izgubljeno</option>
+</select>
+{% endif %}

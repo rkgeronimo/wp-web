@@ -1,9 +1,0 @@
-[submodule "web/app/themes/rkg-theme"]
-	path = web/app/themes/rkg-theme
-	url = git@github.com:rkgeronimo/rkg-theme
-[submodule "web/app/plugins/rkg-plugin"]
-	path = web/app/plugins/rkg-plugin
-	url = git@github.com:rkgeronimo/rkg-plugin
-[submodule "web/app/plugins/rkg-gallery"]
-	path = web/app/plugins/rkg-gallery
-	url = git@github.com:rkgeronimo/rkg-gallery

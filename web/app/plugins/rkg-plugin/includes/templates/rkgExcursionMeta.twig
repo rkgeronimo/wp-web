@@ -1,0 +1,177 @@
+{% block content %}
+<div style="display: inline-block">
+    <table class="form-table">
+        <tbody>
+            <tr>
+                <th><label for="starttime">Od</label></th>
+                <td><input type="date" name="starttime" id="rkg-starttime" value="{{ meta.starttime }}" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th><label for="endtime">Do</label></th>
+                <td><input type="date" name="endtime" id="rkg-endtime" value="{{ meta.endtime }}" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th><label for="deadline">Zadnji dan prijave</label></th>
+                <td><input type="date" name="deadline" value="{{ meta.deadline }}" class="regular-text"></td>
+            </tr>
+            {# {% if user.can('edit_excursion') and (courses is not empty) %}
+            <tr>
+                <th><label for="students">Rezervirano za tečajce sa:</label></th>
+                <td>
+                    <select name="excursion-course">
+                            <option value=""></option>
+                        {% for course in courses %}
+                            <option value="{{ course.d }}" {% if meta.course == course %} selected{% endif %}>
+                            {{ course.category }}; {{ course.starttime|date('j.m.Y') }} - {{ course.endtime|date('j.m.Y') }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            {% endif %}
+            <tr> #}
+                <th><label for="limitation">Planirano osoba</label></th>
+                <td><input type="number" name="limitation" value="{{ meta.limitation }}" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th><label for="leaders">Rezervirano za voditelje</label></th>
+                <td>
+                    <select name="leaders" id="leaders">
+                        {% for i in 0..4 %}
+                            <option value="{{ i }}" {{ meta.leaders == i ? 'selected' }}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            {# <tr>
+                <th><label for="log">Potreban voditelj s dnevnikom?</label></th>
+                <td><input type="checkbox" name="log" value="true" {{ meta.log ? ' checked' }}></td>
+            </tr> #}
+            <tr>
+                <th><label for="log">Dozvoli goste?</label></th>
+                <td><input type="checkbox" id="guest_meta_check" name="guests" value="true" {{ meta.guests ? ' checked' }}></td>
+            </tr>
+            <tr id="guest_count_row">
+                <th><label for="guest_count">Gosti ulaze u ukupan broj?</label></th>
+                <td><input type="checkbox" name="guests_limit" value="true" {{ meta.guests_limit ? ' checked' }}></td>
+            </tr>
+            <tr>
+                <th colspan="2">
+                    Predprijave
+                    <span class="dashicons dashicons-arrow-down-alt2 rkg-admin-switch" id="rkg-pred"></span>
+                </th>
+            </tr>
+        </tbody>
+        <tbody class="rkg-admin-switch-block" id="rkg-pred-block">
+            <tr>
+                <th><label for="pr1">Predprijava 1</label></th>
+                <td>
+                    <select class="preSignupSelect" id="pr1" style="width: 70%" name="pr1">
+                        <option value="" selected></option>
+                        {% for userItem in userList %}
+                            <option value="{{ userItem.ID }}">{{ userItem.data.display_name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="pr2">Predprijava 2</label></th>
+                <td>
+                    <select class="preSignupSelect" id="pr2" style="width: 70%" name="pr2">
+                        <option value="" selected></option>
+                        {% for userItem in userList %}
+                            <option value="{{ userItem.ID }}">{{ userItem.data.display_name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="pr3">Predprijava 3</label></th>
+                <td>
+                    <select class="preSignupSelect" id="pr3" style="width: 70%" name="pr3">
+                        <option value="" selected></option>
+                        {% for userItem in userList %}
+                            <option value="{{ userItem.ID }}">{{ userItem.data.display_name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="pr4">Predprijava 4</label></th>
+                <td>
+                    <select class="preSignupSelect" id="pr4" style="width: 70%" name="pr4">
+                        <option value="" selected></option>
+                        {% for userItem in userList %}
+                            <option value="{{ userItem.ID }}">{{ userItem.data.display_name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+        </tbody>
+        {# <tbody>
+            <tr>
+                <th colspan="2">
+                    Uvjeti prijave
+                    <span class="dashicons dashicons-arrow-down-alt2 rkg-admin-switch" id="rkg-up"></span>
+                </th>
+            </tr>
+        </tbody>
+        <tbody class="rkg-admin-switch-block" id="rkg-up-block">
+            <tr>
+                <th><label for="r1_adavanced">Iskusniji R1+</label></th>
+                <td><input type="checkbox" name="r1_adavanced" value="true" {{ meta.r1_adavanced ? ' checked' }}></td>
+            </tr>
+            <tr>
+                <th><label for="r2">R2+</label></th>
+                <td><input type="checkbox" name="r2" value="true" {{ meta.r2 ? ' checked' }}></td>
+            </tr>
+            <tr>
+                <th><label for="nitrox">Nitrox</label></th>
+                <td><input type="checkbox" name="nitrox" value="true" {{ meta.nitrox ? ' checked' }}></td>
+            </tr>
+        </tbody> #}
+        <tbody>
+            <tr>
+                <th><label for="price">Akontacija</label></th>
+                <td><input type="text" name="price" value="{{ meta.price }}" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th colspan="2"><label for="map">Lokacija</label></th>
+            </tr>
+        </tbody>
+    </table>
+    <div id="cancle_excursion">
+        <span class="dashicons dashicons-no-alt"></span>&nbsp;&nbsp;<span>Otkazan</span>&nbsp;&nbsp;&nbsp;<input type="checkbox" name="canceled" value="true" {{ meta.canceled ? ' checked' }}>
+    </div>
+</div>
+<div style="width: 100%">
+    <div id="rkg-admin-map" style="height: 400px; width: 100%"></div>
+    <input type="hidden" name="latitude" value="{{ meta.latitude }}" />
+    <input type="hidden" name="longitude" value="{{ meta.longitude }}" />
+</div>
+{% if applicants is not empty %}
+<br /><br />
+<h2 class="hndle ui-sortable-handle"><strong>Prijavljeni</strong></h2>
+<table class="wp-list-table widefat fixed striped users">
+    <thead>
+        <tr>
+            <th>Ime</th>
+            <th>E-mail</th>
+            <th>Datum rođenja</th>
+            <th>Spol</th>
+            <th>Telefon</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for applicant in applicants %}
+        <tr>
+            <td>{{ applicant.data.display_name }}</td>
+            <td>{{ applicant.data.user_email }}</td>
+            <td>{{ function('get_user_meta', applicant.data.ID, 'dob', true) }}</td>
+            <td>{{ function('get_user_meta', applicant.data.ID, 'sex', true) }}</td>
+            <td>{{ function('get_user_meta', applicant.data.ID, 'tel', true) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %} {% endblock %}

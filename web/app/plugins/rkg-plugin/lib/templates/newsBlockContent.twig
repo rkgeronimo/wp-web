@@ -1,0 +1,13 @@
+<div class="row">
+    {% for post in posts %}
+        <div class="news-block">
+            <div class="col-3">
+                <a class="news-block-item" href="{{ post.guid }}" style="background-image: url('{{ post.get_thumbnail.src }}');">
+                    <div class="news-block-filter"></div>
+                    <div class="news-block-category">{{ post.categories[0].name }}</div>
+                    <h4 class="news-block-title">{{ post.post_title }}</h4>
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+</div>

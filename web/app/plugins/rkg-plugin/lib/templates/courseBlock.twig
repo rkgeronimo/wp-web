@@ -1,0 +1,99 @@
+<div class="rkg-course-block">
+    <div class="rkg-course-slick">
+        {% for course in courses %}
+            <div class="course-block-container">
+                <a id="course-block-link-{{course.id}}" href="{{ course.link }}">
+                    <div class="course-block-h">{{ course.category }}</div>
+                    <div id="course-block-date-{{course.id}}" class="course-block-date">{{ course.starttime|date('j.n.') }}</div>
+                    <div id="course-block-title-{{course.id}}" class="course-block-h2">{{ course.post_title }}</div>
+                    <div id="course-block-content-{{course.id}}" class="course-block-p">{{ course.post_content|striptags|slice(0, 500) }}</div>
+                </a>
+                <table class="course-block-t"><tbody>
+                        <tr>
+                            <td class="course-block-select-container">
+                                <a href="#" class="course-block-select" data-target="{{ course.id }}">
+                                    <span class="only-mobile">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TERMINI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                    <span class="only-desktop">ODABERI TERMIN</span>
+                                </a>
+                                <div id="course-block-terms-{{course.id}}" class="course-block-terms">
+                                    {% for term in course.terms %}
+                                        <div class="course-block-term"
+                                             data-target="{{ course.id }}"
+                                             data-id="{{ term.id }}"
+                                             data-link="{{ term.link }}"
+                                             data-date="{{ term.starttime|date('d.n.') }}"
+                                             data-title="{{ term.post_title }}"
+                                             data-content="{{ term.post_content|striptags|slice(0, 500) }}"
+                                             data-signdate="{{ term.starttime|date('j.n.Y.') }}"
+                                             {% if attribute(user,'application-'~term.id) == 'applied' %}
+                                                 data-signclass = "course-signout"
+                                                 data-signtext = "ODJAVI SE"
+                                             {% else %}
+                                                 data-signclass = "course-signup"
+                                                 data-signtext = "PRIJAVI SE"
+                                             {% endif %}
+                                             >
+                                             {% if term.starttime|date('Y') != term.endtime|date('Y') %}
+                                                 {{ term.starttime|date('j.n.Y.') }} - {{ term.endtime|date('j.n.Y.') }}
+                                             {% else %}
+                                                 {{ term.starttime|date('j.n.') }} - {{ term.endtime|date('j.n.Y.') }}
+                                             {% endif%}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td>
+                                <a id="course-block-link-more-{{course.id}}" href="{{ course.link }}">VIŠE</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+        {% for course in coursePlaceholders %}
+            <div class="course-block-container">
+                <a id="course-block-placeholder-link-{{course.id}}" href="{{ http_host }}/?page_id=23&id={{course.id}}">
+                    <div class="course-block-h">{{ course.category }}</div>
+                    <div class="course-block-date">
+                            <img src="{{ site.theme.link }}/assets/img/logo-blue.png" />
+                    </div>
+                    <div id="course-block-title-{{course.id}}" class="course-block-h2">{{ course.name }}</div>
+                    <div id="course-block-content-{{course.id}}" class="course-block-p">{{ course.description|striptags|slice(0, 500) }}</div>
+                </a>
+                <table class="course-block-t"><tbody>
+                        <tr>
+                            {% if user.can('member_access') %}
+                            <td>
+                                {% if course.id in interested %}
+                                    <a id="course-block-interested-{{course.id}}" class="course-not-interested"
+                                       href="#"
+                                       data-course="{{ course.id }}"
+                                       data-name="{{ course.name }}"
+                                       >NE ZANIMA ME</a>
+                                {% else %}
+                                    <a id="course-block-interested-{{course.id}}" class="course-interested"
+                                       href="#"
+                                       data-course="{{ course.id }}"
+                                       data-name="{{ course.post_name }}"
+                                       >ZANIMA ME</a>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                            <td>
+                                <a id="course-block-placeholder-link-more-{{course.id}}" href="/?page_id=23&id={{course.id}}">VIŠE</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="rkg-course-gradient-left"></div>
+    <div class="rkg-course-gradient-right"></div>
+    <div class="rkg-course-left">
+        <div class="rkg-course-chevron-left"></div>
+    </div>
+    <div class="rkg-course-right">
+        <div class="rkg-course-chevron-right"></div>
+    </div>
+</div>

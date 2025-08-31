@@ -1,0 +1,75 @@
+{% extends "base.twig" %}
+
+{% block content %}
+	<div class="content-wrapper">
+		<article class="post-type-{{post.post_type}}" id="post-{{post.ID}}">
+			<section class="article-content article-content-narrow">
+				<h1 class="article-h1">Gdje ronimo</h1>
+                <div class="rkg-side">
+                    <h2 class="courses-terms-control-header" id="excursion-contorl-search">Pretraga izleta
+                        <span><i class="fas fa-chevron-down rkg-excursion-search-down"></i></span>
+                        <span><i class="fas fa-chevron-up rkg-excursion-search-up"></i></span>
+                    </h2>
+                    <form id="rkg-excursion-page-search" method="get">
+                        <input type="hidden" name="page_id" value="13" />
+                        <p>
+                            <select name="godina">
+                                <option value="" disabled {% if search.godina is empty %} selected{% endif %}>Godina</option>
+                                    <option value=""> </option>
+                                {% for i in 2010.."now"|date("Y") %}
+                                    <option value="{{ i }}" {%if i == search.godina%} selected{% endif %}>{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </p>
+                        <p>
+                            <input type='text' name="naziv" placeholder="Dio naziva" value="{{ search.naziv }}"><br>
+                        </p>
+                        <p>
+                            <input type="text" name="organizator" placeholder="Organizator" value="{{ search.organizator }}"><br>
+                        </p>
+                        <p>
+                            <input type="text" name="prijavljeni" placeholder="Prijavljena osoba" value="{{ search.prijavljeni }}"><br>
+                        </p>
+                        <input class="btn btn-primary excursion-btn" type="submit" value="Pretraži">
+                    </form>
+                    <h2 class="rkg-toggler-title" data-toggle="rkg-kalendar">KALENDAR
+                        <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
+                    </h2>
+                    <div class="rkg-hidder" id="rkg-kalendar">
+                        <div id="rkg-excursion-calendar">
+                        {{ calendar }}
+                        </div>
+                    </div>
+                    <hr class="wp-block-separator only-mobile">
+                </div>
+				<div class="article-body">
+                    {% for excursion in excursions %}
+                    <div class="page-excursion-container
+                        {%- if excursion.canceled %} canceled
+                        {%- elseif excursion.id in signups.excursions %} signup
+                        {%- elseif excursion.id in signups.excursions_waiting %} signup_waiting{% endif -%}"
+                        >
+                        <a href="{{ excursion.link}}"><div class="excursion-block-h{%if excursion.endtime < now|date('Y-m-d') %} expired{% endif %}">{{ excursion.post_title }}</div></a>
+                        {%- if excursion.id in signups.excursions %}
+<span class="dashicons dashicons-yes{%if excursion.endtime < now|date('Y-m-d') %} expired{% endif %}"></span>
+                        {%- elseif excursion.id in signups.excursions_waiting %}
+<span class="dashicons dashicons-controls-pause{%if excursion.endtime < now|date('Y-m-d') %} expired{% endif %}"></span>
+                        {% endif -%}
+                        <div class="excursion-block-date{%if excursion.endtime < now|date('Y-m-d') %} expired{% endif %}">{{ excursion.starttime|date('j.n.Y.') }} - {{ excursion.endtime|date('j.n.Y.') }}</div>
+                        <div class="excursion-block-p">Izlet organizira: {{ excursion.display_name }}</div>
+                        <div class="excursion-block-p">Planirano osoba: {{ excursion.limitation }}&emsp;Slobodnih mjesta: {{ excursion.limitation - excursion.registered }}&emsp;Zadnji dan prijave: {{ excursion.deadline|date('j.n.Y.') }}</div>
+                        <table class="excursion-block-t"><tbody>
+                                <tr>
+                                    <td>
+                                        <a href="{{ excursion.link}}">VIŠE</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endfor %}
+				</div>
+			</section>
+		</article>
+	</div><!-- /content-wrapper -->
+{% endblock %}

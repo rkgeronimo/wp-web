@@ -6,7 +6,11 @@
   "scripts": {
     "install": "napa"
   },
-  "author": "Adrijan <adanic.ado@gmail.com>",
+  "contributors": [
+    "Adrijan Adanić <adanic.ado@gmail.com>",
+    "Belma Gutlić <belma.dzi@gmail.com>",
+    "Marin Holi"
+  ],
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.10.1",

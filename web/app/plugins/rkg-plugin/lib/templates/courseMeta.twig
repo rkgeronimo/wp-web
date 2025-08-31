@@ -1,0 +1,98 @@
+{% block content %}
+    <table class="form-table" id="rkg_category_table">
+        <tbody>
+            <tr>
+                <th>
+                    Vrsta tečaja
+                </th>
+                <td>
+                    <select name="category" id="rkg_category">
+                        <option value="" disabled{% if meta.category is empty %} selected{% endif %}></option>
+                        {% for template in courseTemplates %}
+                            <option value="{{ template.id }}"{% if meta.category == template.id %} selected{% endif %} data-template='{{ template|json_encode }}'>{{ template.category }} - {{ template.name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="form-table">
+        <tbody>
+            <tr>
+                <th><label>Instruktor</label></th>
+                <td>
+                {% if user.can('edit_others_courses') %}
+                    <select name="organiser" id="rkg_organiser">
+                        <option id="instructor-none" value="" disabled{% if meta.organiser is empty %} selected{% endif %}>Instruktor</option>
+                        {% for instructor in instructors %}
+                            <option
+                                value="{{ instructor.ID }}"
+                                {%if meta.organiser == instructor.ID %} selected{% endif %}
+                            >
+                            {{ instructor.display_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <input type="hidden" name="organiser" value="{{ user.id }}" />
+                    {{ user.display_name }}
+                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th><label>Od</label></th>
+                <td><input type="date" id="rkg-starttime" name="starttime" value="{{ meta.starttime }}"/></td>
+            </tr>
+            <tr>
+                <th><label>Do</label></th>
+                <td><input type="date" id="rkg-endtime" name="endtime" value="{{ meta.endtime }}"/></td>
+            </tr>
+            <tr>
+                <th><label>Zadnji dan prijave</label></th>
+                <td><input type="date" id="rkg-deadline" name="deadline" value="{{ meta.deadline }}"/></td>
+            </tr>
+            <tr>
+                <th><label for="location">Lokacija</label></th>
+                <td><textarea id="rkg-location" name="location" rows="5" cols="20">{{ meta.location }}</textarea></td>
+            </tr>
+            <tr>
+                <th><label><label for="terms">Termini</label></label></th>
+                <td><textarea id="rkg-terms" name="terms" rows="5" cols="20">{{ meta.terms }}</textarea></td>
+            </tr>
+            <tr>
+                <th><label>Cijena</label></th>
+                <td><input id="rkg-price" type="text" name="price" value="{{ meta.price }}" /></td>
+            </tr>
+            <tr>
+                <th><label>Broj polaznika</label></th>
+                <td><input id="rkg-limitation" type="number" name="limitation" value="{{ meta.limitation }}"/></td>
+            </tr>
+        </tbody>
+    </table>
+{% if applicants is not empty %}
+    <br /><br />
+<h2 class="hndle ui-sortable-handle"><strong>Prijavljeni</strong></h2>
+<table class="wp-list-table widefat fixed striped users">
+    <thead>
+        <tr>
+            <th>Ime</th>
+            <th>E-mail</th>
+            <th>Datum rođenja</th>
+            <th>Spol</th>
+            <th>Telefon</th>
+        </tr>
+    </thead>
+    <tbody>
+{% for applicant in applicants %}
+            <tr>
+                <td>{{ applicant.data.display_name }}</td>
+                <td>{{ applicant.data.user_email }}</td>
+                <td>{{ function('get_user_meta', applicant.data.ID, 'dob', true) }}</td>
+                <td>{{ function('get_user_meta', applicant.data.ID, 'sex', true) }}</td>
+                <td>{{ function('get_user_meta', applicant.data.ID, 'tel', true) }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

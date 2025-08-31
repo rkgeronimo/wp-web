@@ -1,0 +1,420 @@
+<form class="form-horizontal course-singuot-form" id="helth-survey" role="form">
+    <input type="hidden" name="course" value="{{ post.ID }}" />
+    <h2>ZDRAVSTVENA IZJAVA</h2>
+    <div class="helth-survey-content">
+        <p class="center">Zapis kandidata<br />
+            (Povjerljiva informacija)</p>
+        <h3>Molimo pročitajte pažljivo prije potpisa.</h3>
+        <p>Ovo je izjava kojom ste informirani o potencijalnim rizicima povezanim s ronjenjem s autonomnom ronilačkom opremom-ARA (SCUBA) i zahtjevanom načinu vašeg ponašanja u toku programa obuke. Od vas se zahtijeva potpis ove izjave kao doprinos programu nastave ronjenja.</p>
+        <p>Pročitajte i prokomentirajte ovu izjavu prije nego što je ovjerite potpisom. Morate ispuniti ovu Zdravstvenu Izjavu, što uključuje i dio Povijesti Bolesti, kako biste upotpunili planirani program nastave ronjenja. Ukoliko ste maloljetni, ovu Izjavu mora potpisom ovjeriti vaš roditelj ili staratelj.</p>
+        <p>Ronjenje je uzbudIjiva i zahtjevna aktivnost. Ukoliko je pravilno pripremljena, primjenjujući ispravnu tehniku, vrlo je sigurna. Ukoliko se ne ispune ustanovljene sigurnosne procedure, razumljivo, dolazi do rizičnih i opasnih situacija.</p>
+        <p>Za sigurno autonomno ronjenje, ne smijete biti prekomjerne tjelesne težine ili slabe fizičke kondicije. Ronjenje može biti naporno pod odredenim okolnostima. Vaš dišni i krvožilni sustav moraju biti u dobrom zdravstvenom stanju.</p>
+        <p>Sve zrakom ispunjenje tjelesne šupljine moraju biti normalne i zdrave. Osobe sa srčanim tegobama, trenutačnom prehladom ili začepljenim dišnim putovima, epilepsijom, astmom, izraženim zdravstvenim problemom ili koje su pod utjecajem alkohola ili lijekova ne smiju roniti.</p>
+        <p>Ukoliko uzimate medikamente, savjetujte se s vašim liječnikom i instruktorom prije započinjanja ovog programa. Takoder morate od vašeg instruktora naučiti važna sigurnosna pravila koja se odnose na disanje i izjednačavanje tlaka za vrijeme ronjenja.</p>
+        <p>Nepravilna upotreba ronilačke opreme može izazvati ozbiljne ozlijede. Morate biti potpuno upućeni u način upotrebe pod izravnim nadzorom kvalificiranog instruktora kako biste je sigurno koristili.</p>
+        <p>Ukoliko imate bilo koje dodatno pitanje koje se odnosi na ovu Zdravstvenu Izjavu ili dio Povijesti Bolesti, razmotrite to s vašim instruktorom prije potpisivanja Izjave.</p>
+        <h3>POVIJEST BOLESTI</h3>
+        <p>Napomena kandidatu:</p>
+        <p>Svrha ovog zdravstvenog upitnika je ustanovljavanje da li je potreban liječnički pregled prije pristupanja rekreativnom ronilačkom nastavnom programu.</p>
+        <p>Potvrdan odgovor na pitanje ne predstavlja isključivo vašu diskvalifikaciju za ronjenje. Potvrdan odgovor znači da postoje preduvjeti koji mogu utjecati na vašu sigurnost za vrijeme ronjenja i stoga morate potražiti liječnički savjet.</p>
+        <p>Molimo vas da odgovorite na slijedeća pitanja o vašem prošlom i sadašnjem zdravstvenom stanju sa DA  ili  NE. Ukoliko niste sigurni, odgovor glasi DA.</p>
+        <p>Ukoliko se bilo koji od ovih stavaka odnosi na vas, moramo od vas zahtijevati da se savjetujete s liječnikom prije početka ronilačkih aktivnosti. Vaš instruktor će vam pripremiti Zdravstvenu Izjavu i Vodič za liječnički pregled rekreativnih ronilaca koje ćete dostaviti liječniku.</p>
+        <table>
+            <tr>
+                <td>
+                    <select name="pregnancy">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.pregnancy is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.pregnancy is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Da li ste trudni ili pokušavate ostati trudni?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="medications">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.medications is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.medications is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Uzimate li redovito propisane ili nepropisane lijekove? (uz izuzeće kontraceptivnih pilula)</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="older">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.older is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.older is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Da li ste stariji od 45 godina i na vas se odnosi jedno ili više od slijedećeg:
+                    <ul>
+                        <li>trenutačno pušite lulu, cigare ili cigarete;</li>
+                        <li>imate povišen nivo kolesterola;</li>
+                        <li>slučajeve srčanog napada u porodičnoj povijesti bolesti</li>
+                    </ul></td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="breathing">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.breathing is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.breathing is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Astma, otežano disanje (hripanje) ili teško disanje pri naporu?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="allergies">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.allergies is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.allergies is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Učestale ili izražene napade peludne groznice ili alergije?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="cold">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.cold is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.cold is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Učestale prehlade, upale sinusa ili bronhitis?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="lungs">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.lungs is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.lungs is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Bilo koji oblik plućne bolesti?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="pneumotorax">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.pneumotorax is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.pneumotorax is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Pneumotorax (kolaps pluća)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="chest">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.chest is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.chest is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnju operaciju prsnog koša?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="phobia">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.phobia is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.phobia is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Klaustrofobiju ili agorafobiju (strah od zatvorenih ili otvorenih prostora)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="behavior">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.behavior is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.behavior is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Zdravstvene probleme u ponašanju?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="epilepsy">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.epilepsy is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.epilepsy is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Epilepsiju, nekontrolirane pokrete, konvulzije ili uzimate lijekove za njihovo sprječavanje?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="migraine">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.migraine is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.migraine is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Povremene migrenske glavobolje ili uzimate lijekove za njihovo sprječavanje?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="fainting">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.fainting is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.fainting is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje gubitke sjećanja ili nesvjestice (potpune ili djelomične gubitke svijesti)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="moving">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.moving is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.moving is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Da li često patite od bolesti kretanja (morska bolest, slabost pri vožnji i slično)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="decompression">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.decompression is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.decompression is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje ronilačke udese ili dekompresijsku bolest?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="back">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.back is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.back is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje povremene probleme s ledima?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="backoperation">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.backoperation is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.backoperation is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje operacije leda?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="diabetes">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.diabetes is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.diabetes is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje slučajeve dijabetesa?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="fracture">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.fracture is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.fracture is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje probleme s ledima, rukama i nogama uz posljedice operacije, ozljede ili frakture?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="exercise">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.exercise is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.exercise is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Nesposobnost za izvedbu umjerenih vježbi (primjer: hodati 1500 m kraće od 12 minuta)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="bloodpresure">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.bloodpresure is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.bloodpresure is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje situacije povišenog krvnog tlaka ili uzimate lijekove za kontrolu krvnog tlaka?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="heart">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.heart is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.heart is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje bolesti srca bilo koje vrste?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="heartattack">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.heartattack is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.heartattack is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje srčane napade?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="infarction">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.infarction is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.infarction is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Infarkt ili operacije srca ili krvnih žila?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="ears">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.ears is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.ears is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje operacije uha ili sinusa?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="deafness">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.deafness is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.deafness is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje bolesti uha, gubitak sluha ili poteškoće s ravnotežom?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="earpressure">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.earpressure is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.earpressure is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje poteškoće izjednačavanja tlaka u uhu za vrijeme leta zrakoplovom ili vožnje u planinama?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="bleeding">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.bleeding is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.bleeding is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnja krvarenja ili ostale poremećaje krvotoka?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="hernia">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.hernia is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.hernia is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnji bilo koji oblik hernije (kile)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="ulcer">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.ulcer is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.ulcer is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje probleme čira ili operacije čira?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="colostomy">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.colostomy is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.colostomy is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje slučajeve kolostomije?</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="addiction">
+                        <option value="1"{% if (helthsurvey is empty) or (helthsurvey.addiction is same as('1')) %} selected{% endif %}>Da</option>
+                        <option value="0"{% if helthsurvey.addiction is same as('0') %} selected{% endif %}>Ne</option>
+                    </select>
+                </td>
+                <td>Dosadašnje slučajeve zloupotrebe droga ili alkohola? </td>
+            </tr>
+            <tr>
+                <td colspan="2"><input type="text" name="parent" placeholder="Ime i prezime roditelja ili staratelja" value="{{ helthsurvey.parent }}" /><br />
+                    (Za maloljetne)
+                </td>
+            </tr>
+        </table>
+    </div>
+    <input type="submit" class="btn btn-primary" id="helth-survey-next" value="Spremi" />
+</form>
+<form class="form-horizontal course-singuot-form" id="responsibility-survey" role="form">
+    <input type="hidden" name="course" value="{{ post.ID }}" />
+    <h2>IZJAVA O ODGOVORNOSTI I IZRAVNOM PREUZIMANJU RIZIKA</h2>
+    <div class="helth-survey-content">
+        <h3>Molimo, pažljivo pročitajte, označite svaki pojedini stavak koji razumijete i prihvaćate. Sve neiasnoće razmotrite u razgovoru s vašim instruktorom-voditeliem ronilačke nastave.</h3>
+        <p>Ja, {{ user.display_name }} ovim potvrđujem da sam upoznat s činjenicom da ronjenje na dah i ronjenje s komprimiranim zrakom (autonomno ronjenje) sadrži potencijalne opasnosti i rizike.</p>
+        <table>
+            <tr>
+                <td>
+                    <select name="rs1">
+                        <option value="0"{% if (responsibilitysurvey is empty) or (responsibilitysurvey.rs1 is same as('0')) %} selected{% endif %}>Ne</option>
+                        <option value="1"{% if responsibilitysurvey.rs1 is same as('1') %} selected{% endif %}>Da</option>
+                    </select>
+                </td>
+                <td>Razumijem daje ronjenje potencijalno opasna aktivnost, koja uključuje mogućnost nastanka ozljeda kao što su dekompresijska bolest, plinska embolija ili koje druge hiperbarične ozljede što zahtijeva liječenje u hiperbaričnoj komori. Mogući rizici uslijed ozljeda nastalih u ronjenju su rizici različitih privremenih ili trajnih tjelesnih ozljeda, rizik nastupanja smrti (u slučaju posljedica uslijed grubih prekršaja pravila o sigurnosti ronjenja), kao i rizik gubitka ili oštećenja dijelova opreme kojom se služim tijekom nastave ronjenja.</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="rs2">
+                        <option value="0"{% if (responsibilitysurvey is empty) or (responsibilitysurvey.rs2 is same as('0')) %} selected{% endif %}>Ne</option>
+                        <option value="1"{% if responsibilitysurvey.rs2 is same as('1') %} selected{% endif %}>Da</option>
+                    </select>
+                </td>
+                <td>Suglasan sam da ću slijediti sva pravila koja moj instruktor {{ organiser.display_name }} navodi tijekom teorijske i praktične nastave, te da ću dosljedno izvršavati sve ostale radnje koje su dio nastavnog programa i predstavljaju osnove sigurnog ronjenja. Poštivanjem pravila o osobnoj i kolektivnoj sigurnosti prihvaćam odgovornost, te ću svojim načinom ponašanja dosljedno poštivati pravila sigurnosti ronjenja.</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="rs3">
+                        <option value="0"{% if (responsibilitysurvey is empty) or (responsibilitysurvey.rs3 is same as('0')) %} selected{% endif %}>Ne</option>
+                        <option value="1"{% if responsibilitysurvey.rs3 is same as('1') %} selected{% endif %}>Da</option>
+                    </select>
+                </td>
+                <td>Obvezujem se poštivati osobna pravila ponašanja koja izravno ili neizravno utječu na sigurnost ronjenja (osobnu i kolektivnu), te sukladno tome shvaćam da moje obveze podrazumijevaju: održavanje dobrog psihičkog i fizičkog zdravstvenog stanja; izbjegavanje ronjenja u slučaju da se osjećam psiho-fizički nespreman sudjelovati u podvodnim aktivnostima; izbjegavati konzumiranje alkohola ili lijekova prije ronjenja (posebno stimulativnih sredstava, prirodnih ili sintetičkih) što može utjecati na moju psiho-fizičku stabilnost u ronjenju; poštivati pravila sigurnosnih priprema za ronjenje, kontrolirati opremu i brinuti se o ispravnost iste; poštivati pravila normalnog disanja pod vodom, izbjegavati zapuhavanje i nepravilnu balansiranost u ronjenju, ne udaljavati se od mog ronilačkog partnera i ronilačke grupe, poštivati pravila sigurnog izrona brzinom od 7 do 10 m/min i izvedbu dekompresijskog režima; održavati opremu u ispravnom stanju i koristiti je na ispravan način u ronjenju, održavati za vrijeme ronjenja stalnu komunikaciju s voditeljem grupe ili instruktorom, te da ću ispravno izvršavati sve ostale radnje koje mi pod vodom nalaže voditelj ronjenja, ronilačke grupe ili instruktor, a dio su osiguravanja sigurnog ronjenja.</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="rs4">
+                        <option value="0"{% if (responsibilitysurvey is empty) or (responsibilitysurvey.rs4 is same as('0')) %} selected{% endif %}>Ne</option>
+                        <option value="1"{% if responsibilitysurvey.rs4 is same as('1') %} selected{% endif %}>Da</option>
+                    </select>
+                </td>
+                <td>Izjavljujem da preuzimam obvezu pravodobnog ukazivanja na poteškoću koja mi se možejaviti tijekom nastave
+ronjenja i obavljanja podvodnih aktivnosti, te da ću o tome odmah izvijestiti svog instruktora. Svjestan sam da prešućivanje bilo kojeg osobnog problema, predvidivog ili nepredvidivog, fizičkog ili psihičkog, može ugroziti moju osobnu sigurnost, kao i sigurnost ostalih osoba koje uz mene sudjeluju u ronilačkim i podvodnim aktivnostima.</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="rs5">
+                        <option value="0"{% if (responsibilitysurvey is empty) or (responsibilitysurvey.rs5 is same as('0')) %} selected{% endif %}>Ne</option>
+                        <option value="1"{% if responsibilitysurvey.rs5 is same as('1') %} selected{% endif %}>Da</option>
+                    </select>
+                </td>
+                <td>Prihvaćam rizik moguće materijalne ili nematerijalne štete nastale tijekom ronjenja i suglasan sam s time da ću
+nadoknaditi svaku štetu nastalu mojim aktivnostima tijekom nastave i ronjenja. Izjavljujem da za bilo koju štetu nastalu tijekom nastave ronjenja i obavljanja podvodnih aktivnosti NE ODGOVARA moj instruktor, osim ukoliko se ne dokaže da je tjelesna ozljeda, smrt kao posljedica nesreće ili materijalna i nematerijalna šteta nastala izravno zbog njegove krivnje.</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="rs6">
+                        <option value="0"{% if (responsibilitysurvey is empty) or (responsibilitysurvey.rs6 is same as('0')) %} selected{% endif %}>Ne</option>
+                        <option value="1"{% if responsibilitysurvey.rs6 is same as('1') %} selected{% endif %}>Da</option>
+                    </select>
+                </td>
+                <td>Suglasan sam da u slučaju nastanka bilo koje psiho-fizičke ozljede ili posljedice, nastanka bilo kojeg oblika
+ronilačkog udesa koji mi se može dogoditi tijekom ronilačkih aktivnosti (pripremnih ili izravnih) uslijed nepoštivanja pravila o sigurnosti ronjenja ili naputaka koje mije predočio instruktor tijekom ovih aktivnosti, preuzimam osobnu odgovornost i izjavljujem da neću dodatno i naknadno teretiti na bilo koji način instruktora niti bilo koju instituciju koja sudjeluje izravno ili neizravno u procesu nastave ronjenja i obavljanja podvodnih aktivnosti.</td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="rs7">
+                        <option value="0"{% if (responsibilitysurvey is empty) or (responsibilitysurvey.rs7 is same as('0')) %} selected{% endif %}>Ne</option>
+                        <option value="1"{% if responsibilitysurvey.rs7 is same as('1') %} selected{% endif %}>Da</option>
+                    </select>
+                </td>
+                <td>Nadalje, izjavljujem da sam pravno i materijalno spreman preuzeti na sebe svaku odgovomost koja se od mene
+zahtijeva u gore navedenim aktivnostima, da potpuno razumijem gore navedene stavke i da sam svjestan njezinih zakonskih posljedica. Svojim potpisom ovog dokumenta preuzimam gore navedene elemente odgovornosti i to prihvaćam slobodno i dragovoljno, bez ikakve prisile, jamstva ili pružene mi garancije. Prije prihvaćanja ovih osobnih odgovornosti bio sam u mogućnosti sve nejasnoće razjasniti u razgovoru s mojim instruktorom.</td>
+            </tr>
+            <tr>
+                <td colspan="2">ZA MALOLJETNE OSOBE: Kao roditelj ili staratelj,</td>
+            </tr>
+            <tr>
+                <td colspan="2"><input type="text" name="rs8" placeholder="Ime i prezime" value="{{ responsibilitysurvey.rs8 }}" /></td>
+            </tr>
+            <tr>
+                <td colspan="2">potpisujem ovaj dokument u ime mog maloljetnog djeteta i suglasan sam obvezati se na navedene stavke odgovomosti kao što je gore navedeno u svim uvjetima, razumijevajući potencijalne rizike u cijelosti i uz konzultaciju s instruktorom ronjenja.</td>
+            </tr>
+        </table>
+    </div>
+    <input type="submit" class="btn btn-primary" id="responsibility-survey-next" value="Spremi" />
+</form>

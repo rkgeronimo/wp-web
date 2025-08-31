@@ -1,0 +1,87 @@
+{% block content %}
+<h1>RK Geronimo Izleti</h1>
+{% if rkgForm  == 'added' %}
+    <p>Izlet uspješno dodan</p>
+{% elseif rkgForm  == 'updated' %}
+    <p>Izlet uspješno promijenjen</p>
+{% elseif rkgForm  == 'deleted' %}
+    <p>Izlet uspješno izbrisan</p>
+{% endif %}
+<fieldset>
+    <legend>{{ rkgMapEdit.id ? 'Uredi izlet' : 'Dodaj izlet' }}</legend>
+    <form method="post" action="">
+        <div style="display: inline-block">
+        <input type="hidden" name="id" value="{{ rkgMapEdit.id }}"/>
+        <input type="text" name="name" value="{{ rkgMapEdit.name }}"/>&nbsp;<span>Naslov</span>
+        <br /><br />
+        <input type="text" name="organizer" value="{{ rkgMapEdit.organizer }}"/>&nbsp;<span>Organizator</span>
+        <br /><br />
+        <input type="date" name="starttime" value="{{ rkgMapEdit.starttime }}"/>&nbsp;<span>Od</span>
+        <br /><br />
+        <input type="date" name="endtime" value="{{ rkgMapEdit.endtime }}"/>&nbsp;<span>Do</span>
+        <br /><br />
+        <input type="date" name="deadline" value="{{ rkgMapEdit.deadline }}"/>&nbsp;<span>Zadnji dan prijave</span>
+        <br /><br />
+        <input type="number" name="limitation" value="{{ rkgMapEdit.limitation }}"/>&nbsp;<span>Planirano osoba</span>
+        <br /><br />
+        <input type="number" name="price" value="{{ rkgMapEdit.price }}"/>&nbsp;<span>Akontacija</span>
+        <br /><br />
+        <input type="text" name="latitude" value="{{ rkgMapEdit.latitude }}"/>&nbsp;<span>Širina</span>
+        <br /><br />
+        <input type="text" name="longitude" value="{{ rkgMapEdit.longitude }}"/>&nbsp;<span>Dužina</span>
+        </div>
+        <div style="display: inline-block; width: 400px; margin-left: 50px">
+            <div id="rkg-admin-map" style="height: 400px; width: 400px"></div>
+        </div>
+        <br /><br />
+        <p><input type="submit" value="Save" class="button button-primary" name="submit" /></p>
+    </form>
+</fieldset>
+<table class="wp-list-table widefat fixed striped users">
+    <thead>
+        <tr>
+            <th>Naslov</th>
+            <th>Organizator</th>
+            <th>Od</th>
+            <th>Do</th>
+            <th>Zadnji dan prijave</th>
+            <th>Planirano osoba</th>
+            <th>Akontacija</th>
+            <th>Širina</th>
+            <th>Dužina</th>
+            <th>Objavljeno</th>
+            <th>Administracija</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for excursion in rkgExcursion %}
+            <tr>
+                <td>{{ excursion.name }}</td>
+                <td>{{ excursion.organizer }}</td>
+                <td>{{ excursion.starttime }}</td>
+                <td>{{ excursion.endtime }}</td>
+                <td>{{ excursion.deadline }}</td>
+                <td>{{ excursion.limitation }}</td>
+                <td>{{ excursion.price }}</td>
+                <td>{{ excursion.latitude }}</td>
+                <td>{{ excursion.longitude }}</td>
+                <td>{{ excursion.published }}</td>
+                <td>
+                    <form method="post" action="">
+                        <input type="hidden" name="id" value="{{ excursion.id }}" checked='checked' />
+                        <p><input type="submit" value="Edit" class="button button-secondary" name="submit" /></p>
+                    </form>
+                    <form method="post" action="">
+                        <input type="hidden" name="id" value="{{ excursion.id }}" checked='checked' />
+                        <p><input type="submit" value="Repeat" class="button button-secondary" name="submit" /></p>
+                    </form>
+                    <form method="post" action="">
+                        <input type="hidden" name="id" value="{{ excursion.id }}" checked='checked' />
+                        <p><input type="submit" value="Delete" class="button delete" name="submit" /></p>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

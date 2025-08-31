@@ -1,0 +1,81 @@
+{% extends "base.twig" %}
+
+{% block content %}
+	<div class="content-wrapper">
+		<article class="post-type-{{post.post_type}}" id="post-{{post.ID}}">
+			<section class="article-content article-content-narrow">
+				<h1 class="article-h1">Izleti</h1>
+                <div class="rkg-side">
+                    <h2 class="courses-terms-control-header">Prošli izleti</h2>
+                </div>
+				<div class="article-body">
+                    {% for excursion in excursions %}
+                    <div class="page-excursion-container">
+                        <div class="course-block-h">{{ excursion.post_title }}</div>
+                        <div class="excursion-block-date">{{ excursion.starttime|date('j.n.Y.') }} - {{ excursion.endtime|date('j.n.Y.') }}</div>
+                        <div class="course-block-h2">Izlet organizira: {{ excursion.display_name }}</div>
+                        <div class="course-block-p">Planirano osoba: {{ excursion.limitation }}, Zadnji dan prijave: {{ excursion.deadline|date('j.n.Y.') }}</div>
+                <table class="course-block-t"><tbody>
+                        <tr>
+                            <td>
+                                {% if attribute(user,'application-'~course.id) == 'applied' %}
+                                    <a id="course-block-signup-{{course.id}}" class="course-signout"
+                                       href="#"
+                                       data-course="{{ course.id }}"
+                                       data-name="{{ course.post_title }}"
+                                       data-date="{{ course.starttime|date('j.n.Y.') }}"
+                                       >ODJAVI SE</a>
+                                {% else %}
+                                    <a id="course-block-signup-{{course.id}}" class="course-signup"
+                                       href="#"
+                                       data-course="{{ course.id }}"
+                                       data-name="{{ course.post_title }}"
+                                       data-date="{{ course.starttime|date('j.n.Y.') }}"
+                                       >PRIJAVI SE</a>
+                                {% endif %}
+                            </td>
+                            <td class="course-block-select-container">
+                                <a href="#" class="course-block-select" data-target="{{ course.id }}">
+                                    <span class="only-mobile">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TERMINI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                    <span class="only-desktop">ODABERI TERMIN</span>
+                                </a>
+                                <div id="course-block-terms-{{course.id}}" class="course-block-terms">
+                                    {% for term in course.terms %}
+                                        <div class="course-block-term"
+                                             data-target="{{ course.id }}"
+                                             data-id="{{ term.id }}"
+                                             data-link="{{ term.link }}"
+                                             data-date="{{ term.starttime|date('d.n.') }}"
+                                             data-title="{{ term.post_title }}"
+                                             data-content="{{ term.post_content|striptags|slice(0, 500) }}"
+                                             data-signdate="{{ term.starttime|date('j.n.Y.') }}"
+                                             {% if attribute(user,'application-'~term.id) == 'applied' %}
+                                                 data-signclass = "course-signout"
+                                                 data-signtext = "ODJAVI SE"
+                                             {% else %}
+                                                 data-signclass = "course-signup"
+                                                 data-signtext = "PRIJAVI SE"
+                                             {% endif %}
+                                             >
+                                             {% if term.starttime|date('Y') != term.endtime|date('Y') %}
+                                                 {{ term.starttime|date('j.n.Y.') }} - {{ term.endtime|date('j.n.Y.') }}
+                                             {% else %}
+                                                 {{ term.starttime|date('j.n.') }} - {{ term.endtime|date('j.n.Y.') }}
+                                             {% endif%}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td>
+                                <a id="course-block-link-more-{{course.id}}" href="{{ course.link }}">VIŠE</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                    </div>
+                    {% endfor %}
+				</div>
+			</section>
+		</article>
+	</div><!-- /content-wrapper -->
+{% endblock %}

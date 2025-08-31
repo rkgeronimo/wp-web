@@ -1,0 +1,229 @@
+<html style="margin-top: 0 !important">
+    <head>
+    {{function('wp_head')}}
+    </head>
+    <body>
+        {% set i = ((students|length)/10)|round(0, 'floor') %}
+        {% set l = 0 %}
+        {% if generate %}
+        {% for j in 0..i %}
+        <div class="hrs-title">
+            <img src="{{ site.theme.link }}/assets/img/hrs.jpg" />
+            <div class="hrs-title-table">
+                <table>
+                    <tr>
+                        <td>
+                            Dalmatinska 12
+                        </td>
+                        <td>
+                            tel: +385 (0)1 48 48 765
+                        </td>
+                        <td>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </td>
+                        <td>
+                            IBAN:
+                        </td>
+                        <td>
+                            HR9124020061100064429
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            10000 ZAGREB
+                        </td>
+                        <td>
+                            fax: +385 (0)1 48 49 119
+                        </td>
+                        <td>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </td>
+                        <td>
+                            OIB:
+                        </td>
+                        <td>
+                            393 633 115 60
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            HRVATSKA
+                        </td>
+                        <td>
+                            info@diving-hrs.hr
+                        </td>
+                        <td>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </td>
+                        <td>
+                            www.diving-hrs.hr
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="hrs-body">
+            <h1>PRIJAVA / IZVJEŠĆE TEČAJA RONILAČKIH SPECIJALNOSTI</h1>
+            <table class="hrs-table-about">
+                <tr>
+                    <td>
+                        NAZIV ČLANICE
+                    </td>
+                    <td colspan="2">
+                        SPECIJALNOST
+                    </td>
+                    <td>
+                        INSTRUKTOR<br />
+                        (ime, prezime i inst. broj)
+                    </td>
+                    <td>
+                        ASISTENT<br />
+                        (ime, prezime i inst. broj)
+                    </td>
+                </tr>
+                <tr class="hrs-bold">
+                    <td contenteditable="true">
+                        RK Geronimo
+                    </td>
+                    <td colspan="2" contenteditable="true">
+                        {{ metaTemplate.name }}
+                    </td>
+                    <td contenteditable="true">
+                        {{ organiser.display_name }}, {{ organiser.cardNumber }}
+                    </td>
+                    <td contenteditable="true">
+                        {{ assistant.display_name }}, {{ assistant.cardNumber }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        MJESTO TEČAJA
+                    </td>
+                    <td>
+                        DATUM POČETKA
+                    </td>
+                    <td>
+                        DATUM ISPITA
+                    </td>
+                    <td>
+                        TEČAJU PRISTUPILO
+                        (broj osoba)
+                    </td>
+                    <td>
+                        TEČAJ POLOŽILO
+                        (broj osoba)
+                    </td>
+                </tr>
+                <tr class="hrs-bold">
+                    <td contenteditable="true">
+                        Zagreb
+                    </td>
+                    <td contenteditable="true">
+                        {{ meta.starttime|date('j.n.Y.') }}
+                    </td>
+                    <td contenteditable="true">
+                        {{ meta.exam|date('j.n.Y.') }}
+                    </td>
+                    <td contenteditable="true">
+                        {{ totalStudents }}
+                    </td>
+                    <td contenteditable="true">
+                        {{ students|length }}
+                    </td>
+                </tr>
+            </table>
+            <table class="hrs-table-data">
+                <tr>
+                    <td>
+                        Br.
+                    </td>
+                    <td>
+                        IME I PREZIME
+                    </td>
+                    <td>
+                        TELEFON ZA KONTAKT
+                    </td>
+                    <td>
+                        MJESTO I DATUM ROĐENJA
+                    </td>
+                    <td>
+                        BROJ RONILAČKE KATEGORIJE
+                    </td>
+                    <td>
+                        ASOCIJACIJA<BR />
+                        (CMAS, PADI, SSI, NAUI...)
+                    </td>
+                </tr>
+                {% for k in 1..10 %}
+                    <tr>
+                        <td>
+                            {{ l+1 }}
+                        </td>
+                        <td contenteditable="true">
+                            {{ students[l].display_name }}
+                        </td>
+                        <td contenteditable="true">
+                            {{ students[l].tel }}
+                        </td>
+                        <td contenteditable="true">
+                            {% if students[l].pob %}{{ students[l].pob }},{% endif %} {% if students[l].dob %}{{ students[l].dob|date('d.m.Y.') }}{% endif %}
+                        </td>
+                        <td contenteditable="true">
+                            {{ students[l].cardNumber }}
+                        </td>
+                        <td contenteditable="true">
+                            {% if students[l] %} CMAS {% endif %}
+                        </td>
+                    </tr>
+                    {% set l=l+1 %}
+                {% endfor %}
+            </table>
+            <table class="hrs-footer">
+                <tr>
+                    <td colspan="2" rowspan="2">
+                        POTPIS I PEČAT
+                    </td>
+                    <td>
+                        INSTRUKTORA
+                    </td>
+                    <td>
+                        ASISTENTA
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        &nbsp;<br />
+                        &nbsp;
+                    </td>
+                    <td>
+                        &nbsp;<br />
+                        &nbsp;
+                    </td>
+                </tr>
+            </table>
+        </div>
+        {% endfor %}
+        {% else %}
+        <form method="get">
+            <p>Prikaži izvještaj za sljedeće tečajce:</p>
+            <input type="hidden" name="page" value="course_report_hrs" />
+            <input type="hidden" name="post" value="{{ post.id }}" />
+            <table>
+                {% for student in students %}
+                    <tr>
+                        <td>
+                            {{ student.display_name }}
+                        </td>
+                        <td>
+                            <input type="checkbox" name="students[]" value="{{ student.id }}" checked />
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <input type="submit" value="generiraj" />
+        </form>
+        {% endif %}
+    </body>
+</html>

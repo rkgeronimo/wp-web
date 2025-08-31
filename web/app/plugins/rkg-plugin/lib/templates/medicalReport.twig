@@ -1,0 +1,462 @@
+<html style="margin-top: 0 !important">
+    <head>
+    {{function('wp_head')}}
+    </head>
+    <body>
+{% for survey in surveys %}
+<div class="survey-print">
+    <h1>ZDRAVSTVENA IZJAVA</h1>
+    <p class="center">Zapis kandidata<br />
+        (Povjerljiva informacija)</p>
+    <h2>Molimo pročitajte pažljivo prije potpisa.</h2>
+    <p>Ovo je izjava kojom ste informirani o potencijalnim rizicima povezanim s ronjenjem s autonomnom ronilačkom opremom-ARA (SCUBA) i zahtjevanom načinu vašeg ponašanja u toku programa obuke. Od vas se zahtijeva potpis ove izjave kao doprinos programu nastave ronjenja koju vodi instruktor <span class="survey-underline-bold">{{ post.author.display_name }}</span> i organiziran u školi <span class="survey-underline-bold">Ronilački klub Geronimo</span> smještenoj u <span class="survey-underline-bold">Zagrebu</span>.</p>
+    <p>Pročitajte i prokomentirajte ovu izjavu prije nego što je ovjerite potpisom. Morate ispuniti ovu Zdravstvenu Izjavu, što uključuje i dio Povijesti Bolesti, kako biste upotpunili planirani program nastave ronjenja. Ukoliko ste maloljetni, ovu Izjavu mora potpisom ovjeriti vaš roditelj ili staratelj.</p>
+    <p>Ronjenje je uzbudIjiva i zahtjevna aktivnost. Ukoliko je pravilno pripremljena, primjenjujući ispravnu tehniku, vrlo je sigurna. Ukoliko se ne ispune ustanovljene sigurnosne procedure, razumljivo, dolazi do rizičnih i opasnih situacija.</p>
+    <p>Za sigurno autonomno ronjenje, ne smijete biti prekomjerne tjelesne težine ili slabe fizičke kondicije. Ronjenje može biti naporno pod odredenim okolnostima. Vaš dišni i krvožilni sustav moraju biti u dobrom zdravstvenom stanju.</p>
+    <p>Sve zrakom ispunjenje tjelesne šupljine moraju biti normalne i zdrave. Osobe sa srčanim tegobama, trenutačnom prehladom ili začepljenim dišnim putovima, epilepsijom, astmom, izraženim zdravstvenim problemom ili koje su pod utjecajem alkohola ili lijekova ne smiju roniti.</p>
+    <p>Ukoliko uzimate medikamente, savjetujte se s vašim liječnikom i instruktorom prije započinjanja ovog programa. Takoder morate od vašeg instruktora naučiti važna sigurnosna pravila koja se odnose na disanje i izjednačavanje tlaka za vrijeme ronjenja.</p>
+    <p>Nepravilna upotreba ronilačke opreme može izazvati ozbiljne ozlijede. Morate biti potpuno upućeni u način upotrebe pod izravnim nadzorom kvalificiranog instruktora kako biste je sigurno koristili.</p>
+    <p>Ukoliko imate bilo koje dodatno pitanje koje se odnosi na ovu Zdravstvenu Izjavu ili dio Povijesti Bolesti, razmotrite to s vašim instruktorom prije potpisivanja Izjave.</p>
+    <h2>POVIJEST BOLESTI</h2>
+    <p>Napomena kandidatu:</p>
+    <p>Svrha ovog zdravstvenog upitnika je ustanovljavanje da li je potreban liječnički pregled prije pristupanja rekreativnom ronilačkom nastavnom programu.</p>
+    <p>Potvrdan odgovor na pitanje ne predstavlja isključivo vašu diskvalifikaciju za ronjenje. Potvrdan odgovor znači da postoje preduvjeti koji mogu utjecati na vašu sigurnost za vrijeme ronjenja i stoga morate potražiti liječnički savjet.</p>
+    <p>Molimo vas da odgovorite na slijedeća pitanja o vašem prošlom i sadašnjem zdravstvenom stanju sa <span class="survey-bold">DA</span> ili <span class="survey-bold">NE</span>. Ukoliko niste sigurni, odgovor glasi <span class="survey-bold">DA</span>.</p>
+    <p>Ukoliko se bilo koji od ovih stavaka odnosi na vas, moramo od vas zahtijevati da se savjetujete s liječnikom prije početka ronilačkih aktivnosti. Vaš instruktor će vam pripremiti Zdravstvenu Izjavu i Vodič za liječnički pregled rekreativnih ronilaca koje ćete dostaviti liječniku.</p>
+    <div class="split">
+        <table>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.pregnancy  %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Da li ste trudni ili pokušavate ostati trudni?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.medications %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Uzimate li redovito propisane ili nepropisane lijekove? (uz izuzeće kontraceptivnih pilula)</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.older %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Da li ste stariji od 45 godina i na vas se odnosi jedno ili više od slijedećeg:
+                    <ul>
+                        <li>trenutačno pušite lulu, cigare ili cigarete;</li>
+                        <li>imate povišen nivo kolesterola;</li>
+                        <li>slučajeve srčanog napada u porodičnoj povijesti bolesti</li>
+                    </ul></td>
+            </tr>
+            <tr>
+                <td>
+                </td>
+                <td class="survey-bold">Dali ste ikada imali ili trnutačno imate:</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.breathing %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Astma, otežano disanje (hripanje) ili teško disanje pri naporu?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.allergies %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Učestale ili izražene napade peludne groznice ili alergije?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.cold %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Učestale prehlade, upale sinusa ili bronhitis?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.lungs %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Bilo koji oblik plućne bolesti?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.pneumotorax %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Pneumotorax (kolaps pluća)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.chest %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnju operaciju prsnog koša?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.phobia %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Klaustrofobiju ili agorafobiju (strah od zatvorenih ili otvorenih prostora)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.behavior %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Zdravstvene probleme u ponašanju?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.epilepsy %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Epilepsiju, nekontrolirane pokrete, konvulzije ili uzimate lijekove za njihovo sprječavanje?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.migraine %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Povremene migrenske glavobolje ili uzimate lijekove za njihovo sprječavanje?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.fainting %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje gubitke sjećanja ili nesvjestice (potpune ili djelomične gubitke svijesti)?</td>
+            </tr>
+        </table>
+    </div>
+    <div class="split">
+        <table>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.moving %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Da li često patite od bolesti kretanja (morska bolest, slabost pri vožnji i slično)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.decompression %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje ronilačke udese ili dekompresijsku bolest?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.back %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje povremene probleme s leđima?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.backoperation %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje operacije leda?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.diabetes %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje slučajeve dijabetesa?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.fracture %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje probleme s ledima, rukama i nogama uz posljedice operacije, ozljede ili frakture?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.exercise %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Nesposobnost za izvedbu umjerenih vježbi (primjer: hodati 1500 m kraće od 12 minuta)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.bloodpresure %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje situacije povišenog krvnog tlaka ili uzimate lijekove za kontrolu krvnog tlaka?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.heart %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje bolesti srca bilo koje vrste?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.heartattack %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje srčane napade?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.infarction %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Infarkt ili operacije srca ili krvnih žila?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.ears %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje operacije uha ili sinusa?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.deafness %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje bolesti uha, gubitak sluha ili poteškoće s ravnotežom?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.earpressure %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje poteškoće izjednačavanja tlaka u uhu za vrijeme leta zrakoplovom ili vožnje u planinama?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.bleeding %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnja krvarenja ili ostale poremećaje krvotoka?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.hernia %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnji bilo koji oblik hernije (kile)?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.ulcer %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje probleme čira ili operacije čira?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.colostomy %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje slučajeve kolostomije?</td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="survey-underline-bold">
+                    {% if survey.addiction %}
+                        DA
+                    {% else %}
+                        NE
+                    {% endif %}
+                    </span>
+                </td>
+                <td>Dosadašnje slučajeve zloupotrebe droga ili alkohola? </td>
+            </tr>
+        </table>
+    </div>
+    <div class="fix"></div>
+    <p class="survey-bold">Informacije koje sam pružio o mojoj povijesti bolesti swu točne, prema meni poznatim činjenicama.</p>
+    <div class="split">
+        <div class="signature-underline">{{ survey.user.display_name }},</div>
+        <div class="signature">Ime i Prezime, Potpis</div>
+        <div class="signature-underline-empty"></div>
+        <div class="signature">Datum</div>
+    </div>
+    <div class="split">
+        {% if survey.parent  %}
+            <div class="signature-underline">{{ survey.parent }},</div>
+        {% else %}
+            <div class="signature-underline-empty"></div>
+        {% endif %}
+        <div class="signature">Ime i Prezime i potpis roditelja ili staratelja (za maloljetne)</div>
+        <div class="signature-underline-empty"></div>
+        <div class="signature">Datum</div>
+    </div>
+    <div class="fix-page"></div>
+</div>
+{% endfor %}
+    </body>
+</html>

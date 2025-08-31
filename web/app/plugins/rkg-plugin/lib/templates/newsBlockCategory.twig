@@ -1,0 +1,11 @@
+<div class="rkg-news-category-select">
+    Kategorije&nbsp;<div class="rkg-news-category-select-arrow"></div>
+</div>
+<div class="rkg-news-category{% if (categorie_id is empty or categorie_id == 'all') %} active{% endif %}" data-id="all">
+        Sve
+    </div>
+{% for categorie in categories %}
+    <div class="rkg-news-category{% if (categorie_id == categorie.term_id) %} active{% endif %}" data-id="{{ categorie.term_id }}">
+        {{ categorie.name }}
+    </div>
+{% endfor %}

@@ -1,0 +1,168 @@
+{% block content %}
+    <table class="form-table">
+        {% if user.can('edit_users') %}
+        <tr>
+            <th><label for="memberNumber">Članski broj</label></th>
+            <td><input name="memberNumber" value="{{ profileMeta.memberNumber }}"></td>
+        </tr>
+        {% endif %}
+        <tr>
+            <th><label for="dob">Datum rođenja</label></th>
+            <td><input type="date" name="dob" value="{{ profileMeta.dob }}"></td>
+        </tr>
+        <tr>
+            <th><label for="pob">Mjesto rođenja</label></th>
+            <td><input type="text" name="pob" value="{{ profileMeta.pob }}"></td>
+        </tr>
+        <tr>
+            <th><label for="oib">OIB</label></th>
+            <td><input type="text" name="oib" value="{{ profileMeta.oib }}"></td>
+        </tr>
+        <tr>
+            <th><label for="tel">Broj mobitela</label></th>
+            <td><input type="text" name="tel" value="{{ profileMeta.tel }}"></td>
+        </tr>
+    </table>
+    <h3>
+        Ronilački profil
+        <span class="dashicons dashicons-arrow-down-alt2 rkg-admin-switch" id="rkg-rp"></span>
+    </h3>
+        <table class="form-table rkg-admin-switch-block" id="rkg-rp-block">
+            <tr>
+                <th><label>Ukupno izleta</label></th>
+                <td>
+                    {{ excursions_all }}
+                </td>
+            </tr>
+            <tr>
+                <th><label>Izleta u zadnjih 6 mjeseci</label></th>
+                <td>
+                    {{ excursions_last }}
+                </td>
+            </tr>
+            <tr>
+                <th><label for="rc">Ronilačka kategorija</label></th>
+                <td>
+                    <select name="rc">
+                        {% set categories = ["", "R1", "R2", "R3", "R4", "I1", "I2", "I3", "R1T", "R2T"] %}
+                        {% for i in categories %}
+                            <option value="{{ i }}" {% if i == profileMeta.rc %} selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="cardNumber">Broj breveta</label></th>
+                <td><input type="text" name="cardNumber" value="{{ profileMeta.cardNumber }}"></td>
+            </tr>
+            <tr>
+                <th><label for="log">Klupski dnevnik</label></th>
+                <td><input type="checkbox" name="log"{{ profileMeta.log ? ' checked' }}></td>
+            </tr>
+            <tr>
+                <th><label for="co">Kompresorist</label></th>
+                <td><input type="checkbox" name="co"{{ profileMeta.co ? ' checked' }}></td>
+            </tr>
+            <tr>
+                <th><label for="nitrox">Nitrox</label></th>
+                <td><input type="checkbox" name="nitrox"{{ profileMeta.nitrox ? ' checked' }}></td>
+            </tr>
+            <tr>
+                <th><label for="dry_suit">Suho odijelo</label></th>
+                <td><input type="checkbox" name="dry_suit"{{ profileMeta.dry_suit ? ' checked' }}></td>
+            </tr>
+            <tr>
+                <th><label for="DAN_op">DAN Oxygen provider</label></th>
+                <td><input type="checkbox" name="DAN_op"{{ profileMeta.DAN_op ? ' checked' }}></td>
+            </tr>
+        </table>
+    <h3>
+        Oprema
+        <span class="dashicons dashicons-arrow-down-alt2 rkg-admin-switch" id="rkg-op"></span>
+    </h3>
+    <table class="form-table form-table-rkg rkg-admin-switch-block" id="rkg-op-block">
+        <tr>
+            <td>Naziv</td>
+            <td>Veličine</td>
+            <td>Trebam</td>
+        </tr>
+        <tr>
+            <th><label for="mask">Maska</label></th>
+            <td></td>
+            <td><input type="checkbox" name="mask"{{ profileMeta.mask ? : ' checked' }}></td>
+        </tr>
+        <tr>
+            <th><label for="regulator">Regulator</label></th>
+            <td></td>
+            <td><input type="checkbox" name="regulator"{{ profileMeta.regulator ? : ' checked' }}></td>
+        </tr>
+        <tr>
+            <th><label for="suit">Odijelo</label></th>
+            <td>
+                <select name="suit_size">
+                    <option value="" {% if profileMeta.suit_size is empty %} selected{% endif %}></option>
+                    {% for i in 2..8 %}
+                        <option value="{{ i }}" {% if i == profileMeta.suit_size %} selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="checkbox" name="suit"{{ profileMeta.suit ? : ' checked' }}></td>
+        </tr>
+        <tr>
+            <th><label for="boots">Čizme</label></th>
+            <td>
+                <select name="boots_size">
+                    <option value="" {% if profileMeta.boots_size is empty %} selected{% endif %}></option>
+                    {% for i in 5..13 %}
+                        <option value="{{ i }}" {% if i == profileMeta.boots_size %} selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="checkbox" name="boots"{{ profileMeta.boots ? : ' checked' }}></td>
+        </tr>
+        <tr>
+            <th><label for="gloves">Rukavice</label></th>
+            <td>
+                {% set sizes = ['S', 'M', 'L', 'XL'] %}
+                <select name="gloves_size">
+                    <option value="" {% if profileMeta.gloves_size is empty %} selected{% endif %}></option>
+                    {% for size in sizes %}
+                        <option value="{{ size }}" {% if profileMeta.gloves_size is same as (size) %} selected{% endif %}>{{ size }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="checkbox" name="gloves"{{ profileMeta.gloves ? : ' checked' }}></td>
+        </tr>
+        <tr>
+            <th><label for="fins">Peraje</label></th>
+            <td>
+                <select name="fins_size">
+                    <option value="" {% if profileMeta.fins_size is empty %} selected{% endif %}></option>
+                    {% set sizes = ['S', 'R', 'L', 'XL'] %}
+                    {% for size in sizes %}
+                        <option value="{{ size }}" {% if profileMeta.fins_size is same as (size) %} selected{% endif %}>{{ size }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="checkbox" name="fins"{{ profileMeta.fins ? : ' checked' }}></td>
+        </tr>
+        <tr>
+            <th><label for="bcd">Kpl</label></th>
+            <td>
+                <select name="bcd_size">
+                    <option value="" {% if profileMeta.bcd_size is empty %} selected{% endif %}></option>
+                    {% set sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] %}
+                    {% for size in sizes %}
+                        <option value="{{ size }}" {% if profileMeta.bcd_size is same as (size) %} selected{% endif %}>{{ size }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="checkbox" name="bcd"{{ profileMeta.bcd ? : ' checked' }}></td>
+        </tr>
+        <tr>
+            <th><label for="lead">Pojas za olovo</label></th>
+            <td><input type="text" name="lead_size" value="{{ profileMeta.lead_size }}"> kg</td>
+            <td><input type="checkbox" name="lead"{{ profileMeta.lead ? : ' checked' }}></td>
+        </tr>
+    </table>
+{% endblock %}

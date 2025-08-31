@@ -1,0 +1,44 @@
+{% block content %}
+    <div class="wrap">
+        <h1 id="add-new-inventory" class="wp-heading-inline">Registar članova</h1>
+        <table class="wp-list-table widefat fixed striped" cellspacing="0">
+            <thead>
+                <tr>
+                    <th scope="col" id="type" class="manage-column column-type sortable column-primary">
+                        <b>Ime i prezime</b>
+                    </th>
+                    <th scope="col" id="email" class="manage-column column-email"><b>Članski broj</b></th>
+                    <th scope="col" id="course" class="manage-column column-date"><b>Datum rođenja</b></th>
+                    <th scope="col" id="date" class="manage-column"><b>OIB</b></th>
+                    <th scope="col" id="date" class="manage-column"><b>Email</b></th>
+                    <th scope="col" id="date" class="manage-column"><b>Datum učlanjenja</b></th>
+                    <th scope="col" id="date" class="manage-column"><b>Zadnja članarina</b></th>
+                    <th scope="col" id="date" class="manage-column"><b>Povijest članarina</b></th>
+            </thead>
+
+            <tbody id="the-list" data-wp-lists="list:registry">
+                {% for item in data %}
+                <tr id="item_{{ data.id }}">
+                    <td class="user column-user" data-colname="Ime i prezime">
+                        {{ loop.index }}. 
+                        {{ item.display_name }}
+                    </td>
+                    <td class="user column-user" data-colname="Članski broj">{{ item.memberNumber }}</td>
+                    <td class="user column-email" data-colname="Datum rođenja">{{ item.dob|date('d.m.Y.') }}</td>
+                    <td class="size column-size" data-colname="OIB">{{ item.oib }}</td>
+                    <td class="size column-size" data-colname="Email">{{ item.user_email }}</td>
+                    <td class="date column-date" data-colname="Datum učlanjenja">{{ item.firstYear|date('d.m.Y.') }}</td>
+                    <td class="date column-date" data-colname="Zadnja članarina">{{ item.lastYear }}</td>
+                    <td>
+                        <select name="history-year">
+                            {% for sub in item.allYears %}
+                                <option value="">{{ sub.year }} </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+{% endblock %}

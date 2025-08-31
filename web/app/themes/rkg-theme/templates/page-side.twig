@@ -1,0 +1,24 @@
+{% extends "base.twig" %}
+
+{% block content %}
+	<div class="content-wrapper">
+		<article class="post-type-{{post.post_type}}" id="post-{{post.ID}}">
+			<section class="article-content article-content-narrow">
+				<h1 class="article-h1">{{post.title}}</h1>
+                <div class="rkg-side">
+                    <h2 class="rkg-toggler" data-toggle="rkg-who-menu">NAVIGACIJA
+                        <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
+                    </h2>
+                    <hr class="wp-block-separator only-mobile">
+                    <div class="rkg-hidder" id="rkg-who-menu">
+                        {{ rkg_side }}
+                        <hr class="wp-block-separator only-mobile">
+                    </div>
+                </div>
+				<div class="article-body">
+					{{post.content}}
+				</div>
+			</section>
+		</article>
+	</div><!-- /content-wrapper -->
+{% endblock %}

@@ -1,0 +1,42 @@
+<table class="rkg-members-table">
+    <thead>
+        <tr>
+            <th>Ime</th>
+            <th>Prezime</th>
+            <th>Email</th>
+            <th>Tel</th>
+        </tr>
+    </thead>
+    <tbody id="rkg-users">
+    {% for member in members %}
+        <tr>
+            <td>{{ member.rkg.first_name[0] }}</td>
+            <td>{{ member.rkg.last_name[0] }}</td>
+            <td><a href="mailto:{{ member.data.user_email }}">{{ member.data.user_email }}</a></td>
+            <td>{{ member.rkg.tel[0] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<table id="rkg-users-mob" class="rkg-members-table-mobile">
+    {% for member in members %}
+    <tbody>
+        <tr>
+            <th>Ime</th>
+            <td>{{ member.rkg.first_name[0] }}</td>
+        </tr>
+        <tr>
+            <th>Prezime&nbsp;&nbsp;</th>
+            <td>{{ member.rkg.last_name[0] }}</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td><a href="mailto:{{ member.data.user_email }}">{{ member.data.user_email }}</a></td>
+        </tr>
+        <tr>
+            <th>Tel</th>
+            <td>{{ member.rkg.tel[0] }}</td>
+        </tr>
+    </tbody>
+    {% endfor %}
+</table>

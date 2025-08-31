@@ -1,0 +1,147 @@
+{% extends "base.twig" %}
+{% block content %}
+	<div class="content-wrapper">
+		<article class="post-type-{{ post.post_type }}" id="post-{{ post.ID }}">
+			{# <img src="{{ post.thumbnail.src|resize(1200, 300) }}"> #}
+			<section class="article-content article-content-narrow">
+                <div class="rkg-article-meta course-category">{{ metaTemplate.category }}</div>
+				<h1 class="article-h1-course">{{ post.title }}</h1>
+                <div class="rkg-article-meta course-instructor">
+                    Tečaj vodi: <span class="course-instructor-name">{% include 'partial/user.twig'  with {'userDetail': organiser} %}</span>
+                </div>
+                <div class="rkg-article-meta course-date">{{ meta.starttime|date('j.n.') }} - {{ meta.endtime|date('j.n.') }}</div>
+                <div class="rkg-side">
+                    {% if meta.endtime <= now|date('Y-m-d') %}
+                        <button class="course-signup course-disabled-button">Prijave završene</button>
+                    {% elseif meta.locked == '1' %}
+                        <button class="course-disabled-button">Zaključano</button>
+                    {% elseif post.ID in signups.courses %}
+                        <button class="course-signout course-signout-button"
+                                data-course="{{ post.ID }}"
+                                data-name="{{ post.title }}">Odjava</button>
+                        <h2>Preostaje ti</h2>
+                        <input type="file" id="brevet" />
+                        <div class="temp-output"></div>
+                        {% if user.brevet is empty %}
+                        <div>
+                            <div class="course-brevet-image"></div>
+                            <a href="#" class="course-page-link" id="brevet-link">Upload slike za brevet</a>
+                        </div>
+                        {% endif %}
+                        {% if helthsurvey is empty %}
+                        <div>
+                            <a href="#" class="course-page-link" id="helth-survey-link">Ispunjavanje zdravstvene izjave</a>
+                        </div>
+                        {% endif %}
+                        {% if responsibilitysurvey is empty %}
+                        <div>
+                            <a href="#" class="course-page-link" id="responsibility-survey-link">Ispunjavanje izjave o odgovornosti</a>
+                        </div>
+                        {% endif %}
+                        {% if user.payed == false %}
+                        <div>
+                                <a href="#" class="ShowPayModal"
+                            data-title="Plaćanje za {{ metaTemplate.payment_desc }}"
+                            data-barcode_text="HRVHUB30
+                            EUR
+                            {{ metaTemplate.hub3_price }}
+                            {{ user.display_name }}
+
+
+                            RK GERONIMO
+                            Trg Krešimira Ćosića 10
+                            10000 Zagreb
+                            HR2524840081102706472
+                            HR67
+                            {{ user.oib }}
+
+                            {{ metaTemplate.payment_desc }} - {{ user.display_name }}"
+                            data-iznos="{{ metaTemplate.payment_price }} EUR"
+                            data-primatelj="RK GERONIMO, Trg Krešimira Ćosića 10, Zagreb"
+                            data-iban="HR2524840081102706472"
+                            data-model_placanja="HR67"
+                            data-poziv_na_broj="{{ user.oib }}"
+                            data-opis_placanja="{{ metaTemplate.payment_desc }} - {{ user.display_name }}"
+                            >Podaci za uplatu</a>
+                        </div>
+                        {% endif %}
+                    {% elseif meta.deadline < now|date('Y-m-d') %}
+                        <button disabled class="course-disabled-button">Istekle prijave</button>
+                    {% elseif meta.limitation <= meta.registered %}
+                        <button class="course-disabled-button">Popunjeno</button>
+                    {% else %}
+                        <button class="course-signup course-signup-button"
+                                data-course="{{ post.ID }}"
+                                data-link="{{ post.link }}"
+                                data-name="{{ post.title }}"
+                                data-date="{{ meta.starttime|date('j.n.Y.') }}">Prijava</button>
+                    {% endif %}
+                    {% if post.ID in signups.courses %}
+                        {% if user.brevet or helthsurvey  %}
+                        <h2>Tvoji podaci</h2>
+                        {% endif %}
+                        {% if user.brevet  %}
+                        <div>
+                            <div class="brevet-preview" id="brevet-link"><img src="{{ user.brevet }}" /><div class="brevet-preview-mask"><div class="brevet-preview-background"></div><div class="brevet-preview-text">Promjena slike za brevet</div></div></div>
+                        </div>
+                        {% endif %}
+                        {% if helthsurvey %}
+                        <div>
+                            <a href="#" class="course-page-link" id="helth-survey-link">Promjena zdravstvene izjave</a>
+                        </div>
+                        {% endif %}
+                        {% if responsibilitysurvey %}
+                        <div>
+                            <a href="#" class="course-page-link" id="responsibility-survey-link">Promjena izjave o odgovornosti</a>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                    <h2>Gdje</h2>
+                    <p>{{ meta.location|nl2br }}</p>
+                    <h2>kada</h2>
+                    <p>{{ meta.starttime|date('j.n.') }} - {{ meta.endtime|date('j.n.Y.') }}</p>
+                    <p>{{ meta.terms|nl2br }}</p>
+                    <h2>Rok prijave</h2>
+                    <p>{{ meta.deadline|date('j.n.Y.') }}</p>
+                    <h2>Cijena</h2>
+                    <p>{{ meta.price }}</p>
+                    {% if courseTerms is not empty %}
+                    <h2 class="course-terms-control">Drugi termini&nbsp;
+                        <span><i class="fas fa-chevron-down course-terms-down"></i></span>
+                        <span><i class="fas fa-chevron-up course-terms-up"></i></span>
+                    </h2>
+                    {% for term in courseTerms %}
+                        <div class="course-terms">
+                            <a href="{{ term.link }}">{{ term.starttime|date('j.m.') }} - {{ term.endtime|date('j.n.Y.') }}</a>
+                        </div>
+                    {% endfor%}
+                    {% endif %}
+                    {% if user.can('edit_courses') %}
+                        <h2 class="rkg-toggler-title" data-toggle="rkg-signups">Prijavljeni na tečaj
+                            <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
+                        </h2>
+                        <div class="rkg-hidder" id="rkg-signups">
+                            <a href='mailto:
+                            {%- for student in students -%}
+                            {%- if loop.index0 > 0 -%}
+                            ,
+                            {%- endif -%}
+                            {{ student.user_email }}
+                    {% endfor%}
+                    '>Pošalji e-mail prijavljenima</a>
+                            {%- for student in students -%}
+                            <div>
+                                {% include 'partial/user.twig'  with {'userDetail': student} %}
+                            </div>
+{% endfor%}
+                        </div>
+                    {% endif %}
+                    <hr class="wp-block-separator only-mobile">
+                </div>
+				<div class="article-body">
+					{{post.content}}
+				</div>
+			</section>
+		</article>
+	</div><!-- /content-wrapper -->
+{% endblock %}

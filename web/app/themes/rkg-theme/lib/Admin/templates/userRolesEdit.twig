@@ -1,0 +1,11 @@
+{% block content %}
+    &nbsp;
+    <select name="rkg_add_role_{{ which }}" id="rkg_add_role_{{ which }}" style="display: inline-block; float: none;">
+    <option value="">Uloga</option>
+    {% for key, value in roleEditList %}
+        <option value="{{ key }}">{{ value }}</option>
+    {% endfor %}
+</select>
+<input type="submit" name="rkg_add_role_submit_{{ which }}" id="rkg_add_role_submit_{{ which }}" class="button" value="Dodaj" />
+<input type="submit" name="rkg_revoke_role_submit_{{ which }}" id="rkg_revoke_role_submit_{{ which }}" class="button" value="Opozovi" />
+{% endblock %}

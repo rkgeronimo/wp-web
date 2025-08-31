@@ -16,7 +16,7 @@ Before running the commands make sure to install all the requirements mentioned 
 
 To install and setup everything, run the following commands:
 
-0. Clone repository *with submodules*: `git clone --recurse-submodules https://github.com/rkgeronimo/wp-web.git`
+0. Clone repository: `git clone https://github.com/rkgeronimo/wp-web.git`
 1. Inside `wp-web` directory run `yarn` - Installs NPM requirements from the `package.json` file
 2. `composer install` - Installs PHP requirements from  the`composer.json` file
 3. `./node_modules/.bin/gulp` - Builds static files (js, css)

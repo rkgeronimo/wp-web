@@ -1,0 +1,23 @@
+/**
+ * #.# Styles
+ *
+ * CSS for both Frontend+Backend.
+ */
+
+.wp-block-cgb-block-rkggallery  {
+    background: black;
+}
+
+.gallery-item {
+    display: block;
+    max-width: 100%;
+    cursor: pointer;
+    transition: opacity .5s ease-in-out;
+    &:hover {
+        opacity: 0.5;
+    }
+}
+
+.gallery-item:not(:first-child) {
+    display: none;
+}

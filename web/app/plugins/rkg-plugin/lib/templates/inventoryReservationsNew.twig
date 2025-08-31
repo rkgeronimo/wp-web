@@ -1,0 +1,47 @@
+{% block content %}
+    <div class="wrap">
+        <h1 id="add-new-inventory" class="wp-heading-inline">Izdavanje opreme</h1>
+    </div>
+        <div id="error-message" class="updated error hidden"><p>Došlo je do greške prilikom spremanja.</p></div>
+        <div id="error-text" class="updated error hidden"></div>
+
+        <table class="wp-list-table widefat fixed striped table-view-list reservations">
+            <thead>
+                <tr>
+                    <th scope="col" class="manage-column column-name column-primary">Korisnik</th>
+                    {% for type in typeTranslation %}
+                        <th scope="col" id="name" class="manage-column column-name">{{ type }}</th>
+                    {% endfor %}
+                    <th scope="col" class="manage-column column-name">Komentar</th>
+                    <th scope="col" class="manage-column column-name"></th>
+            </thead>
+
+            <tbody id="the-list" data-wp-lists="list:reservation">
+                <form id="custom-new-reservation" method="post" action="admin.php?page=reservations">
+                    <tr class="reservations-blocklet is-expanded">
+                        <td class="name column-name column-primary" data-colname="Ime">
+                            <select class="iid" id="niid" style="width: 100%" name="user_id">
+                                <option value="" disabled selected></option>
+                                {% for userItem in userList %}
+                                    <option value="{{ userItem.ID }}"{{ userItem.ID == user.ID ? ' selected' }}>{{ userItem.data.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% for key,type in typeTranslation %}
+                            <td class="manage-column column-name" data-colname={{type}}>
+                                <input class="iid" name="{{ key }}" type="text" placeholder="Šifra" style="width: 70%" value="{{ attribute(reservation, key) }}"/>
+                            </td>
+                        {% endfor %}
+                            <td class="manage-column column-name" data-colname="Komentar">
+                                <span class="dashicons dashicons-admin-comments rkg-popover-control"></span>
+                                <div class="rkg-popover"><textarea name="other"></textarea></div>
+                            </td>
+                        <td>
+                            <input type="submit" class="button button-primary" value="Spremi">
+                        </td>
+                    </tr>
+                </form>
+            </tbody>
+
+        </table>
+{% endblock %}

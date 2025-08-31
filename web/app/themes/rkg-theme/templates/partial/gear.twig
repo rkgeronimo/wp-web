@@ -1,0 +1,102 @@
+<form class="form-horizontal course-singuot-form" id="gear-form" role="form">
+    {# <input type="hidden" name="course" value="{{ post.ID }}" /> #}
+    <p>Najam opreme</p>
+    <input type="hidden" name="post" value="{{ post.id }}" />
+    <table class="rkg-gear-table">
+        <thead>
+            <tr>
+                <th>Naziv</th>
+                <th>Veličina</th>
+                <th>Trebam</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><label for="mask">Maska i disalica</label></td>
+                <td></td>
+                <td><input type="checkbox" name="mask"{{ user.mask ? :' checked' }}></td>
+            </tr>
+            <tr>
+                <td><label for="regulator">Regulator</label></td>
+                <td></td>
+                <td><input type="checkbox" name="regulator"{{ user.regulator ? :' checked' }}></td>
+            </tr>
+            <tr>
+                <td><label for="suit">Odijelo</label></td>
+                <td>
+                    <select name="suit_size">
+                        <option value="" {% if user.suit_size is empty %} selected{% endif %}></option>
+                        {% for i in 2..7 %}
+                            <option value="{{ i }}" {% if i == user.suit_size %} selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="checkbox" name="suit"{{ user.suit ? :' checked' }}></td>
+            </tr>
+            <tr>
+                <td><label for="boots">Čizmice</label></td>
+                <td>
+                    <select name="boots_size">
+                        <option value="" {% if user.boots_size is empty %} selected{% endif %}></option>
+                        {% for i in 5..13 %}
+                            <option value="{{ i }}" {% if i == user.boots_size %} selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="checkbox" name="boots"{{ user.boots ? :' checked' }}></td>
+            </tr>
+            <tr>
+                <td><label for="gloves">Rukavice</label></td>
+                <td>
+                    {% set sizes = ['S', 'M', 'L', 'XL'] %}
+                    <select name="gloves_size">
+                        <option value="" {% if user.gloves_size is empty %} selected{% endif %}></option>
+                        {% for size in sizes %}
+                            <option value="{{ size }}" {% if user.gloves_size is same as (size) %} selected{% endif %}>{{ size }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="checkbox" name="gloves"{{ user.gloves ? :' checked' }}></td>
+            </tr>
+            <tr>
+                <td><label for="fins">Peraje</label></td>
+                <td>
+                    <select name="fins_size">
+                        <option value="" {% if user.fins_size is empty %} selected{% endif %}></option>
+                        {% set sizes = ['S', 'R', 'L', 'XL'] %}
+                        {% for size in sizes %}
+                            <option value="{{ size }}" {% if user.fins_size is same as (size) %} selected{% endif %}>{{ size }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="checkbox" name="fins"{{ user.fins ? :' checked' }}></td>
+            </tr>
+            <tr>
+                <td><label for="bcd">KPL</label></td>
+                <td>
+                    <select name="bcd_size">
+                        <option value="" {% if user.bcd_size is empty %} selected{% endif %}></option>
+                        {% set sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] %}
+                        {% for size in sizes %}
+                            <option value="{{ size }}" {% if user.bcd_size is same as (size) %} selected{% endif %}>{{ size }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="checkbox" name="bcd"{{ user.bcd ? :' checked' }}></td>
+            </tr>
+            <tr>
+                <td><label for="lead">Pojas za olova</label></td>
+                <td><input type="text" name="lead_size" value="{{ user.lead_size }}"> kg</td>
+                <td><input type="checkbox" name="lead"{{ user.lead ? :' checked' }}></td>
+            </tr>
+            <tr>
+                <td><label for="note">Komentar</label></td>
+                <td colspan="2">
+                    <textarea name="other">{{ user.other }}</textarea>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <input type="submit" class="btn btn-primary" id="no-gear" data-post="{{ post.id }}" value="Ne trebam" />
+    <input type="submit" class="btn btn-primary" id="save-gear" value="Spremi" />
+</form>

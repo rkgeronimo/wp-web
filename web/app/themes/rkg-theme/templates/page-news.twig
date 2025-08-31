@@ -1,0 +1,38 @@
+{% extends "base.twig" %}
+
+{% block content %}
+	<div class="content-wrapper">
+		<article class="post-type-{{post.post_type}}" id="post-{{post.ID}}">
+			<section class="article-content">
+				<h1 class="article-h1">{{post.title}}</h1>
+                <div class="rkg-side">
+                    <h2 class="rkg-toggler" data-toggle="rkg-who-menu">NAVIGACIJA
+                        <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
+                    </h2>
+
+                    <div class="rkg-hidder" id="rkg-who-menu">
+                        {{ rkg_side }}
+                        <hr class="wp-block-separator only-mobile">
+                    </div>
+                </div>
+				<div class="article-body">
+                    <div class="row-container news-content-container">
+                        <div class="row">
+                            {% for new in news %}
+                                <div class="news-block">
+                                    <div class="col-3">
+                                        <a class="news-block-item" href="{{ new.guid }}" style="background-image: url('{{ new.get_thumbnail.src }}');">
+                                            <div class="news-block-category">{{ new.categories[0].name }}</div>
+                                            <h4 class="news-block-title">{{ new.post_title }}</h4>
+                                            <div class="news-block-date">{{ new.post_date|date("j.n.Y H:s") }}</div>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+				</div>
+			</section>
+		</article>
+	</div><!-- /content-wrapper -->
+{% endblock %}

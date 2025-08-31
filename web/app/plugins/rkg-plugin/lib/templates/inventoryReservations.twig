@@ -1,0 +1,18 @@
+{% block content %}
+    <div class="wrap">
+        <h1 id="add-new-inventory" class="wp-heading-inline">Izdavanje opreme</h1>
+        <a href="{{site.url}}/wp/wp-admin/admin.php?page=reservations_new" class="page-title-action">Dodaj novu rezervaciju</a>
+    </div>
+
+
+    <div id="error-message" class="updated error hidden"><p>Došlo je do greške prilikom spremanja.</p></div>
+    <div id="error-text" class="updated error hidden"></div>
+
+
+    <form action="admin.php?page=reservations" method="post">
+        {{ table.search_box('Pretraga', 'search_id')}}
+    </form> 
+
+    {{ table.display }}
+
+{% endblock %}

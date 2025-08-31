@@ -1,0 +1,252 @@
+{% extends "base.twig" %}
+{% block content %}
+	<div class="content-wrapper">
+		<article class="post-type-{{ post.post_type }}" id="post-{{ post.ID }}">
+			{# <img src="{{ post.thumbnail.src|resize(1200, 300) }}"> #}
+			<section class="article-content article-content-narrow">
+                <div class="rkg-side">
+                    <div class="excursion-prevnext">
+                        {% if prev %}
+                            <a class="excursion-prevnext-prev" title="{{ prev.post_title }}" href="{{ prev.link }}">
+                                <div class="rkg-excursion-left"></div>
+                        </a>
+                        {% endif %}
+                        {% if next %}
+                            <a class="excursion-prevnext-next" title="{{ next.post_title }}" href="{{ next.link }}">
+                                <div class="rkg-excursion-right"></div>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="excursion-single-nav">
+                    </div>
+
+                    {% if meta.guests_limit == true %}
+                        {% set totalParticipants = participants|length + guests|length %}
+                    {% else %}
+                        {% set totalParticipants = participants|length %}
+                    {% endif %}
+
+                    {% if meta.canceled %}
+                        <button class="course-disabled-button">Otkazan</button>
+                    {% elseif meta.endtime < now|date('Y-m-d') %}
+                        <button class="course-disabled-button">Prošao</button>
+                    {% elseif post.ID in signups.excursions %}
+                        <button class="excursion-signout course-signout-button"
+                                data-post="{{ post.ID }}"
+                                data-name="{{ post.title }}">Odjava</button>
+                    {% elseif meta.deadline < now|date('Y-m-d') %}
+                        <button class="course-disabled-button">Zaključan</button>
+                        {% if post.ID in signups.excursions_waiting %}
+                            <span class="excursion-signout-waiting"
+                                    data-post="{{ post.ID }}"
+                                    data-name="{{ post.title }}"
+                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
+                        {% elseif meta.limitation <= totalParticipants %}
+                            <span class="excursion-signup-waiting"
+                                    data-post="{{ post.ID }}"
+                                    data-name="{{ post.title }}"
+                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
+                        {% endif %}
+                    {% elseif meta.limitation <= totalParticipants %}
+                        <button class="course-disabled-button">Popunjen</button>
+                        {% if post.ID in signups.excursions_waiting %}
+                            <span class="excursion-signout-waiting"
+                                    data-post="{{ post.ID }}"
+                                    data-name="{{ post.title }}"
+                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
+                        {% else %}
+                            <span class="excursion-signup-waiting"
+                                    data-post="{{ post.ID }}"
+                                    data-name="{{ post.title }}"
+                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
+                        {% endif %}
+                    {% elseif replacements|length > 0 %}
+                        {% set freeSpots = meta.limitation - totalParticipants %}
+                        {% if user_waiting_position == 1 and freeSpots > 0 %}
+                            <button class="excursion-signup course-signup-button"
+                                    data-post="{{ post.ID }}"
+                                    data-name="{{ post.title }}"
+                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Prijava</button>
+                            <p><small>Na vrhu si liste interesa i ima slobodno mjesto.</small></p>
+                        {% else %}
+                            <button class="course-disabled-button">Lista interesa postoji</button>
+                            {% if user_waiting_position > 1 %}
+                                <p><small>{{ user_waiting_position }}. si na listi interesa.</small></p>
+                            {% else %}
+                                <p><small>Lista interesa nije prazna - nova prijava nije moguća. Organizator mora ručno dodati osobe sa liste interesa.</small></p>
+                            {% endif %}
+                        {% endif %}
+                        
+                        {% if post.ID in signups.excursions_waiting %}
+                            <span class="excursion-signout-waiting"
+                                    data-post="{{ post.ID }}"
+                                    data-name="{{ post.title }}"
+                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
+                        {% elseif user_waiting_position == 0 %}
+                            <span class="excursion-signup-waiting"
+                                    data-post="{{ post.ID }}"
+                                    data-name="{{ post.title }}"
+                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
+                        {% endif %}
+                    {% else %}
+                        {% set freeSpots = meta.limitation - totalParticipants %}
+                        {% if meta.leaders > 0 and freeSpots <= meta.leaders and not (user.rc in ['R3', 'R4', 'I1', 'I2', 'I3']) %}
+                            <button class="course-disabled-button">Rezervirano za voditelje</button>
+                            <p><small>Sva slobodna mjesta su rezervirana za voditelje.</small></p>
+                            {% if post.ID in signups.excursions_waiting %}
+                                <span class="excursion-signout-waiting"
+                                        data-post="{{ post.ID }}"
+                                        data-name="{{ post.title }}"
+                                        data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
+                            {% else %}
+                                <span class="excursion-signup-waiting"
+                                        data-post="{{ post.ID }}"
+                                        data-name="{{ post.title }}"
+                                        data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
+                            {% endif %}
+                        {% else %}
+                            <button class="excursion-signup course-signup-button"
+                                    data-post="{{ post.ID }}"
+                                    data-name="{{ post.title }}"
+                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Prijava</button>
+                            {% if post.ID in signups.excursions_waiting %}
+                                <span class="excursion-signout-waiting"
+                                        data-post="{{ post.ID }}"
+                                        data-name="{{ post.title }}"
+                                        data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                        <p>
+                            &nbsp;
+                    </p>
+                    {% if meta.endtime > now|date('Y-m-d') and post.ID in signups.excursions %}
+                        <h2>Tvoji podaci</h2>
+                        <div>
+                            {% if gear is empty %}
+                            <a href="#" class="course-page-link" id="excursion-signup-gear">Najam opreme</a>
+                            {% else %}
+                            <a href="#" class="course-page-link" id="excursion-signup-gear">Promjena opreme</a>
+                            {% endif %}
+                        </div>
+
+                        {% if meta.guests_limit == true and totalParticipants >= meta.limitation %}
+                            <p>Izlet popunjen, prijava gostiju nije moguća.</p>
+                        {% else %}
+                            <div>
+                                <a href="#" class="course-page-link" id="excursion-signup-guest">Prijavi gosta</a>
+                            </div>
+                        {% endif %}
+
+                        {% if myGuests is not empty %}
+                            <h2>Tvoji gosti</h2>
+                            {%- for guest in myGuests -%}
+                            <div class="rkg-user">
+                                {{ guest.display_name }}
+                                {% if user.can('edit_excursions') %}
+                                    <div class="rkg-user-details">
+                                        <div class="rkg-info-close"></div>
+                                        <a class="rkg-modal-logo" href="{{ function('home_url') }}"><img class="rkg-top-logo" src="{{ site.theme.link }}/assets/img/logo.png" /></a>
+                                        <div class="rkg-user-details-flex">
+                                            <div><a href="mailto:{{ guest.user_email }}">{{ guest.user_email }}</a></div>
+                                            <div><a href="tel:{{ guest.tel }}">{{ guest.tel }}</a></div>
+                                            <div><a
+                                                    href="#"
+                                                    class="guest-uninvite"
+                                                    data-name="{{ guest.display_name }}"
+                                                    data-email="{{ guest.user_email }}"
+                                                    >Odjavi</a></div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endfor%}
+                        {% endif %}
+                    {% endif %}
+                    <h2>Rok prijave</h2>
+                    <p>{{ meta.deadline|date('j.n.Y.') }}</p>
+                    {% if meta.price is not empty %}
+                    <h2>Akontacija</h2>
+                    <p>{{ meta.price }}</p>
+                    {% endif %}
+
+                    {% if meta.leaders != '0' %}
+                        <h2 class="rkg-toggler-title" data-toggle="rkg-signups">Potrebno voditelja</h2>
+                        <p>{{meta.leaders}}</p>
+                    {% endif %}
+                    
+                    <h2 class="rkg-toggler-title" data-toggle="rkg-signups">Prijavljeni na izlet ({{participants|length}})
+                        <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
+                    </h2>
+                    <div class="rkg-hidder" id="rkg-signups">
+                    {% if participants is empty %}
+                        <p>Nema prijavljenih osoba.</p>
+                    {% endif %}
+
+                    {% if user.ID == post.author.id %}
+                        <a href='mailto:
+                        {%- for participant in participants -%}
+                        {%- if loop.index0 > 0 -%};{%- endif -%}
+                        {{- participant.user_email -}}
+                        {%- endfor -%}
+                    
+                        {% if guests is not empty %}
+                            {%- for guest in guests -%}
+                            ;{{ guest.user_email }}
+                            {% endfor%}
+                        {% endif %}
+                        '>Pošalji e-mail prijavljenima</a>
+                    {% endif %}
+
+                    {% for participant in participants %}
+                        <div>
+                            {% include 'partial/user.twig'  with {'userDetail': participant} %}
+                        </div>
+                    {% endfor%}
+
+                    <h2 class="rkg-toggler-title" data-toggle="rkg-signups">Gosti ({{guests|length}})
+                        <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
+                    </h2>
+                    {% if guests is not empty %}
+                        {%- for guest in guests -%}
+                            <div>
+                                {% include 'partial/user.twig'  with {'userDetail': guest} %}
+                            </div>
+                        {% endfor%}
+                    {% endif %}
+                    </div>
+                    {% if replacements is not empty %}
+                    <h2 class="rkg-toggler-title" data-toggle="rkg-waitings">Lista interesa ({{replacements|length}})
+                        <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
+                    </h2>
+                    <div class="rkg-hidder" id="rkg-waitings">
+                        {% for replacement in replacements %}
+                            <div>
+                                {% include 'partial/user.twig'  with {'userDetail': replacement} %}
+                            </div>
+                        {% endfor%}
+                    </div>
+                    {% endif %}
+                    <hr class="wp-block-separator only-mobile">
+                </div>
+
+                {% if meta.limitation <= totalParticipants %}
+                    <div class="rkg-article-meta course-category filled">Izlet je popunjen!</div>
+                {% else %}
+                    <div class="rkg-article-meta course-category">Izlet</div>
+                {% endif %}
+
+				<h1 class="article-h1-course">{{ post.title }}</h1>
+                <h1 class="article-h1-course">{{ meta.starttime|date('j.n.') }} - {{ meta.endtime|date('j.n.Y.') }}</h1>
+                <div class="rkg-article-meta course-instructor">Izlet organizira: {% include 'partial/user.twig'  with {'userDetail': post.author} %}</div>
+				<div class="article-body">
+					{{post.content}}
+				</div>
+			</section>
+		</article>
+        <div class="rkg-map-container" style="position: relative; clear: both">
+            <div id="rkg-excursion-map" data-lat="{{ meta.latitude }}" data-long="{{ meta.longitude }}"></div>
+            <div class="rkg-map-gradient"></div>
+        </div>
+	</div><!-- /content-wrapper -->
+{% endblock %}

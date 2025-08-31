@@ -1,0 +1,39 @@
+{% block content %}
+    {# {{ dump(table) }} #}
+    <div class="wrap">
+        <div></div>
+        <h1 id="add-new-inventory" class="wp-heading-inline">{{ post.post_title }}</h1>
+        <h3>Prijavljeni na izlet</h3>
+        <h4>{{ excursionMeta.starttime|date("d.m.Y.") }} - {{ excursionMeta.endtime|date("d.m.Y.") }}</h4>
+        {# {{ table.display_tablenav  }} #}
+        {{ table.display }}
+
+        <h3>Gosti</h3>
+
+        <table class="wp-list-table widefat fixed striped table-view-list" cellspacing="0">
+            <thead>
+                <tr>
+                    <th scope="col" class="manage-column column-name sortable column-primary">
+                        Osoba
+                    </th>
+                    <th scope="col" class="manage-column column-email">Email</th>
+                    <th scope="col" class="manage-column column-tel">Telefon</th>
+                    <th scope="col" class="manage-column column-user">Pozvao/la</th>
+            </thead>
+
+            <tbody id="the-list" data-wp-lists="list:guests">
+                {% for item in guests %}
+                <tr>
+                    <td class="user column-name column-primary" data-colname="Osoba">{{ item.name }}
+                        <button type="button" class="toggle-row"><span class="screen-reader-text">Prikaži više detalja</span></button>
+                    </td>
+                    <td class="user column-email" data-colname="Email">{{ item.email }}</td>
+                    <td class="size column-tel" data-colname="Telefon">{{ item.tel }}</td>
+                    <td class="date column-user" data-colname="Pozvao/la">{{ item.invited_by }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.twig" %}
+
+{% block content %}
+	<div class="content-wrapper">
+		<article class="post-type-{{post.post_type}}" id="post-{{post.ID}}">
+			<section class="article-content article-content-narrow">
+                <div class="rkg-side">
+                    {{ rkg_side }}
+                </div>
+				<h1 class="article-h1">{{post.title}}</h1>
+				<div class="article-body">
+                    <input class="form-control" id="rkg-users-input" type="text" placeholder="Pretraži..">
+                    <table class="rkg-members-table">
+                        <thead>
+                            <tr>
+                                <th>Ime</th>
+                                <th>Prezime</th>
+                                <th>Email</th>
+                                <th>Tel</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rkg-users">
+                            {% for member in members %}
+                                <tr>
+                                    <td>{{ member.rkg.first_name[0] }}</td>
+                                    <td>{{ member.rkg.last_name[0] }}</td>
+                                    <td>{{ member.data.user_email }}</td>
+                                    <td>{{ member.rkg.tel[0] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+				</div>
+			</section>
+		</article>
+	</div><!-- /content-wrapper -->
+{% endblock %}

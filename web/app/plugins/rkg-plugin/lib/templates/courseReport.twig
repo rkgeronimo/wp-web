@@ -1,0 +1,60 @@
+{% block content %}
+    <div class="wrap">
+        <form method="post">
+            <h1 id="add-new-inventory" class="wp-heading-inline">{{ post.post_title }}</h1>
+            <table class="form-table">
+                <tr>
+                    <th>
+                        Datum ispita
+                    </th>
+                    <td>
+                        <input name="exam" type="date" value="{{ meta.exam }}" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        Asistent
+                    </th>
+                    <td>
+                        <select class="preSignupSelect" id="pr1" style="width: 70%" name="assistant">
+                            <option value="" {{ meta.assistant ?: 'selected' }}></option>
+                            {% for userItem in userList %}
+                                <option value="{{ userItem.ID }}" {{ meta.assistant == userItem.ID ? 'selected="selected"' }}>{{ userItem.data.display_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        Delegat
+                    </th>
+                    <td>
+                        <input name="delegate" type="text" value="{{ meta.delegate }}" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        Tečaj je zaključan?
+                    </th>
+                    <td>
+                        <input name="locked" type="checkbox" {{ meta.locked ? 'checked' }} />
+                    </td>
+                </tr>
+                <tr class="links-table">
+                    <td>{{ sendEmails }}</td>
+                </tr>
+                <tr><td></td></tr>
+                
+                <tr class="links-table">
+                    <td>{{ allMedical }}</td>
+                    <td>{{ allLiability }}</td>
+                    <td>{{ allBrevet }}</td>
+                    <td><b>{{ hrsReport }}</b></td>
+                </tr>
+                
+            </table>
+            {{ table.display }}
+        <input type="submit" value="spremi">
+        </form>
+    </div>
+{% endblock %}

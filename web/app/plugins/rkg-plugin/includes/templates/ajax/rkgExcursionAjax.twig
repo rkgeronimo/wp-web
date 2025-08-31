@@ -1,0 +1,18 @@
+<div class="excursion-search-count">
+    {{ excursions|length }} {{ excursions|length == 1 ? 'rezultat' : 'rezultata' }}
+</div>
+{% for excursion in excursions %}
+    <a href="{{ excursion.link }}">
+        <div class="excursion excursion-old" id="excursion-{{ excursion.id }}" data-marker='{{ excursion|json_encode() }}'>
+            <div class="excursion-title">{{ excursion.post_title }}</div>
+            {%- if excursion.id in signups.excursions %}
+            <span class="dashicons dashicons-yes"></span>
+            {%- elseif excursion.id in signups.excursions_waiting %}
+            <span class="dashicons dashicons-controls-pause"></span>
+{% endif -%}
+<div class="excursion-p">{{ excursion.starttime|date('d.m.Y.') }} - {{ excursion.endtime|date('d.m.Y.') }}</div>
+<div class="excursion-p">Izlet organizira: {{ excursion.display_name }}</div>
+<div class="excursion-p">Izlet je prošao</div>
+        </div>
+    </a>
+{% endfor %}

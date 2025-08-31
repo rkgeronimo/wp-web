@@ -1,0 +1,111 @@
+{% block map %}
+    {% if  user.can('member_access') %}
+    <div class="rkg-show-map-container">
+        KARTA:&nbsp;
+        <div class="rkg-show-map off">
+            <div class="rkg-show-map-switch"></div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="rkg-map-container">
+        <div id="rkg-map"></div>
+        <div class="rkg-map-gradient"></div>
+        <div id="excursions" class="excursions-map-off"
+             {% if not user.can('member_access') %}style="display: none" {% endif %}
+            data-now="{{ rkgExcursionNow|json_encode()|escape}}"
+            data-new="{{ rkgExcursionNew|json_encode()|escape}}"
+            data-old="{{ rkgExcursionOld|json_encode()|escape}}"
+            >
+            <div class="excursions-title">
+                <button class="button-excursion button-excursion-new active">Aktualni izleti</button><button class="button-excursion button-excursion-old">Prošli izleti</button>
+                <button class="buton-excursion-mobile old">
+                    <span class="span-excursion-old">Prošli izleti</span>
+                    <span class="span-excursion-new">Aktualni izleti</span>
+                </button>
+            </div>
+            <div class="excursion-new-container">
+                {% for excursion in rkgExcursionNow %}
+                    <a href="{{ excursion.link }}">
+                        <div class="excursion excursion-now" id="excursion-{{ excursion.id }}" data-marker='{{ excursion|json_encode() }}'>
+                        <div class="excursion-title">{{ excursion.post_title }}</div>
+                        {%- if excursion.id in signups.excursions %}
+<span class="dashicons dashicons-yes"></span>
+                        {%- elseif excursion.id in signups.excursions_waiting %}
+<span class="dashicons dashicons-controls-pause"></span>
+                        {% endif -%}
+                        <div class="excursion-p">{{ excursion.starttime|date('d.m.Y.') }} - {{ excursion.endtime|date('d.m.Y.') }}</div>
+                        <div class="excursion-p">Izlet organizira: {{ excursion.display_name }}</div>
+                        <div class="excursion-p">Izlet je u tijeku</div>
+                    </div>
+                    </a>
+                {% endfor %}
+                {% for excursion in rkgExcursionNew %}
+                    <a href="{{ excursion.link }}">
+                        <div class="excursion excursion-new" id="excursion-{{ excursion.id }}" data-marker='{{ excursion|json_encode() }}'>
+                        <div class="excursion-title">{{ excursion.post_title }}</div>
+                        {%- if excursion.id in signups.excursions %}
+<span class="dashicons dashicons-yes"></span>
+                        {%- elseif excursion.id in signups.excursions_waiting %}
+<span class="dashicons dashicons-controls-pause"></span>
+                        {% endif -%}
+                        <div class="excursion-p">{{ excursion.starttime|date('d.m.Y.') }} - {{ excursion.endtime|date('d.m.Y.') }}</div>
+                        <div class="excursion-p">Izlet organizira: {{ excursion.display_name }}</div>
+                        {% set freeSpaces = excursion.limitation - excursion.registered %}
+                        {% if freeSpaces <= 0 %}
+                        <div class="excursion-p">Izlet je popunjen</div>
+                        {% else %}
+                        <div class="excursion-p">Slobodnih mjesta: {{ freeSpaces }}</div>
+                        {% endif %}
+                    </div>
+                    </a>
+                {% endfor %}
+            </div>
+            <div class="excursion-old-container">
+                    <form method="post" id="excursion-block-search-form">
+                        <div class="excursion excursion-block-search">
+                            <p>
+                                <select name="godina">
+                                    <option value="" disabled {% if search.godina is empty %} selected{% endif %}>Godina</option>
+                                    <option value=""> </option>
+                                    {% for i in 2014.."now"|date("Y") %}
+                                        <option value="{{ i }}" {%if i == search.godina%} selected{% endif %}>{{ i }}</option>
+                                    {% endfor %}
+                                </select>
+                            </p>
+                            <p>
+                                <input type='text' name="naziv" placeholder="Dio naziva" value="{{ search.naziv }}"><br>
+                            </p>
+                            <p>
+                                <input type="text" name="organizator" placeholder="Organizator" value="{{ search.organizator }}"><br>
+                            </p>
+                            <p>
+                                <input type="text" name="prijavljeni" placeholder="Prijavljena osoba" value="{{ search.prijavljeni }}"><br>
+                            </p>
+                        </div>
+                        <input class="btn btn-primary excursion-block-search-btn" type="submit" value="Pretraži">
+                    </form>
+                <button class="btn btn-primary excursion-block-btn">Pretraga</button>
+                <div class="excursion-old-container-list">
+                {% for excursion in rkgExcursionOld %}
+                    <a href="{{ excursion.link }}">
+                        <div class="excursion excursion-old" id="excursion-{{ excursion.id }}" data-marker='{{ excursion|json_encode() }}'>
+                            <div class="excursion-title">{{ excursion.post_title }}</div>
+                        {%- if excursion.id in signups.excursions %}
+<span class="dashicons dashicons-yes"></span>
+                        {%- elseif excursion.id in signups.excursions_waiting %}
+<span class="dashicons dashicons-controls-pause"></span>
+                        {% endif -%}
+                            <div class="excursion-p">{{ excursion.starttime|date('d.m.Y.') }} - {{ excursion.endtime|date('d.m.Y.') }}</div>
+                            <div class="excursion-p">Izlet organizira: {{ excursion.display_name }}</div>
+                            <div class="excursion-p">Izlet je prošao</div>
+                        </div>
+                    </a>
+                {% endfor %}
+                </div>
+                <div class="excursion-old-container-list-serarch">
+                </div>
+            </div>
+            <div class="excursion-gradient"></div>
+        </div>
+    </div>
+{% endblock %}

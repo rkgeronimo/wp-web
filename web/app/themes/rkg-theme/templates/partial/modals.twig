@@ -1,0 +1,367 @@
+<div class="rkg-modal">
+    <div class="rkg-modal-close"></div>
+    <a class="rkg-modal-logo" href="{{ function('home_url') }}"><img class="rkg-top-logo" src="{{ site.theme.link }}/assets/img/logo.png" /></a>
+    <div class="rkg-modal-flex">
+        {% if user is empty %}
+            <form id="login" action="{{ function('get_option', 'home') }}/wp-login.php" method="post">
+                <p>Provjeri što ima novo ispod površine</p>
+                <p>Prijavi se ili <span class="rkg-modal-link rkg-registration-show">registriraj</span></p>
+
+                <p><input placeholder="Korisničko ime ili E-mail" type="text" name="username" id="username" value="" required /> </p>
+
+                <p><input placeholder="Lozinka" type="password" name="password" id="password" required /></p>
+                <p><span class="rkg-input-size rkg-modal-link rkg-lost-password-show">Zaboravljena lozinka</span></p>
+
+                <p><input type="submit" name="submit" value="Prijava" class="button" /></p>
+
+                <p>
+                    <input type="hidden" name="redirect_to" value="{{ post.guid }}" />
+                </p>
+                {{ function('wp_nonce_field', 'ajax-login-nonce', 'security') }}
+            </form>
+            <form id="registration" class="form-horizontal registraion-form" role="form">
+                <p>Uroni u naš svijet</p>
+                <p>Napravi svoj novi profil ili se <span class="rkg-modal-link rkg-login-show">prijavi</span></p>
+                <p>
+                    <input type="text" name="vb_name" id="vb_name" value="" placeholder="Ime" class="form-control" required minlength="3" />
+                </p>
+                <p>
+                    <input type="text" name="vb_surname" id="vb_surname" value="" placeholder="Prezime" class="form-control" required minlength="3" />
+                </p>
+                <p>
+                    <input type="email" name="vb_email" id="vb_email" value="" placeholder="E-mail" class="form-control" />
+                </p>
+                <p>
+                    <input type="password" name="vb_pass" id="vb_pass" value="" placeholder="Lozinka" class="form-control" required minlength="6" />
+                </p>
+                <p><span class="rkg-input-size"><input type="checkbox" name="news" value="yes" class="form-control"> Želim primati obavijesti kluba na mail.</span></p>
+                <p><span class="rkg-input-size"><input type="checkbox" name="vehicle1" value="Bike" class="form-control" required> <a href="{{ http_host }}/?page_id=19" target="_blank">Slažem s obradom podataka</a> sukladno <a href="{{ http_host }}/?page_id=17" target="_blank">politici privatnosti</a>.</span></p>
+                {{ function('wp_nonce_field', 'vb_new_user','vb_new_user_nonce', true, true) }}
+                <input type="submit" class="button" id="btn-new-user" value="Registracija" />
+            </form>
+            <form id="lost-password" action="{{ function('get_option', 'home') }}/wp/wp-login.php" method="post">
+                <p>Lozinka ti je ostala pod morem?</p>
+                <p><input placeholder="E-mail" type="e-mail" name="lost_username" id="lost_username" value="" required /> </p>
+                <p><input type="submit" name="submit" value="Nova lozinka" class="button" /></p>
+                <p>
+                    <input type="hidden" name="redirect_to" value="{{ post.guid }}" />
+                </p>
+            </form>
+        {% endif %}
+        <form class="form-horizontal course-signup-form" id="additional-details-form" role="form">
+            {% if user.dob is empty or user.pob is empty or user.oib is empty or user.tel is empty %}
+                <p>Na korak si da postaneš dio tečaja!</p>
+                <p>Trebaju nam još ove informacije od tebe</p>
+            {% else %}
+                <p>Korak si do prijave</p>
+                <p>Samo još jednom provjeri ove informacije</p>
+            {% endif %}
+            <p>
+                <input type="text" name="dob" id="dob" placeholder="Datum rođenja (dd.mm.gggg)"
+                pattern="(0[1-9]|1[0-9]|2[0-9]|3[01]).(0[1-9]|1[012]).[0-9]{4}"
+                title="Promijeniti u ispravan format npr. 03.12.1990"
+                value="{{ user.dob ? user.dob|date("d.m.Y") }}" required/>
+            </p>
+            <p>
+                <input type="text" name="pob" id="pob" value="{{ user.pob }}" placeholder="Mjesto rođenja" class="form-control" required minlength="2" />
+            </p>
+            <p>
+                <input type="text" name="oib" id="oib" value="{{ user.oib }}" placeholder="OIB" class="form-control" required minlength="11" minlength="11" pattern="[0-9]+" />
+            </p>
+            <p>
+                <input type="text" name="tel" id="tel" value="{{ user.tel }}" placeholder="Broj mobitela" class="form-control" required />
+            </p>
+
+            <div class="additional-r1-info">
+                <p class="small">
+                    <input type="text" name="height" id="height" placeholder="Visina (cm)" class="form-control small" required />
+                    <input type="text" name="weight" id="weight" placeholder="Težina (kg)" class="form-control small" required />
+                </p>
+                <p>
+                    <input type="text" name="shoe_size" id="shoe_size" placeholder="Broj obuće (EU)" class="form-control" required />
+                </p>
+            </div>
+
+            <p class="error input-error"></p>
+
+            <input type="hidden" name="signup-course" id="signup-course" value="" />
+            <input type="submit" class="btn btn-primary" id="btn-additional-details" value="Prijava na tečaj" />
+        </form>
+        <form class="form-horizontal course-signout-form" id="course-signout-form" role="form">
+            <p>Žao nam je što ne možeš roniti s nama.</p>
+            <p>Odjavljuješ se sa tečaja: "<span class="course-signout-name"></span>"</p>
+            <input type="hidden" name="signout-course" id="signout-course" value="" />
+            <input type="submit" class="btn btn-primary" id="btn-signout-course" value="Odjava" />
+        </form>
+        <form class="form-horizontal course-signout-form" id="excursion-signout-form" role="form">
+            <p>Ne želiš roniti s nama?</p>
+            <p>Odjavljuješ se sa izleta: "<span class="excursion-signout-name"></span>"</p>
+            <input type="hidden" name="signout-excursion" id="signout-excursion" value="" />
+            <input type="submit" class="btn btn-primary" id="btn-signout-excursion" value="Odjava" />
+        </form>
+        <form class="form-horizontal course-signout-form" id="excursion-signout-waiting-form" role="form">
+            <p>Ne želiš roniti s nama?</p>
+            <p>Odjavljuješ se sa liste interesa za izlet: "<span class="excursion-signout-name"></span>"</p>
+            <input type="hidden" name="signout-excursion" id="signout-excursion" value="" />
+            <input type="submit" class="btn btn-primary" id="btn-signout-waiting-excursion" value="Odjava" />
+        </form>
+        <form class="form-horizontal course-signout-form" id="course-interested-form" role="form">
+            <p>Ne postoji termin za tečaj</p>
+            <p>Poslat ćemo ti mail kada se organizira termin za tečaj.</p>
+            <input type="hidden" name="signout-course" id="interested-course-id" value="" />
+            <button class="course-signup-ok-close">U redu</button>
+        </form>
+        <form class="form-horizontal course-signout-form" id="course-not-interested-form" role="form">
+            <p>Žao nam je što ne ideš na tečaj</p>
+            <p>Obavijest za termin tečaja je isključena.</p>
+            <input type="hidden" name="signout-course" id="not-interested-course-id" value="" />
+            <button class="course-signup-ok-close">U redu</button>
+        </form>
+        <form id="excursion-guest-form" class="form-horizontal registraion-form" role="form">
+            <p>Pozovi gosta!</p>
+            <p>
+                <input type="text" name="name" value="" placeholder="Ime i prezime" class="form-control" required minlength="3" />
+            </p>
+            <p>
+                <input type="email" name="email" value="" placeholder="E-mail" class="form-control" required />
+            </p>
+            <p>
+                <input type="tel" name="tel" value="" placeholder="Broj mobitela" class="form-control" required minlength="6" />
+            </p>
+            <p><span class="rkg-input-size"><input type="checkbox" name="gdpr" value="gdpr" class="form-control" required> Potvrđujem da imam dozvolu korištenja osobnih podataka osobe koju prijavljujem na izlet. Osobni podaci gosta koristiti će se isključivo u svrhu organizacije izleta.</p>
+            <input type="hidden" name="post" value="{{ post.id }}" />
+            <input type="submit" class="button" id="btn-new-user" value="Prijavi" />
+        </form>
+        <form id="excursion-guest-remove-form" class="form-horizontal registraion-form" role="form">
+            <p>Odjava gosta</p>
+            <p>
+                Ne želiš da <span id="guest-remove-name"></span> ide na izlet s nama?
+            </p>
+            <input type="hidden" name="post" value="{{ post.id }}" />
+            <input type="hidden" name="email" value="" id="guest-remove-email" />
+            <input type="submit" class="button" id="btn-new-user" value="Odjavi" />
+        </form>
+        <form id="lost-password" action="{{ function('get_option', 'home') }}/wp-login.php" method="post">
+            <p>Lozinka ti je ostala pod morem?</p>
+            <p><input placeholder="Korisničko ime ili E-mail" type="text" name="lost-username" id="lost-username" value="" required /> </p>
+            <p><input type="submit" name="submit" value="Nova lozinka" class="button" /></p>
+            <p>
+                <input type="hidden" name="redirect_to" value="{{ post.guid }}" />
+            </p>
+        </form>
+        {% include 'partial/helth-survey.twig' %}
+        {% include 'partial/gear.twig' %}
+        <div class="modal-div" id="course-signup-ok">
+            <p>Prijava je zaprimljena!</p>
+            <p>Preostaje ti uplata prve rate tečaja kako bi postao <br />Geronimo tečajac ili tečajka!</p>
+            <a href="#" class="rkg-button" id="course-signup-modal-link">U redu</a>
+        </div>
+        <div class="modal-div" id="course-signup-pay">
+            <p>Podaci za uplatu</p>
+            <p>Imamo samo za R1, treba definirati ostale</p>
+            <button class="course-signup-ok-close">U redu</button>
+        </div>
+        <div class="modal-div" id="excursion-signup-ok">
+            <p>Prijava je zaprimljena!</p>
+            <button id="excursion-signup-ok-gear">Najam opreme</button>
+            <button class="course-signup-ok-close">U redu</button>
+        </div>
+        <div class="modal-div" id="excursion-signup-waiting-ok">
+            <p>Prijava interesa je zaprimljena.</p>
+            <p>Lista je informativnog karaktera za potrebe organizatora,</br> ako dođe do promjene prijavljenih.</p>
+            <p><b>U slučaju slobodnog mjesta, potrebno je samostalno se prijaviti na izlet.</b></p>
+            <button class="course-signup-ok-close">U redu</button>
+        </div>
+        <div class="modal-div" id="rkg-moddal-members">
+            <p>Popis članova</p>
+            <input class="form-control" id="rkg-users-input" type="text" placeholder="Pretraži...">
+            <div id="rkg-members-table-container"></div>
+        </div>
+        <div class="modal-div" id="rkg-moddal-brevet">
+            <p>Upload slike za brevet</p>
+            <div class="rkg-croppie-container">
+                <div id="brevet-crop"></div>
+            </div>
+            <div>
+                <i class="fas fa-undo croppie-rotate" data-deg="90"></i>
+                <i class="fas fa-redo croppie-rotate" data-deg="-90"></i>
+            </div>
+            <button class="brevet-upload-button">Postavi</button>
+        </div>
+        <div class="modal-div" id="payment-modal">
+            <p id="payment-title"></p>
+            <div id="payment-barcode"></div>
+            <p>Podaci za RUČNO plaćanje su:</p>
+            <table class="rkg-modal-table">
+                <tbody id="rkg-users">
+                    <tr>
+                        <td>Primatelj:</td><td id="payment-primatelj"></td>
+                    </tr>
+                    <tr>
+                        <td>IBAN:</td><td id="payment-iban"></td>
+                    </tr>
+                    <tr>
+                        <td>Model plaćanja:</td><td id="payment-model_placanja"></td>
+                    </tr>
+                    <tr>
+                        <td>Poziv na broj:</td><td id="payment-poziv_na_broj"></td>
+                    </tr>
+                    <tr>
+                        <td>Opis plaćanja:</td><td id="payment-opis_placanja"></td>
+                    </tr>
+                    <tr>
+                        <td>Iznos:</td><td id="payment-iznos"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="course-signup-ok-close">U redu</button>
+        </div>
+        <p class="rkg-modal-status"></p>
+    </div>
+</div>
+<div class="rkg-moddal-gallery">
+    <div class="rkg-moddal-gallery-close"></div>
+    <div class="rkg-moddal-gallery-left">
+        <div class="rkg-moddal-gallery-chevron-left"></div>
+    </div>
+    <div class="rkg-moddal-gallery-right">
+        <div class="rkg-moddal-gallery-chevron-right"></div>
+    </div>
+    <div class="rkg-moddal-gallery-slick">
+    </div>
+</div>
+
+
+{# {% if user is empty %} #}
+{# <div class="rkg-modal rkg-login"> #}
+    {# <div class="rkg-login-close"></div> #}
+    {# <form id="login" action="{{ function('get_option', 'home') }}/wp-login.php" method="post"> #}
+        {# <p>Provjeri što ima novo ispod površine</p> #}
+        {# <p>Prijavi se ili <span class="rkg-modal-link rkg-registration-show">registriraj</span></p> #}
+
+        {# <p><input placeholder="Korisničko ime ili E-mail" type="text" name="username" id="username" value="" required /> </p> #}
+
+        {# <p><input placeholder="Lozinka" type="password" name="password" id="password" required /></p> #}
+        {# <p class="left-align"><span class="rkg-modal-link rkg-lost-password-show">Zaboravljena lozinka</span></p> #}
+
+        {# <p><input type="submit" name="submit" value="Prijava" class="button" /></p> #}
+        {# <p class="status"></p> #}
+
+        {# <p> #}
+            {# <input type="hidden" name="redirect_to" value="{{ post.guid }}" /> #}
+            {# </p> #}
+        {# {{ function('wp_nonce_field', 'ajax-login-nonce', 'security') }} #}
+        {# </form> #}
+    {# </div> #}
+{# <div class="rkg-modal rkg-registration"> #}
+    {# <div class="rkg-registration-close"></div> #}
+    {# <form class="form-horizontal registraion-form" role="form"> #}
+        {# <p>Uroni u naš svijet</p> #}
+        {# <p>Napravi svoj novi profil ili se <span class="rkg-modal-link rkg-login-button">prijavi</span></p> #}
+        {# <p> #}
+            {# <input type="text" name="vb_name" id="vb_name" value="" placeholder="Ime" class="form-control" required /> #}
+            {# </p> #}
+        {# <p> #}
+            {# <input type="text" name="vb_surname" id="vb_surname" value="" placeholder="Prezime" class="form-control" required /> #}
+            {# </p> #}
+        {# <p> #}
+            {# <input type="email" name="vb_email" id="vb_email" value="" placeholder="E-mail" class="form-control" required /> #}
+            {# </p> #}
+        {# <p> #}
+            {# <input type="password" name="vb_pass" id="vb_pass" value="" placeholder="Lozinka" class="form-control" required /> #}
+            {# </p> #}
+        {# <p class="left-align"><input type="checkbox" name="news" value="yes" class="form-control"> Želim primati obavijesti kluba na mail</p> #}
+        {# <p class="left-align"><input type="checkbox" name="vehicle1" value="Bike" class="form-control" required> Prihvačam GDPR</p> #}
+        {# {{ function('wp_nonce_field', 'vb_new_user','vb_new_user_nonce', true, true) }} #}
+        {# <input type="submit" class="btn btn-primary" id="btn-new-user" value="Registracija" /> #}
+        {# </form> #}
+
+    {# <p class="indicator">Registracija u tijeku...</p> #}
+    {# <div class="alert result-message"></div> #}
+    {# </div> #}
+{# <div class="rkg-modal rkg-lost-password"> #}
+    {# <div class="rkg-lost-password-close"></div> #}
+    {# <form id="login" action="{{ function('get_option', 'home') }}/wp-login.php" method="post"> #}
+        {# <p>Lozinka ti je ostala pod morem?</p> #}
+        {# <p><input placeholder="E-mail" type="text" name="lost-username" id="lost-username" value="" required /> </p> #}
+        {# <p><input type="submit" name="submit" value="Pošalji" class="button" /></p> #}
+        {# <p class="status"></p> #}
+
+        {# <p> #}
+            {# <input type="hidden" name="redirect_to" value="{{ post.guid }}" /> #}
+            {# </p> #}
+        {# </form> #}
+    {# </div> #}
+{# {% else %} #}
+{# {% endif %} #}
+{# <div class="rkg-modal rkg-course-signup"> #}
+    {# <div class="rkg-course-signup-close"></div> #}
+
+    {# <form class="form-horizontal course-signup-form" id="additional-details-form" role="form"> #}
+        {# {% if user.dob is empty or user.oib is empty or user.tel is empty %} #}
+        {# <p>Korak si do titule geronimovca</p> #}
+        {# <p>Trebaju nam još ove informacije od tebe</p> #}
+        {# {% else %} #}
+        {# <p>Korak si do prijave</p> #}
+        {# <p>Samo još jednom provjeri ove informacije</p> #}
+        {# {% endif %} #}
+
+        {# <p> #}
+            {# <input type="text" name="dob" id="dob" value="{{ user.dob }}" placeholder="Datum rođenja" class="form-control" onfocus="(this.type='date')" required /> #}
+            {# </p> #}
+        {# <p> #}
+            {# <input type="text" name="oib" id="oib" value="{{ user.oib }}" placeholder="OIB" class="form-control" required /> #}
+            {# </p> #}
+        {# <p> #}
+            {# <input type="text" name="tel" id="tel" value="{{ user.tel }}" placeholder="Broj telefona" class="form-control" required /> #}
+            {# </p> #}
+        {# <input type="hidden" name="signup-course" id="signup-course" value="" /> #}
+        {# <input type="submit" class="btn btn-primary" id="btn-additional-details" value="Prijava na tečaj" /> #}
+        {# <p class="status"></p> #}
+        {# </form> #}
+    {# </div> #}
+{# <div class="rkg-modal rkg-course-signup-ok"> #}
+    {# <div class="rkg-course-signup-ok-close"></div> #}
+    {# <div> #}
+        {# <p>Prijava uspješna!</p> #}
+        {# <p>Ne zaboravi da <span class="course-signup-name"></span> počinje <span class="course-signup-date"></span></p> #}
+        {# </div> #}
+    {# </div> #}
+{# <div class="rkg-modal rkg-course-signout"> #}
+    {# <div class="rkg-course-signout-close"></div> #}
+    {# <form class="form-horizontal course-signout-form" id="course-signout-form" role="form"> #}
+        {# <p>Ne želiš roniti s nama?</p> #}
+        {# <p>Odjavi se sa <span class="course-signout-name"></span></p> #}
+        {# <input type="hidden" name="signout-course" id="signout-course" value="" /> #}
+        {# <input type="submit" class="btn btn-primary" id="btn-signout-course" value="Odjava sa tečaja" /> #}
+        {# <p class="status"></p> #}
+        {# </form> #}
+    {# </div> #}
+{# <div class="rkg-modal rkg-excursion-signup"> #}
+    {# <div class="rkg-excursion-signup-close"></div> #}
+    {# <div> #}
+        {# <p>Prijava uspješna!</p> #}
+        {# </div> #}
+    {# <form class="form-horizontal excursion-signup-form" id="excursion-signup-form" role="form"> #}
+        {# <input type="hidden" name="signup-excursion" id="signup-excursion" value="" /> #}
+        {# <input type="submit" class="btn btn-primary" id="btn-additional-details" value="U redu" /> #}
+        {# <p class="status"></p> #}
+        {# </form> #}
+    {# </div> #}
+{# <div class="rkg-modal rkg-excursion-signup-ok"> #}
+    {# <div class="rkg-excursion-signup-ok-close"></div> #}
+    {# <div> #}
+        {# <p>Prijava uspješna!</p> #}
+        {# <p>Ne zaboravi da se na <span class="excursion-signup-name"></span> ide <span class="course-excursion-date"></span></p> #}
+        {# </div> #}
+    {# </div> #}
+{# <div class="rkg-modal rkg-excursion-signout"> #}
+    {# <div class="rkg-excursion-signout-close"></div> #}
+    {# <form class="form-horizontal excursion-signout-form" id="excursion-signout-form" role="form"> #}
+        {# <p>Ne želiš roniti s nama?</p> #}
+        {# <p>Odjavi se sa <span class="excursion-signout-name"></span></p> #}
+        {# <input type="hidden" name="signout-excursion" id="signout-excursion" value="" /> #}
+        {# <input type="submit" class="btn btn-primary" id="btn-signout-excursion" value="Odjava sa izleta" /> #}
+        {# <p class="status"></p> #}
+        {# </form> #}
+    {# </div> #}

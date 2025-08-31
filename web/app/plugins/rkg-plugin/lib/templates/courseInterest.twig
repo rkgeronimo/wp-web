@@ -1,0 +1,27 @@
+{% block content %}
+    <div class="wrap">
+        <h1 id="add-new-inventory" class="wp-heading-inline">Zainteresirani za tečajeve</h1>
+        <table class="wp-list-table widefat fixed striped interests" cellspacing="0">
+            <thead>
+                <tr>
+                    <th scope="col" id="type" class="manage-column column-type sortable column-primary">
+                        Korisnik
+                    </th>
+                    <th scope="col" id="email" class="manage-column column-email">Email</th>
+                    <th scope="col" id="course" class="manage-column column-course">Tečaj</th>
+                    <th scope="col" id="date" class="manage-column column-date">Datum upisa</th>
+            </thead>
+
+            <tbody id="the-list" data-wp-lists="list:interest">
+                {% for item in data %}
+                <tr id="item_{{ data.id }}">
+                    <td class="user column-user" data-colname="Korisnik">{{ item.display_name }}</td>
+                    <td class="user column-email" data-colname="Email">{{ item.user_email }}</td>
+                    <td class="size column-size" data-colname="Tečaj">{{ item.course_name }}</td>
+                    <td class="date column-date" data-colname="Datum upisa">{{ item.created|date('d.m.Y.') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+{% endblock %}
