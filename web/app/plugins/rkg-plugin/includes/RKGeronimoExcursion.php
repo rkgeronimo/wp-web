@@ -271,8 +271,9 @@ class RKGeronimoExcursion
                 // set author, in case admin has put organizer as someone else
                 $author = isset($this->post['post_author_override']) ? $this->post['post_author_override'] : $this->post['post_author'];
                 $sql = $this->wpdb->prepare(
-                    "INSERT INTO $tableName (post_id, user_id) ".
-                    "VALUES (%s, %s) ",
+                    // since this does not check if the author is already added
+                    // IGNORE will prevent duplicate error on update of excursion
+                    "INSERT IGNORE INTO $tableName (post_id, user_id) VALUES (%s, %s) ",
                     $this->post['post_ID'],
                     $author
                 );

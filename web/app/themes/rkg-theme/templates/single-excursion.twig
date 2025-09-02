@@ -60,37 +60,21 @@
                                     data-name="{{ post.title }}"
                                     data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
                         {% endif %}
-                    {% elseif replacements|length > 0 %}
+                    {% else %}
                         {% set freeSpots = meta.limitation - totalParticipants %}
-                        {% if user_waiting_position == 1 and freeSpots > 0 %}
+                        {% if meta.leaders > 0 and freeSpots <= meta.leaders and (user.rc in ['R3', 'R4', 'I1', 'I2', 'I3']) %}
                             <button class="excursion-signup course-signup-button"
                                     data-post="{{ post.ID }}"
                                     data-name="{{ post.title }}"
                                     data-date="{{ meta.starttime|date('j.n.Y.') }}">Prijava</button>
-                            <p><small>Na vrhu si liste interesa i ima slobodno mjesto.</small></p>
-                        {% else %}
-                            <button class="course-disabled-button">Lista interesa postoji</button>
-                            {% if user_waiting_position > 1 %}
-                                <p><small>{{ user_waiting_position }}. si na listi interesa.</small></p>
-                            {% else %}
-                                <p><small>Lista interesa nije prazna - nova prijava nije moguća. Organizator mora ručno dodati osobe sa liste interesa.</small></p>
+                            <p><small>Mjesto rezervirano za voditelje.</small></p>
+                            {% if post.ID in signups.excursions_waiting %}
+                                <span class="excursion-signout-waiting"
+                                        data-post="{{ post.ID }}"
+                                        data-name="{{ post.title }}"
+                                        data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
                             {% endif %}
-                        {% endif %}
-                        
-                        {% if post.ID in signups.excursions_waiting %}
-                            <span class="excursion-signout-waiting"
-                                    data-post="{{ post.ID }}"
-                                    data-name="{{ post.title }}"
-                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
-                        {% elseif user_waiting_position == 0 %}
-                            <span class="excursion-signup-waiting"
-                                    data-post="{{ post.ID }}"
-                                    data-name="{{ post.title }}"
-                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
-                        {% endif %}
-                    {% else %}
-                        {% set freeSpots = meta.limitation - totalParticipants %}
-                        {% if meta.leaders > 0 and freeSpots <= meta.leaders and not (user.rc in ['R3', 'R4', 'I1', 'I2', 'I3']) %}
+                        {% elseif meta.leaders > 0 and freeSpots <= meta.leaders and not (user.rc in ['R3', 'R4', 'I1', 'I2', 'I3']) %}
                             <button class="course-disabled-button">Rezervirano za voditelje</button>
                             <p><small>Sva slobodna mjesta su rezervirana za voditelje.</small></p>
                             {% if post.ID in signups.excursions_waiting %}
@@ -99,6 +83,33 @@
                                         data-name="{{ post.title }}"
                                         data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
                             {% else %}
+                                <span class="excursion-signup-waiting"
+                                        data-post="{{ post.ID }}"
+                                        data-name="{{ post.title }}"
+                                        data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
+                            {% endif %}
+                        {% elseif replacements|length > 0 %}
+                            {% if user_waiting_position == 1 and freeSpots > 0 and not (meta.leaders > 0 and freeSpots <= meta.leaders and not (user.rc in ['R3', 'R4', 'I1', 'I2', 'I3'])) %}
+                                <button class="excursion-signup course-signup-button"
+                                        data-post="{{ post.ID }}"
+                                        data-name="{{ post.title }}"
+                                        data-date="{{ meta.starttime|date('j.n.Y.') }}">Prijava</button>
+                                <p><small>Na vrhu si liste interesa i ima slobodno mjesto.</small></p>
+                            {% else %}
+                                <button class="course-disabled-button">Lista interesa postoji</button>
+                                {% if user_waiting_position > 1 %}
+                                    <p><small>{{ user_waiting_position }}. si na listi interesa.</small></p>
+                                {% else %}
+                                    <p><small>Lista interesa nije prazna - nova prijava nije moguća. Organizator mora ručno dodati osobe sa liste interesa.</small></p>
+                                {% endif %}
+                            {% endif %}
+                            
+                            {% if post.ID in signups.excursions_waiting %}
+                                <span class="excursion-signout-waiting"
+                                        data-post="{{ post.ID }}"
+                                        data-name="{{ post.title }}"
+                                        data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
+                            {% elseif user_waiting_position == 0 %}
                                 <span class="excursion-signup-waiting"
                                         data-post="{{ post.ID }}"
                                         data-name="{{ post.title }}"
