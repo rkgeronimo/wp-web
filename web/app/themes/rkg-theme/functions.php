@@ -605,3 +605,14 @@ function login_url_to_homepage($login_url, $redirect, $force_reauth) {
 
 // Disable admin notification when any user changes password
 add_filter( 'send_password_change_email', '__return_false' );
+
+add_filter('wp_nav_menu_objects', function($items, $args) {
+    if ( !is_user_logged_in() ) {
+        foreach ( $items as $key => $item ) {
+            if ( in_array('members-only', $item->classes) ) {
+                unset($items[$key]);
+            }
+        }
+    }
+    return $items;
+}, 10, 2);
