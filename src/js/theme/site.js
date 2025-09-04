@@ -17,6 +17,14 @@ jQuery(document).ready(($) => {
 
     const loginStatus = {action: 'is_user_logged_in'};
     $('.rkg-meni-open').on('click', () => {
+        if ($('.rkg-profile-meni').is(':visible')) {
+            if (($(window).width() <= 1080) && (window.devicePixelRatio > 1.5)) {
+                $('.rkg-profile-meni').css('left', '-90vw');
+            } else {
+                $('.rkg-profile-meni').hide();
+            }
+        }
+        
         $('body').addClass('modal-open');
         $('.rkg-meni-background').fadeIn(200, () => {
             $('.rkg-meni').fadeIn({queue: false, duration: 200})
