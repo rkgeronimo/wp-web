@@ -226,6 +226,49 @@ function rkg_user_excursion_signup()
 
     if ($result) {
         $wpdb->query("UPDATE $tableName SET registered = registered + 1 WHERE id = {$info['post']};");
+
+        $current_excursion = $wpdb->get_row($wpdb->prepare(
+            "SELECT starttime, endtime FROM {$wpdb->prefix}rkg_excursion_meta WHERE id = %d",
+            $info['post']
+        ));
+
+        if ($current_excursion && $current_excursion->starttime && $current_excursion->endtime) {
+            $conflicting_ids = $wpdb->get_col($wpdb->prepare("
+                SELECT DISTINCT w.post_id
+                FROM {$wpdb->prefix}rkg_excursion_waiting w
+                JOIN {$wpdb->prefix}rkg_excursion_meta em ON em.id = w.post_id
+                WHERE w.user_id = %d
+                AND w.post_id <> %d
+                AND NOT ( em.endtime < %s OR em.starttime > %s )
+            ",
+                $currentUser->ID,
+                $info['post'],
+                $current_excursion->starttime, 
+                $current_excursion->endtime
+            ));
+
+            if (!empty($conflicting_ids)) {
+                foreach ($conflicting_ids as $cid) {
+                    $cid = (int) $cid;
+
+                    $removed = $wpdb->delete(
+                        $wpdb->prefix . "rkg_excursion_waiting",
+                        ['user_id' => $currentUser->ID, 'post_id' => $cid],
+                        ['%d','%d']
+                    );
+
+                    if ($removed && $removed > 0) {
+                        $wpdb->query($wpdb->prepare(
+                            "UPDATE {$wpdb->prefix}rkg_excursion_meta
+                            SET waiting = GREATEST(waiting - 1, 0)
+                            WHERE id = %d",
+                            $cid
+                        ));
+                    }
+                }
+            }
+        }
+        
         echo json_encode(array('update'=>true, 'message'=>__('Prijava uspješna')));
         wp_die();
     } 
