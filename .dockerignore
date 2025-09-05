@@ -1,0 +1,92 @@
+# Git
+.git
+.gitignore
+README.md
+.gitattributes
+
+# Docker
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+.docker
+
+# Documentation
+*.md
+docs/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+
+# Composer
+/vendor
+
+# Application specific
+web/app/languages
+web/app/plugins/*
+!web/app/plugins/.gitkeep
+!web/app/plugins/rkg-plugin
+!web/app/plugins/rkg-gallery
+web/app/mu-plugins/*/
+web/app/themes/twentytwentytwo/
+web/app/upgrade
+web/app/uploads/*
+!web/app/uploads/.gitkeep
+web/app/cache/*
+
+# WordPress
+web/wp
+web/.htaccess
+
+# WP-CLI
+wp-cli.local.yml
+
+# Database dumps
+*.sql
+!geronimo_basic.sql
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Build artifacts
+dist/
+build/
+
+# Testing
+.phpunit.result.cache
+tests/
+phpunit.xml
+.phpunit.cache
+
+# Coverage reports
+coverage/

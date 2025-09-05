@@ -127,3 +127,15 @@ gulp.task(
         },
     ),
 );
+
+const watchOpts = { usePolling: true, interval: 500, awaitWriteFinish: { stabilityThreshold: 200 } };
+
+gulp.task('watch', (done) => {
+  gulp.watch(['src/sss/**/*.sss'], watchOpts, gulp.series('styles', 'styles-admin', 'styles-survey'));
+  gulp.watch(['src/js/theme/**/*.js', 'src/js/mixins/**/*.js'], watchOpts, gulp.series('scriptsTheme'));
+  gulp.watch(['src/js/plugin/**/*.js'], watchOpts, gulp.series('scriptsPlugin'));
+  // don't call done; keeping process alive
+});
+
+// build once, then watch
+gulp.task('dev', gulp.series('default', 'watch'));

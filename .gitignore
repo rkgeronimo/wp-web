@@ -23,6 +23,7 @@ web/.htaccess
 .env
 .env.*
 !.env.example
+!.env.docker-example.local
 
 # Composer
 /vendor
