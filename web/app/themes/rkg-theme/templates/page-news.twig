@@ -1,28 +1,30 @@
 {% extends "base.twig" %}
 
 {% block content %}
-	<div class="content-wrapper">
-		<article class="post-type-{{post.post_type}}" id="post-{{post.ID}}">
-			<section class="article-content">
-				<h1 class="article-h1">{{post.title}}</h1>
-                <div class="rkg-side">
-                    <h2 class="rkg-toggler" data-toggle="rkg-who-menu">NAVIGACIJA
-                        <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
-                    </h2>
-
-                    <div class="rkg-hidder" id="rkg-who-menu">
-                        {{ rkg_side }}
-                        <hr class="wp-block-separator only-mobile">
-                    </div>
-                </div>
-				<div class="article-body">
-                    <div class="row-container news-content-container">
+    <div class="content-wrapper">
+        <article class="post-type-{{post.post_type}}" id="post-{{post.ID}}">
+            <section class="article-content">
+                <h1 class="article-h1">{{post.title}}</h1>
+                
+                <div class="article-body news-layout">
+                    <div class="news-main-content">
+                        {% set paged = fn('get_query_var', 'paged') ?: 1 %}
+                        {% set offset = (paged - 1) * 8 %}
+                        {% set total_news = news|length %}
+                        {% set paginated_news = news|slice(offset, 8) %}
+                        
                         <div class="row">
-                            {% for new in news %}
-                                <div class="news-block">
-                                    <div class="col-3">
+                            {% for new in paginated_news %}
+                                <div class="news-block" 
+                                    data-categories="{% for category in new.categories %}{{ category.slug }}{% if not loop.last %} {% endif %}{% endfor %}"
+                                    data-category-ids="{% for category in new.categories %}{{ category.term_id }}{% if not loop.last %},{% endif %}{% endfor %}">
+                                    <div class="col-2-news">
                                         <a class="news-block-item" href="{{ new.guid }}" style="background-image: url('{{ new.get_thumbnail.src }}');">
-                                            <div class="news-block-category">{{ new.categories[0].name }}</div>
+                                            <div class="news-block-category">
+                                                {% for category in new.categories|slice(0, 3) %}
+                                                    {{ category.name }}{% if not loop.last %}, {% endif %}
+                                                {% endfor %}
+                                            </div>
                                             <h4 class="news-block-title">{{ new.post_title }}</h4>
                                             <div class="news-block-date">{{ new.post_date|date("j.n.Y H:s") }}</div>
                                         </a>
@@ -30,9 +32,106 @@
                                 </div>
                             {% endfor %}
                         </div>
+                        
+                        <!-- Pagination -->
+                        {% if total_news > 8 %}
+                            <div class="news-pagination">
+                                {% set total_pages = (total_news / 8)|round(0, 'ceil') %}
+                                
+                                {% if paged > 1 %}
+                                    <a href="{{ fn('get_pagenum_link', paged - 1) }}" class="pagination-prev">« Prethodna</a>
+                                {% endif %}
+                                
+                                {% for page in 1..total_pages %}
+                                    {% if page == paged %}
+                                        <span class="pagination-current">{{ page }}</span>
+                                    {% else %}
+                                        <a href="{{ fn('get_pagenum_link', page) }}" class="pagination-page">{{ page }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if paged < total_pages %}
+                                    <a href="{{ fn('get_pagenum_link', paged + 1) }}" class="pagination-next">Sljedeća »</a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
-				</div>
-			</section>
-		</article>
-	</div><!-- /content-wrapper -->
+                    
+                    <div class="news-sidebar">
+                        <!-- Categories Filter -->
+                        <div class="news-categories-sidebar">
+                            <h2>KATEGORIJE</h2>
+                            <ul class="menu">
+                                <li><a class="rkg-news-category active" data-category="all" href="#">SVE</a></li>
+                                
+                                {% set all_categories = [] %}
+                                {% set parent_categories = [] %}
+                                {% set child_categories = [] %}
+                                
+                                {% for new in news %}
+                                    {% for category in new.categories %}
+                                        {% if category.term_id not in all_categories %}
+                                            {% set all_categories = all_categories|merge([category.term_id]) %}
+                                            {% if category.parent == 0 %}
+                                                {% set parent_categories = parent_categories|merge([category]) %}
+                                            {% else %}
+                                                {% set child_categories = child_categories|merge([category]) %}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                                
+                                {% for parent in parent_categories %}
+                                    <li>
+                                        <a class="rkg-news-category" data-category="{{ parent.slug }}" data-category-id="{{ parent.term_id }}" href="#">{{ parent.name|upper }}</a>
+                                        
+                                        {% set has_children = false %}
+                                        {% for child in child_categories %}
+                                            {% if child.parent == parent.term_id %}
+                                                {% if not has_children %}
+                                                    <ul>
+                                                    {% set has_children = true %}
+                                                {% endif %}
+                                                <li>
+                                                    <a class="rkg-news-category" data-category="{{ child.slug }}" data-category-id="{{ child.term_id }}" data-parent-id="{{ parent.term_id }}" href="#">{{ child.name|upper }}</a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if has_children %}
+                                            </ul>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                                
+                                {% for child in child_categories %}
+                                    {% set parent_exists = false %}
+                                    {% for parent in parent_categories %}
+                                        {% if parent.term_id == child.parent %}
+                                            {% set parent_exists = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not parent_exists %}
+                                        <li>
+                                            <a class="rkg-news-category" data-category="{{ child.slug }}" data-category-id="{{ child.term_id }}" href="#">{{ child.name|upper }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <!-- Navigation -->
+                        <div class="rkg-side">
+                            <h2 class="rkg-toggler" data-toggle="rkg-who-menu">NAVIGACIJA
+                                <span><i class="fas fa-chevron-down rkg-toggler-icon"></i></span>
+                            </h2>
+                            <div class="rkg-hidder" id="rkg-who-menu">
+                                {{ rkg_side }}
+                                <hr class="wp-block-separator only-mobile">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </div><!-- /content-wrapper -->
 {% endblock %}
