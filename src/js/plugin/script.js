@@ -856,4 +856,64 @@ jQuery(document).ready(($) => {
             e.preventDefault();
         }
     });
+
+    // Course unregister functionality
+    let currentUserId = null;
+    let currentCourseId = null;
+
+    function showUnregisterDialog(userId, courseId, userName) {
+        currentUserId = userId;
+        currentCourseId = courseId;
+        $('#rkg-unregister-user-name').text(userName);
+        $('#rkg-dialog-overlay').show();
+        $('#rkg-unregister-dialog').show();
+    }
+
+    function hideUnregisterDialog() {
+        $('#rkg-dialog-overlay').hide();
+        $('#rkg-unregister-dialog').hide();
+        currentUserId = null;
+        currentCourseId = null;
+    }
+
+    // Handle unregister button clicks
+    $(document).on('click', '.rkg-unregister-btn', function () {
+        const userId = $(this).attr('data-user-id');
+        const courseId = $(this).attr('data-course-id');
+        const userName = $(this).attr('data-user-name');
+        showUnregisterDialog(userId, courseId, userName);
+    });
+
+    // Handle cancel button and overlay clicks
+    $(document).on('click', '#rkg-cancel-btn, #rkg-dialog-overlay', hideUnregisterDialog);
+
+    // Handle confirm button
+    $(document).on('click', '#rkg-confirm-btn', () => {
+        if (!currentUserId || !currentCourseId) return;
+
+        const formData = new FormData();
+        formData.append('action', 'rkg_unregister_user');
+        formData.append('user_id', currentUserId);
+        formData.append('course_id', currentCourseId);
+
+        $.ajax({
+            url: rkgScript.ajaxUrl,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            success(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(`Greška: ${response.data}`);
+                }
+            },
+            error() {
+                alert('Dogodila se greška prilikom odjave korisnika.');
+            },
+        });
+
+        hideUnregisterDialog();
+    });
 });

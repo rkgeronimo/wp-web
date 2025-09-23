@@ -83,6 +83,8 @@ class Courses implements InitInterface
         add_action('admin_menu', array($this, 'courseInterests'));
 
         add_filter('bulk_actions-edit-course', '__return_empty_array', 100);
+
+        add_action('wp_ajax_rkg_unregister_user', array($this, 'handleUnregisterUser'));
     }
 
     function my_remove_date_filter( $months ) {
@@ -1110,6 +1112,76 @@ class Courses implements InitInterface
         global $wpdb;
         $tableName = $wpdb->prefix."rkg_course_meta";
         $this->wpdb->delete($tableName, array('id' => $postId));
+    }
+
+    /**
+     * Handle AJAX request to unregister a user from a course
+     *
+     * @return void
+     */
+    public function handleUnregisterUser()
+    {
+        // Check user permissions
+        if (!current_user_can('edit_courses')) {
+            wp_die('Insufficient permissions');
+        }
+
+        // Check parameters
+        $userId = intval($_POST['user_id']);
+        $courseId = intval($_POST['course_id']);
+
+        if (!$userId || !$courseId) {
+            wp_send_json_error('Invalid user ID or course ID');
+            return;
+        }
+
+        // Check if current user is the instructor for this course
+        global $wpdb;
+        $currentUserId = get_current_user_id();
+        $tableName = $wpdb->prefix . 'rkg_course_meta';
+
+        $courseOrganiser = $wpdb->get_var($wpdb->prepare(
+            "SELECT organiser FROM $tableName WHERE id = %d",
+            $courseId
+        ));
+
+        if ($courseOrganiser != $currentUserId) {
+            wp_send_json_error('Nemaš ovlasti za odjavu, nisi instruktor ovog tečaja.');
+            return;
+        }
+
+        // Delete the user's signup record
+        global $wpdb;
+        $tableName = $wpdb->prefix . 'rkg_course_signup';
+        $result = $wpdb->delete(
+            $tableName,
+            array(
+                'user_id' => $userId,
+                'course_id' => $courseId
+            ),
+            array('%d', '%d')
+        );
+
+        if (!$result) {
+            wp_send_json_error('Error, user was not registered for this course');
+            return;
+        }
+
+        // Update the registered count in course meta
+        $metaTableName = $wpdb->prefix . 'rkg_course_meta';
+        $wpdb->query($wpdb->prepare(
+            "UPDATE $metaTableName
+             SET registered = (
+                 SELECT COUNT(*)
+                 FROM $tableName
+                 WHERE course_id = %d
+             )
+             WHERE id = %d",
+            $courseId,
+            $courseId
+        ));
+
+        wp_send_json_success('User successfully unregistered');
     }
 
 }

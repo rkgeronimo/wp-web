@@ -88,6 +88,7 @@ class CourseStatus extends WP_List_Table
             'brevet'       => 'Slika za brevet',
             'newbrevet'    => 'Novi broj breveta',
             'payed'        => 'Plaćeno',
+            'actions'      => 'Akcije',
         );
 
         $additionalColumns = array(
@@ -149,6 +150,7 @@ class CourseStatus extends WP_List_Table
             case 'height':
             case 'shoe_size':
             case 'payed':
+            case 'actions':
                 return $item[$column_name];
 
             default:
@@ -254,6 +256,15 @@ class CourseStatus extends WP_List_Table
                 $payed = $payed.' checked ';
             }
             $payed = $payed.'>';
+
+            $unregisterButton = '<button type="button" class="button button-small rkg-unregister-btn"
+                data-user-id="'.$value->user_id.'"
+                data-course-id="'.$this->post.'"
+                data-user-name="'.$user->data->display_name.'"
+                style="background-color: #dc3232; color: white; border-color: #dc3232;">
+                Odjavi
+            </button>';
+
             $data[] = array(
                 'rkg_name'           => $user->data->display_name,
                 'email'           => $user->data->user_email,
@@ -267,6 +278,7 @@ class CourseStatus extends WP_List_Table
                 'height'       => $value->height,
                 'shoe_size'    => $value->shoe_size,
                 'payed'        => $payed,
+                'actions'      => $unregisterButton,
             );
         }
 
