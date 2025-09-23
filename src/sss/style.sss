@@ -2038,9 +2038,6 @@ input.excursion-btn
     text-transform: uppercase
     font-weight: $bold
 
-.news-block
-    margin-bottom: 3vw
-
 .rkg-news-category-select
     @media (--desktop)
         display: none
@@ -2065,7 +2062,7 @@ a.rkg-news-category-link
 .rkg-category-container
     display: flex
     justify-content: space-between
-    width: 60vw !important
+    width: 50vw !important
     @media (--mobile)
         flex-direction: column
         text-align: center
@@ -2251,3 +2248,155 @@ form#responsibility-survey
 .input-error
     color: $color-title-negative
     margin: 0
+
+/* News 3-column layout */
+.news-layout
+    display: flex
+    gap: 2vw
+    margin-left: 12.5vw
+    margin-right: 5vw
+    @media (--mobile)
+        flex-direction: column
+        margin-left: 0
+        margin-right: 0
+
+.news-main-content
+    flex: 2
+    min-width: 0
+
+.news-sidebar
+    flex: 0 0 25vw
+    @media (--mobile)
+        flex: none
+        width: 100%
+
+/* News grid - 2 columns for main content */
+.col-2-news
+    width: 48%
+    margin: 0 1%
+    float: left
+    @media (--mobile)
+        width: 100%
+        margin: 0 0 5vw
+        float: none
+
+.news-main-content .row
+    @util clearfix
+    margin: 0
+
+/* Categories in sidebar - match rkg-side styling */
+.news-categories-sidebar
+    margin-bottom: 3vw
+    padding-left: 40px
+
+    h2
+        margin-bottom: 1vw
+        color: black
+        text-transform: uppercase
+        font-weight: $bold
+        font-size: 1.2rem
+    
+    ul
+        list-style: none
+        margin-top: 0
+        margin-bottom: 1vw
+        padding: 0
+        
+        li
+            display: block
+            min-height: 1.2vw
+            font-size: 1.1rem
+            
+            a.rkg-news-category
+                display: block
+                margin-bottom: 0.5vw
+                color: $color-main
+                text-decoration: none
+                text-transform: uppercase
+                font-weight: $semi-bold
+                cursor: pointer
+                
+                &:hover
+                    color: color($color-main tint(30%))
+                
+                &.active
+                    color: black
+                    font-weight: $bold
+            ul
+                list-style: none
+                padding-left: 0
+                margin: 0
+                
+                li  
+                    a.rkg-news-category
+                        padding-left: 1vw
+                        margin-bottom: 0.5vw
+                        color: $color-main
+                        text-transform: none
+                        font-weight: $semi-bold
+                        
+                        &:hover
+                            color: color($color-main tint(30%))
+                        
+                        &.active
+                            color: $color-main
+                            font-weight: $bold
+
+        @media (--mobile)
+            padding-left: 0
+            
+            li
+                margin-bottom: 2vw
+                min-height: 2.6vw
+                font-size: 14px
+
+                ul
+                    li
+                        a.rkg-news-category
+                            padding-left: 2vw
+
+    @media (--mobile)
+        padding-left: 0
+
+/* Pagination */
+.news-pagination
+    margin-top: 4vw
+    text-align: center
+    @util clearfix
+    
+    a, span
+        display: inline-block
+        padding: 1vw 1.5vw
+        margin: 0 0.5vw
+        color: $color-main
+        text-decoration: none
+        border: 1px solid color($color-main tint(50%))
+        border-radius: 0.3vw
+        
+        &:hover
+            background: $color-title
+            color: white
+            border-color: $color-title
+    
+    .pagination-current
+        background: $color-title
+        color: white
+        border-color: $color-title
+        font-weight: $bold
+    
+    @media (--mobile)
+        margin-top: 6vw
+        
+        a, span
+            padding: 2vw 3vw
+            font-size: 14px
+
+/* Sidebar adjustments for news layout */
+.news-sidebar .rkg-side
+    float: none
+    margin-right: 0
+    width: 100%
+    
+    @media (--mobile)
+        margin: 0 0 4vw
+        width: 95vw

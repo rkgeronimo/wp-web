@@ -1,5 +1,54 @@
 /* global rkgTheme Croppie */
 
+// News category filtering functionality
+function initNewsFiltering() {
+    const $categoryFilters = jQuery('.rkg-news-category');
+    const $newsBlocks = jQuery('.news-block');
+
+    if ($categoryFilters.length === 0 || $newsBlocks.length === 0) {
+        return;
+    }
+
+    const parentChildMap = {};
+    $categoryFilters.each(function() {
+        const $filter = jQuery(this);
+        const parentId = $filter.data('parent-id');
+        if (parentId) {
+            if (!parentChildMap[parentId]) {
+                parentChildMap[parentId] = [];
+            }
+            parentChildMap[parentId].push($filter.data('category-id'));
+        }
+    });
+
+    $categoryFilters.on('click', function(e) {
+        e.preventDefault();
+        const $this = jQuery(this);
+        const selectedCategoryId = $this.data('category-id');
+
+        $categoryFilters.removeClass('active');
+        $this.addClass('active');
+
+        if ($this.data('category') === 'all') {
+            $newsBlocks.show();
+            return;
+        }
+
+        const targetIds = $this.data('parent-id') === undefined 
+            ? [selectedCategoryId, ...(parentChildMap[selectedCategoryId] || [])]
+            : [selectedCategoryId];
+
+        $newsBlocks.each(function() {
+            const $block = jQuery(this);
+            const blockCategoryIds = $block.data('category-ids')?.toString().split(',') || [];
+            const hasMatch = targetIds.some(id => blockCategoryIds.includes(id.toString()));
+            
+            $block.toggle(hasMatch);
+        });
+    });
+}
+
+
 jQuery(document).ready(($) => {
     //=require ../../../node_modules/pdf417/bcmath-min.js
     //=require ../../../node_modules/pdf417/pdf417.js
@@ -308,4 +357,6 @@ jQuery(document).ready(($) => {
         $('.rkg-excursion-cal-down').show();
         $('.rkg-excursion-cal-up').hide();
     });
+
+    initNewsFiltering();    
 });
