@@ -32,6 +32,7 @@ class Inventory implements InitInterface
         add_action('wp_ajax_check_inventory', array($this, 'checkInventory'));
         add_action('wp_ajax_edit_reservation', array($this, 'editReservation'));
         add_action('wp_ajax_add_custom_reservation', array($this, 'addCustomReservation'));
+        add_action('wp_ajax_rkg_inventory_hard_delete', array($this, 'handleHardDelete'));
     }
 
     /**
@@ -437,7 +438,7 @@ class Inventory implements InitInterface
      */
     private function translateState()
     {
-        $types = array('Na stanju', 'Izdano', 'Neispravno', 'Izgubljeno', 'Otpisano');
+        $types = array('Na stanju', 'Izdano', 'Neispravno', 'Izgubljeno', 'Otpisano', 'Obrisano');
 
         return $types;
     }
@@ -521,16 +522,19 @@ class Inventory implements InitInterface
         $context['stateTranslation'] = $this->translateState();
         $context['inventoryCount']   = $wpdb->get_results(
             "SELECT COUNT(*) as num
-            FROM $tableName"
+            FROM $tableName
+            WHERE state != 5"
         );
         $context['typeCount']        = $wpdb->get_results(
             "SELECT type, COUNT(*) as num
             FROM $tableName
+            WHERE state != 5
             GROUP BY type"
         );
 
         if (isset($context['request']->get['action'])
             && !empty($context['request']->get['ids'])
+            && is_numeric($context['request']->get['action'])
             && $context['request']->get['action'] >= 0) {
             $ids = implode("', '", $context['request']->get['ids']);
             $query = "UPDATE $tableName
@@ -558,6 +562,8 @@ class Inventory implements InitInterface
         }
         if (isset($context['request']->get['state'])) {
             $wherePart[] = "state = '".$context['request']->get['state']."'";
+        } else {
+            $wherePart[] = "state != 5";
         }
         if (isset($context['request']->get['id'])) {
             $wherePart[] = "id = '".$context['request']->get['id']."'";
@@ -600,7 +606,6 @@ class Inventory implements InitInterface
     private function getAvailableInventory($type)
     {
         global $wpdb;
-
         $definitions = new Definitions();
         $equipment   = $definitions->defineEquipment();
         $tableName   = $wpdb->prefix."rkg_inventory";
@@ -608,11 +613,11 @@ class Inventory implements InitInterface
         if (isset($equipment[$type]) && !$equipment[$type]['size']) {
             return $wpdb->get_results(
                 "
-            SELECT *
-            FROM $tableName
-            WHERE type = '$type' AND STATE = 0
-            ORDER BY id
-            "
+                SELECT *
+                FROM $tableName
+                WHERE type = '$type' AND STATE = 0 AND STATE != 5
+                ORDER BY id
+                "
             );
         }
 
@@ -621,15 +626,52 @@ class Inventory implements InitInterface
             foreach ($equipment[$type]['size'] as $value) {
                 $result[$value] = $wpdb->get_results(
                     "
-                SELECT *
-                FROM $tableName
-                WHERE type = '$type' AND STATE = 0 and size = '$value'
-                ORDER BY id
-                "
+                    SELECT *
+                    FROM $tableName
+                    WHERE type = '$type' AND STATE = 0 AND STATE != 5 AND size = '$value'
+                    ORDER BY id
+                    "
                 );
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Handle AJAX request to permanently delete inventory items
+     *
+     * @return void
+     */
+    public function handleHardDelete()
+    {
+        if (!current_user_can('manage_equipment')) {
+            wp_die('Insufficient permissions');
+        }
+
+        $ids = $_POST['ids'];
+        if (empty($ids) || !is_array($ids)) {
+            wp_send_json_error('Invalid inventory IDs');
+            return;
+        }
+
+        $sanitizedIds = array_map('sanitize_text_field', $ids);
+        $sanitizedIds = array_map('intval', $sanitizedIds);
+
+        global $wpdb;
+        $tableName = $wpdb->prefix . 'rkg_inventory';
+        $placeholders = implode(',', array_fill(0, count($sanitizedIds), '%d'));
+        
+        $result = $wpdb->query($wpdb->prepare(
+            "DELETE FROM $tableName WHERE id IN ($placeholders) AND state = 5",
+            ...$sanitizedIds
+        ));
+
+        if ($result === false) {
+            wp_send_json_error('Error deleting inventory items');
+            return;
+        }
+
+        wp_send_json_success("Successfully deleted $result inventory items");
     }
 }

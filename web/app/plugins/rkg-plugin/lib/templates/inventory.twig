@@ -45,8 +45,19 @@
     </form>
     <form method="get">
         <input type="hidden" name="page" value="inventory_managment" />
-<div class="clear"></div>
-<div class="alignleft actions bulkactions">
+        <div class="clear"></div>
+        {% if request.get.state == '5' %}
+            <div class="alignleft actions bulkactions">
+                <label for="bulk-action-selector-top" class="screen-reader-text">Odaberi grupnu akciju</label>
+                <select name="action" id="bulk-action-selector-top">
+                    <option value="-1">Grupne radnje</option>
+                    <option value="0">Vrati na stanje</option>
+                    <option value="hard_delete" style="color: #dc3232;">Trajno obriši</option>
+                </select>
+                <input type="submit" id="apply-trash-actions" class="button action" value="Primijeni">
+            </div>
+        {% else %}
+            <div class="alignleft actions bulkactions">
                 <label for="bulk-action-selector-top" class="screen-reader-text">Odaberi grupnu akciju</label>
                 <select name="action" id="bulk-action-selector-top">
                     <option value="-1">Grupne radnje</option>
@@ -55,9 +66,11 @@
                     <option value="2">Neispravno</option>
                     <option value="3">Izgubljeno</option>
                     <option value="4">Otpisano</option>
+                    <option value="5">Obriši</option>
                 </select>
                 <input type="submit" id="doaction" class="button action" value="Primijeni">
             </div>
+        {% endif %}
             <br class="clear">
         <table class="wp-list-table widefat fixed striped users" cellspacing="0">
             <thead>
@@ -103,7 +116,7 @@
             <tbody id="the-list" data-wp-lists="list:item">
 
                 {% for item in inventoryItems %}
-                <tr id="item_{{ item.id }}">
+                <tr id="item_{{ item.id }}" {{ (item.state == 5) ? 'style="background-color: #ffebee;"' : '' }}>
                     <th scope="row" class="check-column"><label class="screen-reader-text" for="item_{{ item.id }}">{{ item.id }}</label><input type="checkbox" name="ids[]" id="{{ item.id }}" class="{{ stateTranslation[item.state] }}" value="{{ item.id }}"></th>
                     <td class="id column-id has-row-actions column-primary" data-colname="Id">
                         <strong>
