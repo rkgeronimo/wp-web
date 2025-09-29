@@ -916,4 +916,48 @@ jQuery(document).ready(($) => {
 
         hideUnregisterDialog();
     });
+
+    $(document).on('click', '#apply-trash-actions', function(e) {
+        var form = $(this).closest('form');
+        var select = form.find('select[name="action"]');
+        
+        if (select.val() === 'hard_delete') {
+            e.preventDefault();
+            
+            var selectedIds = [];
+            form.find('input[name="ids[]"]:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+            
+            if (selectedIds.length === 0) {
+                alert('Molimo odaberite stavke za brisanje');
+                return false;
+            }
+            
+            if (confirm('Jeste li sigurni da želite trajno obrisati odabranu opremu? Ova akcija se ne može poništiti.')) {
+                var formData = new FormData();
+                formData.append('action', 'rkg_inventory_hard_delete');
+                selectedIds.forEach(id => formData.append('ids[]', id));
+
+                $.ajax({
+                    url: rkgScript.ajaxUrl,
+                    type: 'POST',
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert('Greška: ' + response.data);
+                        }
+                    },
+                    error: function() {
+                        alert('Dogodila se greška prilikom brisanja.');
+                    }
+                });
+            }
+            return false;
+        }
+    });
 });
