@@ -9,7 +9,6 @@ A simple, WordPress-integrated database migration tool for the Geronimo project.
 - ✅ Rollback migrations to any point
 - ✅ View migration status
 - ✅ Create new migration files from CLI
-- ✅ Initial schema from `geronimo_basic.sql`
 
 ## Installation
 
@@ -81,6 +80,7 @@ CREATE TABLE wp_example (
 ```
 
 **Note:** SQL migrations cannot be rolled back automatically.
+**Note:**  Initial `.sql` file needs to be imported directly on initial setup as migrations with multi-line INSERT statements containing serialized data may not parse correctly.
 
 ### PHP Migrations
 
@@ -113,15 +113,15 @@ return [
 ];
 ```
 
-## Initial Schema
+## Initial Database Setup
 
-The initial database schema from [`geronimo_basic.sql`](../geronimo_basic.sql) has been imported as:
+⚠️ **Important:** The initial database schema from [`geronimo_basic.sql`](../geronimo_basic.sql) should be imported directly using MySQL, not through the migration system, for example:
 
+```bash
+mysql -u your_db_user -p your_db_name < geronimo_basic.sql
 ```
-database/migrations/2024_01_01_000000_initial_schema.sql
-```
 
-Run `php database/migrate.php migrate` to apply it.
+Once the initial schema is imported, you can use the migration system for all future database changes.
 
 ## Example Workflow
 
@@ -155,6 +155,8 @@ Run `php database/migrate.php migrate` to apply it.
 4. **Use descriptive names** - Make it clear what each migration does
 5. **Version control** - Commit migration files to git
 6. **Run in order** - Migrations are executed in chronological order based on timestamp
+7. **Prefer PHP migrations over SQL** - PHP migrations support rollback and are more flexible
+8. **Test before deploying** - Always test migrations on a copy of production data first
 
 ## File Structure
 
@@ -163,10 +165,23 @@ database/
 ├── MigrationManager.php          # Core migration logic
 ├── migrate.php                   # CLI tool
 ├── migrations/                   # Migration files directory
-│   ├── 2024_01_01_000000_initial_schema.sql
 │   └── 2024_10_01_120000_example_migration.php
 └── README.md                     # This file
 ```
+
+## Testing Status
+
+✅ **All features tested and working:**
+- ✅ `status` - Shows migration status with batch numbers
+- ✅ `create` - Creates new timestamped migration files
+- ✅ `migrate` - Executes pending migrations and tracks them
+- ✅ `rollback` - Rolls back last batch
+- ✅ `rollback --steps=N` - Rolls back multiple batches
+- ✅ Batch tracking in `wp_schema_migrations` table
+- ✅ PHP migrations with up/down methods
+- ✅ Table creation and deletion via migrations
+
+Tested on: 2025-10-01
 
 ## Troubleshooting
 
@@ -182,3 +197,14 @@ database/
 **WordPress not found error:**
 - Ensure you're running from the correct directory
 - Check that WordPress is installed at `web/wp/`
+
+**Database connection error:**
+- Ensure WordPress is properly installed with the initial schema
+- Import `geronimo_basic.sql` if starting fresh: `mysql -u geronimo -pgeronimo geronimo < geronimo_basic.sql`
+- Verify database credentials in `.env` file
+- Confirm database exists and is accessible
+
+**SQL parsing errors with complex INSERT statements:**
+- The migration tool uses simple semicolon-based SQL splitting
+- Complex INSERT statements with serialized data may fail
+- Solution: Import complex SQL files directly with MySQL or convert to PHP migrations
