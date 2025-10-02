@@ -22,7 +22,10 @@ To install and setup everything, run the following commands:
 3. `./node_modules/.bin/gulp` - Builds static files (js, css)
 4. `cp .env.example .env` - Create environment file and define variables (below explained)
 5. Make sure all Wordpress permissions are allright, there could be an issue with `uploads` directory. If so, run `chmod -R 755 web/app/uploads` and make sure it's owned by the right group e.g. `chown -R www-data:www-data web/app/uploads`
-6. Import app database [geronimo_basic.sql](geronimo_basic.sql) to your newly created MySQL database
+6. Import app database [geronimo_basic.sql](geronimo_basic.sql) to your newly created MySQL database:
+   ```bash
+   mysql -u your_db_user -p your_db_name < geronimo_basic.sql
+   ```
 7. Install plugin `wp-mail-smtp`, manually or using WP CLI `wp plugin install wp-mail-smtp --activate`
 8. Setup Apache virtual host `http://local.rkgeronimo` the document root on the webserver to the `web` folder: `/path/to/site/web/`
 9. Map the hostname by editing your local `/etc/hosts` file and adding entry for the domain (http://local.rkgeronimo) next to localhost.
@@ -61,6 +64,32 @@ Environment variables in the `.env` file. Wrap values that may contain non-alpha
 
 
 ## Development Docs
+
+### Database Migrations
+
+This project uses a custom database migration system for tracking and managing schema changes. See [database/README.md](database/README.md) for complete documentation.
+
+**Quick reference:**
+
+```bash
+# Check migration status
+php database/migrate.php status
+
+# Create a new migration
+php database/migrate.php create add_new_feature
+
+# Run pending migrations
+php database/migrate.php migrate
+
+# Rollback last batch
+php database/migrate.php rollback
+```
+
+**Important for contributors:**
+- Always create migrations for database schema changes
+- Never modify the database directly in development
+
+### Other Development Topics
 
 - JavaScript / CSS changes (watcher and build)
 - Plugin building
