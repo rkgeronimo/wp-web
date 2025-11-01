@@ -960,4 +960,46 @@ jQuery(document).ready(($) => {
             return false;
         }
     });
+
+    // Course reservation info updater for excursion admin
+    if ($('#excursion-course-select').length) {
+        var limitationInput = $('input[name="limitation"]');
+        var leadersInput = $('select[name="leaders"]');
+        var courseSelect = $('#excursion-course-select');
+        var infoDiv = $('#reservation-info');
+
+        function updateReservationInfo() {
+            var selectedOption = courseSelect.find('option:selected');
+            var courseId = selectedOption.val();
+            var limitation = parseInt(limitationInput.val()) || 0;
+            var leadersNeeded = parseInt(leadersInput.val()) || 0;
+            
+            if (courseId) {
+                var participantsCount = parseInt(selectedOption.data('participants')) || 0;
+                var generalSpots = limitation - participantsCount - leadersNeeded;
+                generalSpots = generalSpots < 0 ? 0 : generalSpots;
+                
+                $('#reserved-count').text(participantsCount);
+                $('#leaders-count').text(leadersNeeded);
+                $('#general-count').text(generalSpots);
+                infoDiv.show();
+            } else if (leadersNeeded > 0) {
+                var generalSpotsNoReservation = limitation - leadersNeeded;
+                generalSpotsNoReservation = generalSpotsNoReservation < 0 ? 0 : generalSpotsNoReservation;
+                
+                $('#reserved-count').text(0);
+                $('#leaders-count').text(leadersNeeded);
+                $('#general-count').text(generalSpotsNoReservation);
+                infoDiv.show();
+            } else {
+                infoDiv.hide();
+            }
+        }
+        
+        courseSelect.on('change', updateReservationInfo);
+        limitationInput.on('input', updateReservationInfo);
+        leadersInput.on('change', updateReservationInfo);
+        
+        updateReservationInfo();
+    }
 });

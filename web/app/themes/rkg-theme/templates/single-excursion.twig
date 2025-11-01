@@ -26,6 +26,26 @@
                         {% set totalParticipants = participants|length %}
                     {% endif %}
 
+                    {% set freeSpots = meta.limitation - totalParticipants %}
+
+                    {% set courseParticipantsNeeded = 0 %}
+                    {# count how many course participants have signed up and make sure there is enough spots for them #}
+                    {% if meta.course %}
+                        {% set courseSignedUp = 0 %}
+                        {% for participant in participants %}
+                            {% if participant.ID in course_participant_ids %}
+                                {% set courseSignedUp = courseSignedUp + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {% set courseParticipantsNeeded = course_participants_count - courseSignedUp %}
+                        {% set courseParticipantsNeeded = courseParticipantsNeeded < 0 ? 0 : courseParticipantsNeeded %}
+                    {% endif %}
+
+                    {% set leadersNeeded = meta.leaders %}
+
+                    {% set generalSpots = freeSpots - courseParticipantsNeeded - leadersNeeded %}
+                    {% set generalSpots = generalSpots < 0 ? 0 : generalSpots %}
+
                     {% if meta.canceled %}
                         <button class="course-disabled-button">Otkazan</button>
                     {% elseif meta.endtime < now|date('Y-m-d') %}
@@ -41,13 +61,13 @@
                                     data-post="{{ post.ID }}"
                                     data-name="{{ post.title }}"
                                     data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
-                        {% elseif meta.limitation <= totalParticipants %}
+                        {% elseif freeSpots <= 0 %}
                             <span class="excursion-signup-waiting"
                                     data-post="{{ post.ID }}"
                                     data-name="{{ post.title }}"
                                     data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
                         {% endif %}
-                    {% elseif meta.limitation <= totalParticipants %}
+                    {% elseif freeSpots <= 0 %}
                         <button class="course-disabled-button">Popunjen</button>
                         {% if post.ID in signups.excursions_waiting %}
                             <span class="excursion-signout-waiting"
@@ -61,8 +81,24 @@
                                     data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
                         {% endif %}
                     {% else %}
-                        {% set freeSpots = meta.limitation - totalParticipants %}
-                        {% if meta.leaders > 0 and freeSpots <= meta.leaders and (user.rc in ['R3', 'R4', 'I1', 'I2', 'I3']) %}
+                        {# Priority 1: Course participants can always sign up if free spots exist #}
+                        {% if user_in_reserved_course and freeSpots > 0 %}
+                            <button class="excursion-signup course-signup-button"
+                                    data-post="{{ post.ID }}"
+                                    data-name="{{ post.title }}"
+                                    data-date="{{ meta.starttime|date('j.n.Y.') }}">Prijava</button>
+                            {% if courseParticipantsNeeded > 0 %}
+                                <p><small>Mjesto rezervirano za tečajce.</small></p>
+                            {% endif %}
+                            {% if post.ID in signups.excursions_waiting %}
+                                <span class="excursion-signout-waiting"
+                                        data-post="{{ post.ID }}"
+                                        data-name="{{ post.title }}"
+                                        data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
+                            {% endif %}
+                        
+                        {# Priority 2: Leaders can sign up if leader spots remain #}
+                        {% elseif (user.rc in ['R3', 'R4', 'I1', 'I2', 'I3']) and leadersNeeded > 0 %}
                             <button class="excursion-signup course-signup-button"
                                     data-post="{{ post.ID }}"
                                     data-name="{{ post.title }}"
@@ -74,9 +110,11 @@
                                         data-name="{{ post.title }}"
                                         data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
                             {% endif %}
-                        {% elseif meta.leaders > 0 and freeSpots <= meta.leaders and not (user.rc in ['R3', 'R4', 'I1', 'I2', 'I3']) %}
+                        
+                        {# Priority 3: Block non-leaders if only leader spots remain #}
+                        {% elseif not (user.rc in ['R3', 'R4', 'I1', 'I2', 'I3']) and leadersNeeded > 0 and generalSpots <= 0 %}
                             <button class="course-disabled-button">Rezervirano za voditelje</button>
-                            <p><small>Sva slobodna mjesta su rezervirana za voditelje.</small></p>
+                            <p><small>Preostala mjesta rezervirana za voditelje.</small></p>
                             {% if post.ID in signups.excursions_waiting %}
                                 <span class="excursion-signout-waiting"
                                         data-post="{{ post.ID }}"
@@ -88,34 +126,55 @@
                                         data-name="{{ post.title }}"
                                         data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
                             {% endif %}
+                        
+                        {# Priority 4: Block non-course members if only course spots remain #}
+                        {% elseif not user_in_reserved_course and courseParticipantsNeeded > 0 and generalSpots <= 0 %}
+                            <button class="course-disabled-button">Rezervirano</button>
+                            <p><small>Preostala mjesta rezervirana za tečajce: {{ reserved_course.category }} ({{ reserved_course.starttime|date('j.m.Y') }} - {{ reserved_course.endtime|date('j.m.Y') }})</small></p>
+                            {% if post.ID in signups.excursions_waiting %}
+                                <span class="excursion-signout-waiting"
+                                        data-post="{{ post.ID }}"
+                                        data-name="{{ post.title }}"
+                                        data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
+                            {% else %}
+                                <span class="excursion-signup-waiting"
+                                        data-post="{{ post.ID }}"
+                                        data-name="{{ post.title }}"
+                                        data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
+                            {% endif %}
+                        
+                        {# Priority 5: Waiting list blocks general members #}
                         {% elseif replacements|length > 0 %}
-                            {% if user_waiting_position == 1 and freeSpots > 0 and not (meta.leaders > 0 and freeSpots <= meta.leaders and not (user.rc in ['R3', 'R4', 'I1', 'I2', 'I3'])) %}
+                            {% if user_waiting_position == 1 and generalSpots > 0 %}
                                 <button class="excursion-signup course-signup-button"
                                         data-post="{{ post.ID }}"
                                         data-name="{{ post.title }}"
                                         data-date="{{ meta.starttime|date('j.n.Y.') }}">Prijava</button>
                                 <p><small>Na vrhu si liste interesa i ima slobodno mjesto.</small></p>
-                            {% else %}
+                            {% elseif generalSpots > 0 %}
                                 <button class="course-disabled-button">Lista interesa postoji</button>
                                 {% if user_waiting_position > 1 %}
                                     <p><small>{{ user_waiting_position }}. si na listi interesa.</small></p>
                                 {% else %}
-                                    <p><small>Lista interesa nije prazna - nova prijava nije moguća. Organizator mora ručno dodati osobe sa liste interesa.</small></p>
+                                    <p><small>Lista interesa nije prazna - nova prijava nije moguća.</small></p>
                                 {% endif %}
+                            {% else %}
+                                <button class="course-disabled-button">Popunjen</button>
                             {% endif %}
-                            
                             {% if post.ID in signups.excursions_waiting %}
                                 <span class="excursion-signout-waiting"
                                         data-post="{{ post.ID }}"
                                         data-name="{{ post.title }}"
                                         data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
-                            {% elseif user_waiting_position == 0 %}
+                            {% elseif user_waiting_position == 0 and generalSpots > 0 %}
                                 <span class="excursion-signup-waiting"
                                         data-post="{{ post.ID }}"
                                         data-name="{{ post.title }}"
                                         data-date="{{ meta.starttime|date('j.n.Y.') }}">Zabilježi se na listu interesa</span>
                             {% endif %}
-                        {% else %}
+                        
+                        {# Priority 6: Normal signup - general spots available, no waiting list #}
+                        {% elseif generalSpots > 0 %}
                             <button class="excursion-signup course-signup-button"
                                     data-post="{{ post.ID }}"
                                     data-name="{{ post.title }}"
@@ -126,6 +185,10 @@
                                         data-name="{{ post.title }}"
                                         data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
                             {% endif %}
+                        
+                        {# Fallback #}
+                        {% else %}
+                            <button class="course-disabled-button">Popunjen</button>
                         {% endif %}
                     {% endif %}
                         <p>

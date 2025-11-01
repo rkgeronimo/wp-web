@@ -18,12 +18,68 @@ $context['post'] = $post;
 $tableName       = $wpdb->prefix."rkg_excursion_meta";
 $context['meta'] = $wpdb->get_row(
     "SELECT id, leaders, latitude, longitude, canceled, guests_limit"
-    .", price, limitation, registered, starttime, endtime, deadline FROM "
+    .", price, limitation, registered, starttime, endtime, deadline, course FROM "
     .$tableName
     ." WHERE id="
     .$post->ID
 );
 
+if (!empty($context['meta']->course)) {
+    $user_id = $context['user']->id;
+    $course_signup_table = $wpdb->prefix . "rkg_course_signup";
+    $course_meta_table = $wpdb->prefix . "rkg_course_meta";
+    
+    // Check if user is in course OR is the assistant
+    $user_in_course = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $course_signup_table WHERE user_id = %d AND course_id = %d",
+        $user_id,
+        $context['meta']->course
+    ));
+    
+    $is_assistant = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $course_meta_table WHERE id = %d AND assistant = %d",
+        $context['meta']->course,
+        $user_id
+    ));
+    
+    $context['user_in_reserved_course'] = ($user_in_course > 0 || $is_assistant > 0);
+    
+    // get total number of people in the reserved course
+    $course_participants_count = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $course_signup_table WHERE course_id = %d",
+        $context['meta']->course
+    ));
+    
+    // add 1 for assistant if they exist
+    $assistant_exists = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $course_meta_table WHERE id = %d AND assistant IS NOT NULL AND assistant != 0",
+        $context['meta']->course
+    ));
+
+    // Get list of course participant IDs for template
+    $context['course_participant_ids'] = $wpdb->get_col($wpdb->prepare(
+        "SELECT user_id FROM $course_signup_table WHERE course_id = %d",
+        $context['meta']->course
+    ));
+    
+    $context['course_participants_count'] = $course_participants_count + $assistant_exists;
+    
+    $course_template_table = $wpdb->prefix . "rkg_course_template";
+    $posts_table = $wpdb->prefix . "posts";
+    
+    $context['reserved_course'] = $wpdb->get_row($wpdb->prepare(
+        "SELECT p.post_title, rcm.starttime, rcm.endtime, rct.category 
+         FROM $course_meta_table AS rcm 
+         INNER JOIN $course_template_table AS rct ON rcm.category = rct.id 
+         INNER JOIN $posts_table AS p ON rcm.id = p.id 
+         WHERE rcm.id = %d",
+        $context['meta']->course
+    ));
+} else {
+    $context['user_in_reserved_course'] = false;
+    $context['reserved_course'] = null;
+    $context['course_participants_count'] = 0;
+}
 
 $join = $wpdb->prefix."posts";
 $same = $wpdb->get_col(
@@ -97,7 +153,18 @@ foreach ($participants as $value) {
 
     // Check if still needs reserved spots for leaders (dive masters)
     if ($context['meta']->leaders != '0') {
-        if (in_array($user->rc, array('R3', 'R4', 'I1', 'I2', 'I3'))) {
+        $is_course_assistant = false;
+        // course assisant should not count in leaders needed - he is reserved for the course participants
+        // since assistant is usually not used it will not really have implication to counts
+        if (!empty($context['meta']->course)) {
+            $course_assistant_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT assistant FROM {$wpdb->prefix}rkg_course_meta WHERE id = %d",
+                $context['meta']->course
+            ));
+            $is_course_assistant = ($user->ID == $course_assistant_id);
+        }
+        
+        if (in_array($user->rc, array('R3', 'R4', 'I1', 'I2', 'I3')) && !$is_course_assistant) {
             $context['meta']->leaders -= 1;
         }
     }

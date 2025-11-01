@@ -88,11 +88,11 @@ class Courses implements InitInterface
     }
 
     function my_remove_date_filter( $months ) {
-        global $typenow; // use this to restrict it to a particular post type
+        global $typenow;
         if ( $typenow == 'course' ) {
-            return null; // return an empty array
+            return array();
         }
-        return $months; // otherwise return the original for other post types
+        return $months;
     }
 
     /**
@@ -138,15 +138,8 @@ class Courses implements InitInterface
 
         $tableName      = $wpdb->prefix."rkg_course_meta";
         if ($context['request']->post) {
-            // TODO: Remove locked & completed
-            $locked = 0;
-            if ($context['request']->post['locked']) {
-                $locked = 1;
-            }
-            $completed = 0;
-            if ($context['request']->post['completed']) {
-                $completed = 1;
-            }
+            $locked = !empty($context['request']->post['locked']) ? 1 : 0;
+            $completed = !empty($context['request']->post['completed']) ? 1 : 0;
             $wpdb->update(
                 $tableName,
                 array(
