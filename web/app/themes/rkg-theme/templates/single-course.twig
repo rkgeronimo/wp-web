@@ -74,6 +74,7 @@
                                 data-course="{{ post.ID }}"
                                 data-link="{{ post.link }}"
                                 data-name="{{ post.title }}"
+                                data-category="{{ meta.category }}"
                                 data-date="{{ meta.starttime|date('j.n.Y.') }}">Prijava</button>
                     {% endif %}
                     {% if post.ID in signups.courses %}

@@ -97,6 +97,7 @@ function rkg_user_additional_details()
     $info['weight']    = $_POST['weight'];
     $info['height']    = $_POST['height'];
     $info['shoe_size']    = $_POST['shoe_size'];
+    $info['shirt_size']    = $_POST['shirt_size'];
 
     $currentUser = wp_get_current_user();
     update_user_meta(
@@ -130,6 +131,7 @@ function rkg_user_additional_details()
             'weight' => $info['weight'],
             'height' => $info['height'],
             'shoe_size' => $info['shoe_size'],
+            'shirt_size' => $info['shirt_size'],
             'created'   => date("Y-m-d H:i:s"),
         )
     );

@@ -208,12 +208,23 @@ $('.course-signup').on('click', (e) => {
     signup = 'course';
     const signupId = $(e.currentTarget).data('course');
     const signupName = $(e.currentTarget).data('name');
-    if (signupName.toUpperCase().indexOf('R1') === -1) {
+    const signupCategory = $(e.currentTarget).data('category');
+
+    // Category 1 is R1 course - show additional fields
+    if (signupCategory === 1) {
+        $('.additional-r1-info').show();
+        $('input[name="height"]').attr('required', 'required');
+        $('input[name="weight"]').attr('required', 'required');
+        $('input[name="shoe_size"]').attr('required', 'required');
+        $('input[name="shirt_size"]').attr('required', 'required');
+    } else {
         $('.additional-r1-info').hide();
         $('input[name="height"]').removeAttr('required');
         $('input[name="weight"]').removeAttr('required');
         $('input[name="shoe_size"]').removeAttr('required');
+        $('input[name="shirt_size"]').removeAttr('required');
     }
+
     const signupDate = $(e.currentTarget).data('date');
     const link = $(e.currentTarget).data('link');
     $('input[name="signup-course"]').val(signupId);
@@ -333,6 +344,7 @@ $('form#additional-details-form').on('submit', (e) => {
             height: $('form#additional-details-form #height').val(),
             weight: $('form#additional-details-form #weight').val(),
             shoe_size: $('form#additional-details-form #shoe_size').val(),
+            shirt_size: $('form#additional-details-form #shirt_size').val(),
             course: $('form#additional-details-form #signup-course').val(),
         },
         success: (data) => {
