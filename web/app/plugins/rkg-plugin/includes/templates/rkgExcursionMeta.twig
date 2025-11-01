@@ -14,14 +14,16 @@
                 <th><label for="deadline">Zadnji dan prijave</label></th>
                 <td><input type="date" name="deadline" value="{{ meta.deadline }}" class="regular-text"></td>
             </tr>
-            {# {% if user.can('edit_excursion') and (courses is not empty) %}
+            {% if user.can('edit_excursion') and (courses is not empty) %}
             <tr>
                 <th><label for="students">Rezervirano za tečajce sa:</label></th>
                 <td>
-                    <select name="excursion-course">
-                            <option value=""></option>
+                    <select name="excursion-course" id="excursion-course-select">
+                        <option value="">Nema rezervacije</option>
                         {% for course in courses %}
-                            <option value="{{ course.d }}" {% if meta.course == course %} selected{% endif %}>
+                            <option value="{{ course.id }}" 
+                                    data-participants="{{ course.participants_count }}"
+                                    {% if meta.course|number_format == course.id|number_format %} selected{% endif %}>
                             {{ course.category }}; {{ course.starttime|date('j.m.Y') }} - {{ course.endtime|date('j.m.Y') }}
                             </option>
                         {% endfor %}
@@ -29,7 +31,7 @@
                 </td>
             </tr>
             {% endif %}
-            <tr> #}
+            <tr>
                 <th><label for="limitation">Planirano osoba</label></th>
                 <td><input type="number" name="limitation" value="{{ meta.limitation }}" class="regular-text"></td>
             </tr>
@@ -41,6 +43,16 @@
                             <option value="{{ i }}" {{ meta.leaders == i ? 'selected' }}>{{ i }}</option>
                         {% endfor %}
                     </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div id="reservation-info" style="margin-top: 10px; padding: 10px; background: #f0f0f1; border-left: 4px solid #2271b1; display: none;">
+                        <strong>Rezervacija mjesta:</strong><br>
+                        <span id="reserved-count">0</span> mjesta za tečajce<br> {#(uključujući assistenta)#}
+                        <span id="leaders-count">0</span> mjesta za voditelje<br>  {#(ne uključujući assistenta)#}
+                        <span id="general-count">0</span> mjesta dostupno svima
+                    </div>
                 </td>
             </tr>
             {# <tr>

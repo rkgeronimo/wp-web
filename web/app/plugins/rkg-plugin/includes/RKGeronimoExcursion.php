@@ -112,7 +112,7 @@ class RKGeronimoExcursion
             $tableName       = $this->wpdb->prefix . "rkg_excursion_meta";
             $context['meta'] = $this->wpdb->get_row("SELECT id, leaders, log, ".
                 "price, latitude, longitude, limitation, guests, guests_limit, canceled, starttime, "
-                ."endtime, deadline FROM "
+                ."endtime, deadline, course FROM "
                 .$tableName
                 ." WHERE id="
                 .$post->ID);
@@ -125,16 +125,44 @@ class RKGeronimoExcursion
             $tableName          = $wpdb->prefix."rkg_course_meta";
             $firstJoin          = $wpdb->prefix."rkg_course_template";
             $secondJoin         = $wpdb->prefix."posts";
-            $context['courses'] = $wpdb->get_results("SELECT rcm.id, rcm.category AS cat, "
+
+            $whereClause = "WHERE rcm.endtime > '".date("Y-m-d")."' ";
+            if (!current_user_can('edit_others_courses')) {
+                $whereClause .= "AND rcm.organiser = ".$user->ID." ";
+            }
+            
+            $query = "SELECT rcm.id, rcm.category AS cat, "
                 ."rct.category, rcm.starttime, rcm.endtime, rcm.deadline, rct.name, rct.priority, "
                 ."p.post_title, p.post_content FROM ".$tableName." AS rcm "
                 ."INNER JOIN ".$firstJoin." AS rct ON rcm.category = rct.id "
                 ."INNER JOIN ".$secondJoin." AS p ON rcm.id = p.id "
-                ."WHERE rcm.endtime > ".date("Y-m-d")." AND p.post_author = "
-                .$user->ID
-                ." AND p.post_status='publish'"
-                ." ORDER BY rct.priority, rcm.category, rcm.starttime");
+                .$whereClause
+                ."AND p.post_status='publish'"
+                ." ORDER BY rct.priority, rcm.category, rcm.starttime";
+            
+            $context['courses'] = $wpdb->get_results($query);
+
+            // TO-DO: it is only one course always?
+            foreach ($context['courses'] as $key => $course) {
+                $course_signup_table = $wpdb->prefix . "rkg_course_signup";
+                $course_meta_table = $wpdb->prefix . "rkg_course_meta";
+                
+                // count course participants
+                $participants_count = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM $course_signup_table WHERE course_id = %d",
+                    $course->id
+                ));
+                
+                // add assistant if exists
+                $assistant_exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM $course_meta_table WHERE id = %d AND assistant IS NOT NULL AND assistant != 0",
+                    $course->id
+                ));
+                
+                $context['courses'][$key]->participants_count = $participants_count + $assistant_exists;
+            }
         }
+
         $context['applicants'] = get_users(array(
             'fields' => 'all_with_meta',
             'meta_key' => "application-".$post->ID,
@@ -225,14 +253,15 @@ class RKGeronimoExcursion
                 }
             }
 
+            $course = !empty($this->post['excursion-course']) ? $this->post['excursion-course'] : null;
+
             $sql = $this->wpdb->prepare(
                 "INSERT INTO $tableName (id, leaders, log, limitation, registered, guests, guests_limit, ".
-                "price, latitude, longitude, canceled, starttime, endtime, ".
-                "deadline) ".
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ".
+                "price, latitude, longitude, canceled, starttime, endtime, deadline, course) ".
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ".
                 "ON DUPLICATE KEY UPDATE leaders = %s, log = %s, limitation = %s, registered = %s, ".
                 "guests = %s, guests_limit = %s, price = %s, latitude = %s, longitude = %s, ".
-                "canceled = %s, starttime = %s, endtime = %s, deadline = %s",
+                "canceled = %s, starttime = %s, endtime = %s, deadline = %s, course = %s",
                 $this->post['post_ID'],
                 $this->post['leaders'],
                 $log,
@@ -247,6 +276,7 @@ class RKGeronimoExcursion
                 $this->post['starttime'],
                 $this->post['endtime'],
                 $this->post['deadline'],
+                $course,
                 $this->post['leaders'],
                 $log,
                 $this->post['limitation'],
@@ -259,7 +289,8 @@ class RKGeronimoExcursion
                 $canceled,
                 $this->post['starttime'],
                 $this->post['endtime'],
-                $this->post['deadline']
+                $this->post['deadline'],
+                $course
             );
             $result = $this->wpdb->query($sql);
 
