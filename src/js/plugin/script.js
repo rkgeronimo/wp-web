@@ -768,6 +768,53 @@ jQuery(document).ready(($) => {
         });
     });
 
+    // Deleting equipment reservations (soft delete)
+    $(document).on('click', '.reservation-delete', (e) => {
+        e.preventDefault();
+
+        // Get the button element (could be the button itself or clicked on the span inside)
+        const button = $(e.target).closest('.reservation-delete');
+        const reservationId = button.attr('data-id');
+
+        // Show confirmation dialog
+        const confirmMessage = 'Jeste li sigurni da želite obrisati ovu rezervaciju?\n\n' +
+            'Sva oprema koja je trenutno izdana bit će vraćena u dostupno stanje.\n' +
+            'Izgubljena oprema će ostati označena kao izgubljena.\n\n' +
+            'Ova akcija se ne može poništiti. Potrebno je dodati novu rezervaciju.';
+
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+
+        button.prop('disabled', true);
+
+        const data = new FormData();
+        data.append('reservation_id', reservationId);
+        data.append('action', 'delete_reservation');
+
+        jQuery.ajax({
+            url: rkgScript.ajaxUrl,
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            data,
+            success: (response) => {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('Greška: ' + (response.data.message || 'Nepoznata greška'));
+                    button.prop('disabled', false);
+                }
+            },
+            error(response) {
+                alert('Došlo je do greške prilikom brisanja rezervacije.');
+                console.error(response);
+                button.prop('disabled', false);
+            }
+        });
+    });
+
     $('#custom-new-reservation').on('submit', (e) => {
         e.preventDefault();
 

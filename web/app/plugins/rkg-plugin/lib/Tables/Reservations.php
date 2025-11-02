@@ -79,6 +79,7 @@ class Reservations extends WP_List_Table
         $columns         = array(
             'rkg_name'       => 'Korisnik',
             'excursion'      => 'Izlet',
+            'status'         => 'Status',
             'user_id' => 'user_id'
         );
 
@@ -142,16 +143,30 @@ class Reservations extends WP_List_Table
         global $wpdb;
         $tableName    = $wpdb->prefix."rkg_excursion_gear";
 
+        // status filter (default: exclude deleted)
+        $statusFilter = "r.state != " . Definitions::RESERVATION_STATUS_DELETED;
+        if (isset($_REQUEST['status'])) {
+            if ($_REQUEST['status'] === 'all') {
+                $statusFilter = "1=1"; // Show all
+            } elseif ($_REQUEST['status'] === 'deleted') {
+                $statusFilter = "r.state = " . Definitions::RESERVATION_STATUS_DELETED;
+            } else {
+                $statusFilter = "r.state = " . intval($_REQUEST['status']);
+            }
+        }
+
         $search = ( isset( $_REQUEST['s'] ) ) ? sanitize_text_field($_REQUEST['s']) : false;
         if ($search) {
             return $wpdb->get_results(
                 "
-                SELECT *
+                SELECT r.*
                 FROM $tableName AS r
                 JOIN wp_users AS u ON r.user_id = u.ID
-                WHERE '".$search."' = r.mask OR '".$search."' = r.regulator OR '".$search."' = r.suit
-                OR '".$search."' = r.gloves OR '".$search."' = r.fins OR '".$search."' = r.bcd OR '".$search."' = r.lead
-                OR u.display_name LIKE '%".$search."%'
+                WHERE (".$statusFilter.") AND (
+                    '".$search."' = r.mask OR '".$search."' = r.regulator OR '".$search."' = r.suit
+                    OR '".$search."' = r.gloves OR '".$search."' = r.fins OR '".$search."' = r.bcd OR '".$search."' = r.lead
+                    OR u.display_name LIKE '%".$search."%'
+                )
                 ORDER BY r.id desc
                 "
             );
@@ -159,7 +174,8 @@ class Reservations extends WP_List_Table
             return $wpdb->get_results(
                 "
                 SELECT *
-                FROM $tableName
+                FROM $tableName AS r
+                WHERE ".$statusFilter."
                 ORDER BY id desc
                 "
             );
@@ -182,9 +198,15 @@ class Reservations extends WP_List_Table
             $user      = new Timber\User($value->user_id);
             $excursion = new Timber\Post($value->post_id);
 
+            // Get status label
+            $definitions = new Definitions();
+            $statusLabels = $definitions->getReservationStatusLabels();
+            $statusLabel = isset($statusLabels[$value->state]) ? $statusLabels[$value->state] : 'Nepoznato';
+
             $dataSingle =  array(
                 'rkg_name'       => $user->display_name,
                 'excursion'      => $excursion->post_title,
+                'status'         => $statusLabel,
             );
             $dataSingle['user_id'] = $value->user_id;
 
@@ -212,8 +234,21 @@ class Reservations extends WP_List_Table
                 $dataSingle[$keyItem] = Timber::compile($templates, $item);
             }
             $dataSingle['comment'] = $value->other;
-            $dataSingle['actions'] = '<button class="button button-primary reservation-save" data-id="'.$value->id.'">Spremi</button>';
 
+            // actions buttons
+            if ($value->state == Definitions::RESERVATION_STATUS_DELETED) {
+                // For deleted reservations, show deletion timestamp instead of actions
+                $deletedAt = !empty($value->deleted_at) ? date('d.m.Y H:i', strtotime($value->deleted_at)) : '-';
+                $actions = '<span style="color: #999; font-style: italic;">Obrisano: ' . $deletedAt . '</span>';
+            } else {
+                // For active reservations, show Save and Delete buttons
+                $actions = '<div style="display: flex; align-items: center; gap: 8px;">';
+                $actions .= '<button class="button button-primary reservation-save" data-id="'.$value->id.'">Spremi</button>';
+                $actions .= '<button class="button button-link-delete reservation-delete" data-id="'.$value->id.'" title="Obriši rezervaciju" style="color: #b32d2e; padding: 3px 8px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; line-height: 1;"><span class="dashicons dashicons-trash" style="font-size: 18px; width: 18px; height: 18px;"></span></button>';
+                $actions .= '</div>';
+            }
+
+            $dataSingle['actions'] = $actions;
 
             $data[] = $dataSingle;
         }
