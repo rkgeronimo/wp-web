@@ -127,6 +127,9 @@ class RKGeronimoExcursion
             $secondJoin         = $wpdb->prefix."posts";
 
             $whereClause = "WHERE rcm.endtime > '".date("Y-m-d")."' ";
+            
+            // Allow admins to see all courses
+            // regular users only see their own courses
             if (!current_user_can('edit_others_courses')) {
                 $whereClause .= "AND rcm.organiser = ".$user->ID." ";
             }
@@ -142,7 +145,6 @@ class RKGeronimoExcursion
             
             $context['courses'] = $wpdb->get_results($query);
 
-            // TO-DO: it is only one course always?
             foreach ($context['courses'] as $key => $course) {
                 $course_signup_table = $wpdb->prefix . "rkg_course_signup";
                 $course_meta_table = $wpdb->prefix . "rkg_course_meta";
