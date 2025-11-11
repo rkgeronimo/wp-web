@@ -239,16 +239,11 @@ class Reservations extends WP_List_Table
             if ($value->state == Definitions::RESERVATION_STATUS_DELETED) {
                 // For deleted reservations, show deletion timestamp instead of actions
                 $deletedAt = !empty($value->deleted_at) ? date('d.m.Y H:i', strtotime($value->deleted_at)) : '-';
-                $actions = '<span style="color: #999; font-style: italic;">Obrisano: ' . $deletedAt . '</span>';
+                $dataSingle['actions'] = '<span style="color: #999; font-style: italic;">Obrisano: ' . $deletedAt . '</span>';
             } else {
                 // For active reservations, show Save and Delete buttons
-                $actions = '<div style="display: flex; align-items: center; gap: 8px;">';
-                $actions .= '<button class="button button-primary reservation-save" data-id="'.$value->id.'">Spremi</button>';
-                $actions .= '<button class="button button-link-delete reservation-delete" data-id="'.$value->id.'" title="Obriši rezervaciju" style="color: #b32d2e; padding: 3px 8px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: none; background: none; cursor: pointer; line-height: 1;"><span class="dashicons dashicons-trash" style="font-size: 18px; width: 18px; height: 18px;"></span></button>';
-                $actions .= '</div>';
+                $dataSingle['actions'] = '<button class="button button-primary reservation-save" data-id="'.$value->id.'">Spremi</button><br><button class="button reservation-delete" data-id="'.$value->id.'" style="color: #b32d2e; margin-top: 4px;">Obriši</button>';
             }
-
-            $dataSingle['actions'] = $actions;
 
             $data[] = $dataSingle;
         }
