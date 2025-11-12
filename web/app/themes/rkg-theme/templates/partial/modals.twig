@@ -48,47 +48,51 @@
                 </p>
             </form>
         {% endif %}
-        <form class="form-horizontal course-signup-form" id="additional-details-form" role="form">
-            {% if user.dob is empty or user.pob is empty or user.oib is empty or user.tel is empty %}
-                <p>Na korak si da postaneš dio tečaja!</p>
-                <p>Trebaju nam još ove informacije od tebe</p>
-            {% else %}
-                <p>Korak si do prijave</p>
-                <p>Samo još jednom provjeri ove informacije</p>
-            {% endif %}
-            <p>
-                <input type="text" name="dob" id="dob" placeholder="Datum rođenja (dd.mm.gggg)"
-                pattern="(0[1-9]|1[0-9]|2[0-9]|3[01]).(0[1-9]|1[012]).[0-9]{4}"
-                title="Promijeniti u ispravan format npr. 03.12.1990"
-                value="{{ user.dob ? user.dob|date("d.m.Y") }}" required/>
-            </p>
-            <p>
-                <input type="text" name="pob" id="pob" value="{{ user.pob }}" placeholder="Mjesto rođenja" class="form-control" required minlength="2" />
-            </p>
-            <p>
-                <input type="text" name="oib" id="oib" value="{{ user.oib }}" placeholder="OIB" class="form-control" required minlength="11" minlength="11" pattern="[0-9]+" />
-            </p>
-            <p>
-                <input type="text" name="tel" id="tel" value="{{ user.tel }}" placeholder="Broj mobitela" class="form-control" required />
-            </p>
+        <form class="form-horizontal has-sticky-footer course-signup-form" id="additional-details-form" role="form">
+            <div class="form-scroll-content">
+                {% if user.dob is empty or user.pob is empty or user.oib is empty or user.tel is empty %}
+                    <p>Na korak si da postaneš dio tečaja!</p>
+                    <p>Trebaju nam još ove informacije od tebe</p>
+                {% else %}
+                    <p>Korak si do prijave</p>
+                    <p>Samo još jednom provjeri ove informacije</p>
+                {% endif %}
+                <p>
+                    <input type="text" name="dob" id="dob" placeholder="Datum rođenja (dd.mm.gggg)"
+                    pattern="(0[1-9]|1[0-9]|2[0-9]|3[01]).(0[1-9]|1[012]).[0-9]{4}"
+                    title="Promijeniti u ispravan format npr. 03.12.1990"
+                    value="{{ user.dob ? user.dob|date("d.m.Y") }}" required/>
+                </p>
+                <p>
+                    <input type="text" name="pob" id="pob" value="{{ user.pob }}" placeholder="Mjesto rođenja" class="form-control" required minlength="2" />
+                </p>
+                <p>
+                    <input type="text" name="oib" id="oib" value="{{ user.oib }}" placeholder="OIB" class="form-control" required minlength="11" minlength="11" pattern="[0-9]+" />
+                </p>
+                <p>
+                    <input type="text" name="tel" id="tel" value="{{ user.tel }}" placeholder="Broj mobitela" class="form-control" required />
+                </p>
 
-            <div class="additional-r1-info">
-                <p class="small">
-                    <input type="text" name="height" id="height" placeholder="Visina (cm)" class="form-control small" required />
-                    <input type="text" name="weight" id="weight" placeholder="Težina (kg)" class="form-control small" required />
-                </p>
-                <p>
-                    <input type="text" name="shoe_size" id="shoe_size" placeholder="Broj obuće (EU)" class="form-control" required />
-                </p>
-                <p>
-                    <input type="text" name="shirt_size" id="shirt_size" placeholder="Veličina majice (npr. M, L, XL)" class="form-control" required />
-                </p>
+                <div class="additional-r1-info">
+                    <p class="small">
+                        <input type="text" name="height" id="height" placeholder="Visina (cm)" class="form-control small" required />
+                        <input type="text" name="weight" id="weight" placeholder="Težina (kg)" class="form-control small" required />
+                    </p>
+                    <p>
+                        <input type="text" name="shoe_size" id="shoe_size" placeholder="Broj obuće (EU)" class="form-control" required />
+                    </p>
+                    <p>
+                        <input type="text" name="shirt_size" id="shirt_size" placeholder="Veličina majice (npr. M, L, XL)" class="form-control" required />
+                    </p>
+                </div>
+
+                <p class="error input-error"></p>
             </div>
 
-            <p class="error input-error"></p>
-
-            <input type="hidden" name="signup-course" id="signup-course" value="" />
-            <input type="submit" class="btn btn-primary" id="btn-additional-details" value="Prijava na tečaj" />
+            <div class="form-sticky-footer">
+                <input type="hidden" name="signup-course" id="signup-course" value="" />
+                <input type="submit" class="btn btn-primary" id="btn-additional-details" value="Prijava na tečaj" />
+            </div>
         </form>
         <form class="form-horizontal course-signout-form" id="course-signout-form" role="form">
             <p>Žao nam je što ne možeš roniti s nama.</p>
