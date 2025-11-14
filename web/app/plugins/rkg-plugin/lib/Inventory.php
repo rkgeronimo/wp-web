@@ -32,6 +32,7 @@ class Inventory implements InitInterface
         add_action('wp_ajax_check_inventory', array($this, 'checkInventory'));
         add_action('wp_ajax_edit_reservation', array($this, 'editReservation'));
         add_action('wp_ajax_add_custom_reservation', array($this, 'addCustomReservation'));
+        add_action('wp_ajax_delete_reservation', array($this, 'deleteReservation'));
         add_action('wp_ajax_rkg_inventory_hard_delete', array($this, 'handleHardDelete'));
     }
 
@@ -167,7 +168,6 @@ class Inventory implements InitInterface
         // Add other data types that can be edited
         $allDataKeys = $typeTranslations + array('other' => 'komentar');
 
-        $state = 0;
         foreach ($allDataKeys as $key => $value) {
             $returnKey = $key.'_returned';
 
@@ -196,7 +196,6 @@ class Inventory implements InitInterface
                         )
                     );
                 }
-                $state = 1;
             }
 
             if (isset($data[$returnKey])) {
@@ -222,10 +221,59 @@ class Inventory implements InitInterface
                 );
             }
         }
+
+        // Determine the correct reservation state based on equipment status
+        // Re-fetch the reservation to get the updated data
+        $updatedReservation = $wpdb->get_row(
+            $wpdb->prepare("SELECT * FROM $tableName WHERE id = %d", $reservationId)
+        );
+
+        $hasEquipment = false;
+        $hasUnreturned = false;
+        $allReturned = true;
+
+        // Check all equipment types
+        $equipmentTypes = array('mask', 'regulator', 'suit', 'boots', 'gloves', 'fins', 'bcd', 'lead');
+        foreach ($equipmentTypes as $type) {
+            $equipmentId = $updatedReservation->$type;
+            $returnedKey = $type . '_returned';
+            $returnedStatus = isset($updatedReservation->$returnedKey) ? $updatedReservation->$returnedKey : null;
+
+            if (!empty($equipmentId)) {
+                $hasEquipment = true;
+
+                // Check if this item is returned (returned = 0 or 3 for lost)
+                // returned = null or 1 means still out
+                if ($returnedStatus === null || $returnedStatus == 1) {
+                    $hasUnreturned = true;
+                    $allReturned = false;
+                } elseif ($returnedStatus != 0 && $returnedStatus != 3) {
+                    // If returned status is something unexpected, consider it unreturned
+                    $hasUnreturned = true;
+                    $allReturned = false;
+                }
+            }
+        }
+
+        // Determine state:
+        // 0 = PENDING: No equipment assigned yet
+        // 1 = ACTIVE: Has equipment and some is unreturned
+        // 2 = COMPLETED: Has equipment and all is returned (returned=0) or lost (returned=3)
+        $newState = Definitions::RESERVATION_STATUS_PENDING; // Default: no equipment
+
+        if ($hasEquipment) {
+            if ($hasUnreturned) {
+                $newState = Definitions::RESERVATION_STATUS_ACTIVE; // Has unreturned equipment
+            } else {
+                $newState = Definitions::RESERVATION_STATUS_COMPLETED; // All equipment returned or lost
+            }
+        }
+
+        // Update the reservation state
         $wpdb->update(
             $tableName,
             array(
-                'state' => $state,
+                'state' => $newState,
             ),
             array('id' => $reservationId)
         );
@@ -245,10 +293,42 @@ class Inventory implements InitInterface
         $context['equipment']        = $definitions->defineEquipment();
         $context['typeTranslation']  = $this->translateTypes();
         $context['stateTranslation'] = $this->translateState();
+        $context['reservationStatusLabels'] = $definitions->getReservationStatusLabels();
 
-        $where = "";
+        // Get total count (excluding deleted)
+        $context['reservationCount'] = $wpdb->get_results(
+            "SELECT COUNT(*) as num
+            FROM $tableName
+            WHERE state != " . Definitions::RESERVATION_STATUS_DELETED
+        );
+
+        // Get count by status
+        $context['statusCount'] = $wpdb->get_results(
+            "SELECT state, COUNT(*) as num
+            FROM $tableName
+            GROUP BY state"
+        );
+
+        $where = "WHERE state != " . Definitions::RESERVATION_STATUS_DELETED;
         if (isset($context['request']->get['type'])) {
-            $where = "WHERE type = '".$context['request']->get['type']."'";
+            $where .= " AND type = '".$context['request']->get['type']."'";
+        }
+        
+        // optional status filter
+        if (isset($context['request']->get['status'])) {
+            if ($context['request']->get['status'] === 'all') {
+                // Show all including deleted
+                $where = "";
+                if (isset($context['request']->get['type'])) {
+                    $where = "WHERE type = '".$context['request']->get['type']."'";
+                }
+            } elseif ($context['request']->get['status'] === 'deleted') {
+                // Show only deleted
+                $where = "WHERE state = " . Definitions::RESERVATION_STATUS_DELETED;
+            } else {
+                // Show specific status
+                $where = "WHERE state = " . intval($context['request']->get['status']);
+            }
         }
         $context['reservations'] = $wpdb->get_results(
             "
@@ -334,7 +414,105 @@ class Inventory implements InitInterface
         }
     }
 
-    
+    /**
+     * Delete (soft delete) a reservation
+     * Releases any issued equipment back to available state
+     *
+     * @return void
+     */
+    public function deleteReservation()
+    {
+        if (!current_user_can('manage_equipment')) {
+            status_header(401);
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            wp_die();
+        }
+
+        global $wpdb;
+        $reservationId = isset($_POST['reservation_id']) ? intval($_POST['reservation_id']) : 0;
+
+        if (!$reservationId) {
+            wp_send_json_error(array('message' => 'Invalid reservation ID'));
+            wp_die();
+        }
+
+        $reservationTable = $wpdb->prefix . 'rkg_excursion_gear';
+        $inventoryTable = $wpdb->prefix . 'rkg_inventory';
+
+        // Get the reservation details
+        $reservation = $wpdb->get_row(
+            $wpdb->prepare("SELECT * FROM $reservationTable WHERE id = %d", $reservationId)
+        );
+
+        if (!$reservation) {
+            wp_send_json_error(array('message' => 'Reservation not found'));
+            wp_die();
+        }
+
+        // Equipment types to check
+        $equipmentTypes = array('mask', 'regulator', 'suit', 'boots', 'gloves', 'fins', 'bcd', 'lead');
+
+        // Release all issued equipment back to available state
+        foreach ($equipmentTypes as $type) {
+            $equipmentId = $reservation->$type;
+            $returnedKey = $type . '_returned';
+            $returnedStatus = isset($reservation->$returnedKey) ? $reservation->$returnedKey : null;
+
+            // Only release equipment that:
+            // 1. Has an equipment ID assigned
+            // 2. Is not already returned (returned = 0 or null)
+            // 3. Is not lost (returned = 3)
+            if (!empty($equipmentId)) {
+                // If equipment is currently issued (not returned, or returned=1 meaning still out)
+                // release it back to available (state=0)
+                // If equipment is lost (returned=3), keep it as lost
+                if ($returnedStatus === null || $returnedStatus == 1) {
+                    // Release equipment: set state to 0 (available), clear user_id and issue_date
+                    $wpdb->update(
+                        $inventoryTable,
+                        array(
+                            'state' => Definitions::EQUIPMENT_STATUS_AVAILABLE,
+                            'user_id' => null,
+                            'issue_date' => null,
+                        ),
+                        array('id' => $equipmentId)
+                    );
+                }
+                // If equipment is marked as lost (returned=3), update inventory to lost state
+                elseif ($returnedStatus == 3) {
+                    $wpdb->update(
+                        $inventoryTable,
+                        array(
+                            'state' => Definitions::EQUIPMENT_STATUS_LOST,
+                            'user_id' => null,
+                            'issue_date' => null,
+                        ),
+                        array('id' => $equipmentId)
+                    );
+                }
+                // If returned=0, equipment is already returned, no action needed
+            }
+        }
+
+        // Soft delete the reservation: set state to 3 (deleted) and record deletion time
+        $result = $wpdb->update(
+            $reservationTable,
+            array(
+                'state' => Definitions::RESERVATION_STATUS_DELETED,
+                'deleted_at' => current_time('mysql'),
+            ),
+            array('id' => $reservationId)
+        );
+
+        if ($result === false) {
+            wp_send_json_error(array('message' => 'Failed to delete reservation'));
+            wp_die();
+        }
+
+        wp_send_json_success(array('message' => 'Reservation deleted successfully'));
+        wp_die();
+    }
+
     // Used when adding new reservation from admin panel (not requested by user)
     public function showNewReservations()
     {

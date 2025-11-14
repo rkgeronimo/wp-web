@@ -2,12 +2,46 @@
     <div class="wrap">
         <h1 id="add-new-inventory" class="wp-heading-inline">Izdavanje opreme</h1>
         <a href="{{site.url}}/wp/wp-admin/admin.php?page=reservations_new" class="page-title-action">Dodaj novu rezervaciju</a>
+        <hr class="wp-header-end">
     </div>
-
 
     <div id="error-message" class="updated error hidden"><p>Došlo je do greške prilikom spremanja.</p></div>
     <div id="error-text" class="updated error hidden"></div>
 
+    <div>
+        <ul class="subsubsub">
+            <li class="all">
+                <a href="admin.php?page=reservations" {{ request.get.status ? : 'class="current"'}} aria-current="page">
+                    Sve (bez obrisanih) <span class="count">({{ reservationCount[0].num }})</span>
+                </a> |
+            </li>
+            {% for status in statusCount %}
+                {% if status.state != 3 %}
+                    <li>
+                        <a {{ (request.get.status == status.state) ? 'class="current"' }} href="admin.php?page=reservations&status={{ status.state }}">
+                            {{ reservationStatusLabels[status.state] }}
+                            <span class="count">({{ status.num }})</span>
+                        </a> |
+                    </li>
+                {% endif %}
+            {% endfor %}
+            {% for status in statusCount %}
+                {% if status.state == 3 %}
+                    <li>
+                        <a {{ (request.get.status == 'deleted') ? 'class="current"' }} href="admin.php?page=reservations&status=deleted">
+                            {{ reservationStatusLabels[status.state] }}
+                            <span class="count">({{ status.num }})</span>
+                        </a> |
+                    </li>
+                {% endif %}
+            {% endfor %}
+            <li>
+                <a {{ (request.get.status == 'all') ? 'class="current"' }} href="admin.php?page=reservations&status=all">
+                    Sve
+                </a>
+            </li>
+        </ul>
+    </div>
 
     <form action="admin.php?page=reservations" method="post">
         {{ table.search_box('Pretraga', 'search_id')}}
