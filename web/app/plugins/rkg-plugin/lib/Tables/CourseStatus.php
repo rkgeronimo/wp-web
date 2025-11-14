@@ -94,7 +94,8 @@ class CourseStatus extends WP_List_Table
         $additionalColumns = array(
             'weight'       => 'Težina (kg)',
             'height'       => 'Visina (cm)',
-            'shoe_size'       => 'Veličina obuće',
+            'shoe_size'    => 'Veličina obuće',
+            'shirt_size'   => 'Veličina majice',
         );
 
         $courseName = get_the_title($this->post);
@@ -149,6 +150,7 @@ class CourseStatus extends WP_List_Table
             case 'weight':
             case 'height':
             case 'shoe_size':
+            case 'shirt_size':
             case 'payed':
             case 'actions':
                 return $item[$column_name];
@@ -266,19 +268,20 @@ class CourseStatus extends WP_List_Table
             </button>';
 
             $data[] = array(
-                'rkg_name'           => $user->data->display_name,
-                'email'           => $user->data->user_email,
-                'rkg_gsm'            => $userData->showData('tel'),
+                'rkg_name'      => $user->data->display_name,
+                'email'         => $user->data->user_email,
+                'rkg_gsm'       => $userData->showData('tel'),
                 // 'questionaire' => 'Upitnik',
-                'health'       => $medical,
-                'liability'    => $liability,
-                'brevet'       => $brevet,
-                'newbrevet'    => $newBrevet,
-                'weight'       => $value->weight,
-                'height'       => $value->height,
-                'shoe_size'    => $value->shoe_size,
-                'payed'        => $payed,
-                'actions'      => $unregisterButton,
+                'health'        => $medical,
+                'liability'     => $liability,
+                'brevet'        => $brevet,
+                'newbrevet'     => $newBrevet,
+                'weight'        => $value->weight,
+                'height'        => $value->height,
+                'shoe_size'     => $value->shoe_size,
+                'shirt_size'    => $value->shirt_size,
+                'payed'         => $payed,
+                'actions'       => $unregisterButton,
             );
         }
 

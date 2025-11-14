@@ -91,8 +91,28 @@ button
     min-width: 30vw
     transition: width 0.5s, height 0.2s
     .form-horizontal
+        padding-bottom: 0.1vw
         max-height: 80vh
         overflow-y: auto
+        &.has-sticky-footer
+            position: relative
+            display: flex
+            flex-direction: column
+            overflow-y: hidden
+    .form-scroll-content
+        flex: 1
+        overflow-y: auto
+        padding-bottom: 0.5vw
+        position: relative
+    .form-sticky-footer
+        position: sticky
+        bottom: 0
+        background: white
+        padding: 0.5vw 0 0
+        margin-top: auto
+        z-index: 10
+        @media (--mobile)
+            padding: 3vw 0 0
     .form-hide
         display: none
     p
@@ -109,6 +129,8 @@ button
         &.small
             display: inline-flex
             max-width: 22vw
+            margin-bottom: 0
+            margin-top: 0
     a
         color: $color-title
         text-decoration: none
@@ -121,8 +143,8 @@ button
             color: $color-main
             font-weight: $medium
         &[type=submit]
-            margin-top: 1vw
-            width: 10vw
+            margin-top: 0
+            width: 12vw
             border: 1px solid $color-title
             border-radius: 5vw
             &:hover
