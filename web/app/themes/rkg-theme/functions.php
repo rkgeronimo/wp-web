@@ -661,3 +661,14 @@ add_filter('wp_nav_menu_objects', function($items, $args) {
     }
     return $items;
 }, 10, 2);
+
+
+add_action('init','prevent_wp_default_registration_pages');
+
+function prevent_wp_default_registration_pages(){
+ global $pagenow;
+ if( 'wp-login.php' === $pagenow && $_GET['action'] === "register") {
+  wp_redirect('/');
+  exit();
+ }
+}
