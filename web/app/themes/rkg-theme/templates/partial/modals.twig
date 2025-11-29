@@ -34,6 +34,9 @@
                 <p>
                     <input type="password" name="vb_pass" id="vb_pass" value="" placeholder="Lozinka" class="form-control" required minlength="6" />
                 </p>
+                <p style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;">
+                    <input type="text" name="vb_website" id="vb_website" value="" tabindex="-1" autocomplete="off" />
+                </p>
                 <p><span class="rkg-input-size"><input type="checkbox" name="news" value="yes" class="form-control"> Želim primati obavijesti kluba na mail.</span></p>
                 <p><span class="rkg-input-size"><input type="checkbox" name="vehicle1" value="Bike" class="form-control" required> <a href="{{ http_host }}/?page_id=19" target="_blank">Slažem s obradom podataka</a> sukladno <a href="{{ http_host }}/?page_id=17" target="_blank">politici privatnosti</a>.</span></p>
                 {{ function('wp_nonce_field', 'vb_new_user','vb_new_user_nonce', true, true) }}

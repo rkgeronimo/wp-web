@@ -280,6 +280,7 @@ $('form#registration').on('submit', (e) => {
     const regMail      = $('#vb_email').val();
     const regFirstname = $('#vb_name').val();
     const regLastname  = $('#vb_surname').val();
+    const regWebsite = $('#vb_website').val();
     const data         = {
         action: 'register_user',
         nonce: regNonce,
@@ -287,6 +288,7 @@ $('form#registration').on('submit', (e) => {
         mail: regMail,
         firstname: regFirstname,
         lastname: regLastname,
+        website: regWebsite, // no input required
     };
 
     $.ajax({
