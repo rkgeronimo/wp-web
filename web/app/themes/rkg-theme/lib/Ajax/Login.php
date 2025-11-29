@@ -252,6 +252,16 @@ class Login
             wp_die();
         }
 
+        // Bot prevention - check honeypot field
+        if (!empty($_POST['website'])) {
+            echo json_encode(array(
+                'status' => 1,
+                'message' => 'Došlo je do greške. Ako nisi bot, javi se adminu',
+            ));
+
+            wp_die();
+        }
+
         // Post values
         $password  = $_POST['pass'];
         $email     = $_POST['mail'];
