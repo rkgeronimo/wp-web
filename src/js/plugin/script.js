@@ -1009,20 +1009,29 @@ jQuery(document).ready(($) => {
     });
 
     // Course reservation info updater for excursion admin
-    if ($('#excursion-course-select').length) {
-        var limitationInput = $('input[name="limitation"]');
-        var leadersInput = $('select[name="leaders"]');
-        var courseSelect = $('#excursion-course-select');
-        var infoDiv = $('#reservation-info');
+    var limitationInput = $('input[name="limitation"]');
+    var leadersInput = $('select[name="leaders"]');
+    var courseSelect = $('#excursion-course-select');
+    var infoDiv = $('#reservation-info');
 
+    if (limitationInput.length && infoDiv.length) {
         function updateReservationInfo() {
-            var selectedOption = courseSelect.find('option:selected');
-            var courseId = selectedOption.val();
             var limitation = parseInt(limitationInput.val()) || 0;
             var leadersNeeded = parseInt(leadersInput.val()) || 0;
+            var participantsCount = 0;
             
-            if (courseId) {
-                var participantsCount = parseInt(selectedOption.data('participants')) || 0;
+            // Only check course if the select exists
+            if (courseSelect.length) {
+                var selectedOption = courseSelect.find('option:selected');
+                var courseId = selectedOption.val();
+                
+                if (courseId) {
+                    participantsCount = parseInt(selectedOption.data('participants')) || 0;
+                }
+            }
+            
+            // Show info if there's any limitation set
+            if (limitation > 0) {
                 var generalSpots = limitation - participantsCount - leadersNeeded;
                 generalSpots = generalSpots < 0 ? 0 : generalSpots;
                 
@@ -1030,22 +1039,19 @@ jQuery(document).ready(($) => {
                 $('#leaders-count').text(leadersNeeded);
                 $('#general-count').text(generalSpots);
                 infoDiv.show();
-            } else if (leadersNeeded > 0) {
-                var generalSpotsNoReservation = limitation - leadersNeeded;
-                generalSpotsNoReservation = generalSpotsNoReservation < 0 ? 0 : generalSpotsNoReservation;
-                
-                $('#reserved-count').text(0);
-                $('#leaders-count').text(leadersNeeded);
-                $('#general-count').text(generalSpotsNoReservation);
-                infoDiv.show();
             } else {
                 infoDiv.hide();
             }
         }
         
-        courseSelect.on('change', updateReservationInfo);
+        if (courseSelect.length) {
+            courseSelect.on('change', updateReservationInfo);
+        }
         limitationInput.on('input', updateReservationInfo);
-        leadersInput.on('change', updateReservationInfo);
+        
+        if (leadersInput.length) {
+            leadersInput.on('change', updateReservationInfo);
+        }
         
         updateReservationInfo();
     }
