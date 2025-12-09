@@ -89,6 +89,13 @@ php database/migrate.php rollback
 - Always create migrations for database schema changes
 - Never modify the database directly in development
 
+### Backups
+
+This project includes an automated backup system that creates compressed database and uploads backups, uploads them to Dropbox (or other storage providers), and automatically deletes old backups.
+
+See **[BACKUP_README.md](BACKUP_README.md)** for complete documentation.
+
+
 ### Other Development Topics
 
 - JavaScript / CSS changes (watcher and build)
