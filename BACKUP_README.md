@@ -8,7 +8,6 @@ A production-ready Python backup script that creates compressed MySQL database d
 - ✅ **Uploads Backup**: Compressed tar archive of WordPress uploads folder
 - ✅ **Dropbox Integration**: Automatic upload to Dropbox with chunked upload support for large files
 - ✅ **Automatic Cleanup**: Deletes backups older than 7 days
-- ✅ **Email Notifications**: Sends alerts on backup failures
 - ✅ **Dry-Run Mode**: Test without actual uploads or deletions
 - ✅ **Provider Abstraction**: Easy to add AWS S3, Google Drive, or other storage providers
 - ✅ **Comprehensive Logging**: Detailed logs with file sizes and progress
@@ -63,16 +62,6 @@ Edit `.env` file and update these values:
 # Dropbox Configuration
 DROPBOX_ACCESS_TOKEN=your_actual_dropbox_access_token_here
 
-# Email Notifications (if enabled)
-BACKUP_EMAIL_FROM=backups@yourdomain.com
-BACKUP_EMAIL_TO=admin@yourdomain.com
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASSWORD=your_app_password
-```
-
-**Note**: For Gmail, you need to create an [App Password](https://support.google.com/accounts/answer/185833?hl=en).
 
 ### 4. Test the Backup Script
 
@@ -173,18 +162,6 @@ Create `/etc/logrotate.d/wordpress_backup`:
 | `DROPBOX_ACCESS_TOKEN` | *(required)* | Dropbox API access token |
 | `DROPBOX_BACKUP_FOLDER` | `/backups` | Remote folder path in Dropbox |
 
-### Email Configuration
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `BACKUP_EMAIL_ENABLED` | `true` | Enable/disable email notifications |
-| `BACKUP_EMAIL_FROM` | *(required)* | Sender email address |
-| `BACKUP_EMAIL_TO` | *(required)* | Recipient email address |
-| `SMTP_HOST` | *(required)* | SMTP server hostname |
-| `SMTP_PORT` | `587` | SMTP server port |
-| `SMTP_USER` | *(required)* | SMTP username |
-| `SMTP_PASSWORD` | *(required)* | SMTP password |
-| `SMTP_USE_TLS` | `true` | Use TLS encryption |
 
 ## Backup File Naming
 
@@ -300,15 +277,6 @@ FLUSH PRIVILEGES;
 - Check if the token has expired
 - Ensure your Dropbox app has the required permissions
 
-### Email Notifications Not Working
-
-**Error**: `Failed to send email notification`
-
-**Solution**:
-- For Gmail, use an [App Password](https://support.google.com/accounts/answer/185833?hl=en) instead of your regular password
-- Check SMTP settings (host, port, username, password)
-- Verify firewall isn't blocking SMTP port (usually 587 or 465)
-- Set `BACKUP_EMAIL_ENABLED=false` to disable email notifications temporarily
 
 ### Disk Space Issues
 
@@ -363,7 +331,6 @@ wp-web/
 │   ├── config.py                 # Configuration management
 │   ├── database.py               # MySQL backup with mysqldump + gzip
 │   ├── filesystem.py             # Uploads folder tar.gz compression
-│   ├── notifier.py               # Email notifications on failure
 │   └── providers/                # Storage provider implementations
 │       ├── __init__.py
 │       ├── base.py               # Abstract StorageProvider base class
@@ -384,7 +351,7 @@ wp-web/
 - [ ] GPG encryption for backups
 - [ ] Multi-provider uploads (upload to multiple services simultaneously)
 - [ ] Incremental backups (only backup changed files)
-- [ ] Success notifications (optional email on successful backups)
+- [ ] Failure/Success notifications (optional email on successful or failed backups)
 - [ ] Backup verification (test restore process automatically)
 - [ ] Web dashboard for monitoring backup status
 

@@ -32,7 +32,6 @@ from typing import List
 from backup.config import BackupConfig
 from backup.database import DatabaseBackup
 from backup.filesystem import FilesystemBackup
-from backup.notifier import EmailNotifier
 from backup.providers.dropbox_provider import DropboxProvider
 from backup.providers.local_provider import LocalProvider
 
@@ -78,7 +77,6 @@ class BackupOrchestrator:
         # Initialize components
         self.db_backup = DatabaseBackup(config)
         self.fs_backup = FilesystemBackup(config)
-        self.notifier = EmailNotifier(config)
         self.storage_provider = self._get_storage_provider()
 
     def _get_storage_provider(self):
@@ -140,7 +138,6 @@ class BackupOrchestrator:
         except Exception as e:
             self.logger.error(f"Backup process failed with exception: {str(e)}", exc_info=True)
             self.errors.append(f"Fatal error: {str(e)}")
-            self._send_failure_notification()
             return False
 
     def _test_connection(self) -> bool:
@@ -163,12 +160,10 @@ class BackupOrchestrator:
             else:
                 self.logger.error("Storage provider connection failed")
                 self.errors.append("Storage provider connection test failed")
-                self._send_failure_notification()
                 return False
         except Exception as e:
             self.logger.error(f"Connection test error: {str(e)}", exc_info=True)
             self.errors.append(f"Connection test error: {str(e)}")
-            self._send_failure_notification()
             return False
 
     def _create_backups(self) -> bool:
@@ -191,7 +186,6 @@ class BackupOrchestrator:
             self.logger.info(" Database backup created successfully")
         else:
             self.errors.append("Database backup failed")
-            self._send_failure_notification()
             return False
 
         # Create uploads backup
@@ -204,7 +198,6 @@ class BackupOrchestrator:
             self.logger.info(" Uploads backup created successfully")
         else:
             self.errors.append("Uploads backup failed")
-            self._send_failure_notification()
             return False
 
         self.logger.info("-" * 70)
@@ -244,9 +237,6 @@ class BackupOrchestrator:
                     success = False
 
         self.logger.info("-" * 70)
-
-        if not success:
-            self._send_failure_notification()
 
         return success
 
@@ -304,12 +294,6 @@ class BackupOrchestrator:
                 return f"{size_bytes:.2f} {unit}"
             size_bytes /= 1024.0
         return f"{size_bytes:.2f} PB"
-
-    def _send_failure_notification(self):
-        """Send email notification on failure"""
-        if self.errors:
-            error_message = "\n".join(self.errors)
-            self.notifier.send_failure_notification(error_message)
 
 
 def main():

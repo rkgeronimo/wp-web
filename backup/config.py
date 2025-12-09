@@ -40,16 +40,6 @@ class BackupConfig:
         self.dropbox_access_token = os.getenv('DROPBOX_ACCESS_TOKEN')
         self.dropbox_backup_folder = os.getenv('DROPBOX_BACKUP_FOLDER', '/backups')
 
-        # Email notification configuration
-        self.email_enabled = os.getenv('BACKUP_EMAIL_ENABLED', 'true').lower() == 'true'
-        self.email_from = os.getenv('BACKUP_EMAIL_FROM')
-        self.email_to = os.getenv('BACKUP_EMAIL_TO')
-        self.smtp_host = os.getenv('SMTP_HOST')
-        self.smtp_port = int(os.getenv('SMTP_PORT', '587'))
-        self.smtp_user = os.getenv('SMTP_USER')
-        self.smtp_password = os.getenv('SMTP_PASSWORD')
-        self.smtp_use_tls = os.getenv('SMTP_USE_TLS', 'true').lower() == 'true'
-
         # mysqldump path
         self.mysqldump_path = os.getenv('MYSQLDUMP_PATH', '/usr/local/bin/mysqldump')
 
@@ -77,13 +67,6 @@ class BackupConfig:
         if self.backup_provider == 'dropbox':
             if not self.dropbox_access_token or self.dropbox_access_token == 'your_dropbox_access_token_here':
                 errors.append("DROPBOX_ACCESS_TOKEN is required when using Dropbox provider")
-
-        # Email validation (only if enabled)
-        if self.email_enabled:
-            if not self.email_to or self.email_to == 'admin@yourdomain.com':
-                errors.append("BACKUP_EMAIL_TO is required when email is enabled")
-            if not self.smtp_host or self.smtp_host == 'smtp.gmail.com':
-                errors.append("SMTP_HOST must be configured when email is enabled")
 
         # Check mysqldump exists
         if not Path(self.mysqldump_path).exists():
