@@ -33,8 +33,15 @@ class BackupConfig:
         self.backup_provider = os.getenv('BACKUP_PROVIDER', 'dropbox')
         self.backup_retention_days = int(os.getenv('BACKUP_RETENTION_DAYS', '7'))
         self.backup_temp_dir = os.getenv('BACKUP_TEMP_DIR', '/tmp/backups')
-        self.uploads_path = os.getenv('BACKUP_UPLOADS_PATH',
-                                      '/private/var/www/geronimo/wp-web/web/app/uploads')
+
+        # Get uploads path (relative to wp-web directory)
+        uploads_path_env = os.getenv('BACKUP_UPLOADS_PATH', 'web/app/uploads')
+        if not os.path.isabs(uploads_path_env):
+            # Convert relative path to absolute based on script location
+            script_dir = Path(__file__).parent.parent
+            self.uploads_path = str(script_dir / uploads_path_env)
+        else:
+            self.uploads_path = uploads_path_env
 
         # Dropbox configuration
         self.dropbox_access_token = os.getenv('DROPBOX_ACCESS_TOKEN')

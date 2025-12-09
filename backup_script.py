@@ -312,7 +312,7 @@ Examples:
 
     parser.add_argument(
         '--config',
-        default='/private/var/www/geronimo/wp-web/.env',
+        default='.env',
         help='Path to .env configuration file (default: %(default)s)'
     )
     parser.add_argument(

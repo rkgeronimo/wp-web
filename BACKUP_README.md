@@ -33,7 +33,7 @@ python3 backup_script.py
 ### 1. Install Python Dependencies
 
 ```bash
-cd /private/var/www/geronimo/wp-web
+cd /path/to/wp-web
 /usr/local/bin/python3 -m pip install -r requirements.txt --break-system-packages
 ```
 
@@ -85,7 +85,7 @@ Test actual backup (will upload to Dropbox):
 python3 backup_script.py [OPTIONS]
 
 Options:
-  --config PATH      Path to .env configuration file (default: /private/var/www/geronimo/wp-web/.env)
+  --config PATH      Path to .env configuration file (default: .env)
   --dry-run          Run in dry-run mode (no uploads or deletions)
   --verbose, -v      Enable verbose (DEBUG) logging
   --log-file PATH    Path to log file (logs to stdout if not specified)
@@ -117,9 +117,9 @@ python3 backup_script.py --log-file /var/log/backup.log
 crontab -e
 ```
 
-2. Add this line:
+2. Add this line (adjust the path to your wp-web directory):
 ```cron
-0 2 * * * cd /private/var/www/geronimo/wp-web && /usr/local/bin/python3 backup_script.py >> /var/log/wordpress_backup.log 2>&1
+0 2 * * * cd /path/to/wp-web && /usr/local/bin/python3 backup_script.py >> /var/log/wordpress_backup.log 2>&1
 ```
 
 3. Verify crontab:
@@ -151,7 +151,7 @@ Create `/etc/logrotate.d/wordpress_backup`:
 | `BACKUP_PROVIDER` | `dropbox` | Storage provider (dropbox, s3, local) |
 | `BACKUP_RETENTION_DAYS` | `7` | Number of days to retain backups |
 | `BACKUP_TEMP_DIR` | `/tmp/backups` | Temporary directory for backup files |
-| `BACKUP_UPLOADS_PATH` | `wp-web/web/app/uploads` | Path to uploads folder |
+| `BACKUP_UPLOADS_PATH` | `web/app/uploads` | Path to uploads folder (relative to wp-web) |
 | `MYSQLDUMP_PATH` | `/usr/local/bin/mysqldump` | Path to mysqldump binary |
 | `BACKUP_DRY_RUN` | `false` | Enable dry-run mode |
 
@@ -194,14 +194,14 @@ mysql -u $DB_USER -p $DB_NAME < geronimo_database_20251209_143022.sql
 # Extract uploads
 
 # Backup existing uploads (optional)
-mv /private/var/www/geronimo/wp-web/web/app/uploads /tmp/uploads_old
+mv web/app/uploads /tmp/uploads_old
 
-# Extract archive
-tar -xzf uploads_20251209_143022.tar.gz -C /private/var/www/geronimo/wp-web/web/app/
+# Extract archive (run from wp-web directory)
+tar -xzf uploads_20251209_143022.tar.gz -C web/app/
 
 # Set proper permissions
-chown -R www-data:www-data /private/var/www/geronimo/wp-web/web/app/uploads
-chmod -R 755 /private/var/www/geronimo/wp-web/web/app/uploads
+chown -R www-data:www-data web/app/uploads
+chmod -R 755 web/app/uploads
 ```
 
 ## Adding New Storage Providers
@@ -336,7 +336,8 @@ wp-web/
 │       ├── base.py               # Abstract StorageProvider base class
 │       ├── dropbox_provider.py   # Dropbox API implementation
 │       └── local_provider.py     # Local storage for testing
-└── requirements.txt              # Python dependencies
+├── requirements.txt              # Python dependencies
+└── .env                          # Configuration (relative paths)
 ```
 
 ### Design Patterns
