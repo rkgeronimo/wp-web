@@ -30,3 +30,23 @@ web/.htaccess
 
 # WP-CLI
 wp-cli.local.yml
+
+# Python backup script
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backup/__pycache__/
+backup/*/__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Backup temporary files
+/tmp/backups/
+geronimo_database_*.sql
+geronimo_database_*.sql.gz
+*.tar.gz
+backup_*.log
