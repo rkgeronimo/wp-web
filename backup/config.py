@@ -43,8 +43,10 @@ class BackupConfig:
         else:
             self.uploads_path = uploads_path_env
 
-        # Dropbox configuration
-        self.dropbox_access_token = os.getenv('DROPBOX_ACCESS_TOKEN')
+        # Dropbox configuration (OAuth 2.0 with refresh token)
+        self.dropbox_app_key = os.getenv('DROPBOX_APP_KEY')
+        self.dropbox_app_secret = os.getenv('DROPBOX_APP_SECRET')
+        self.dropbox_refresh_token = os.getenv('DROPBOX_REFRESH_TOKEN')
         self.dropbox_backup_folder = os.getenv('DROPBOX_BACKUP_FOLDER', '/backups')
 
         # mysqldump path
@@ -72,8 +74,12 @@ class BackupConfig:
 
         # Provider-specific validation
         if self.backup_provider == 'dropbox':
-            if not self.dropbox_access_token or self.dropbox_access_token == 'your_dropbox_access_token_here':
-                errors.append("DROPBOX_ACCESS_TOKEN is required when using Dropbox provider")
+            if not self.dropbox_app_key:
+                errors.append("DROPBOX_APP_KEY is required when using Dropbox provider")
+            if not self.dropbox_app_secret:
+                errors.append("DROPBOX_APP_SECRET is required when using Dropbox provider")
+            if not self.dropbox_refresh_token:
+                errors.append("DROPBOX_REFRESH_TOKEN is required when using Dropbox provider")
 
         # Check mysqldump exists
         if not Path(self.mysqldump_path).exists():
@@ -93,7 +99,9 @@ class BackupConfig:
             Dictionary with configuration values
         """
         return {
-            'dropbox_access_token': self.dropbox_access_token,
+            'dropbox_app_key': self.dropbox_app_key,
+            'dropbox_app_secret': self.dropbox_app_secret,
+            'dropbox_refresh_token': self.dropbox_refresh_token,
             'dropbox_backup_folder': self.dropbox_backup_folder,
             'dry_run': self.dry_run,
             'backup_temp_dir': self.backup_temp_dir,

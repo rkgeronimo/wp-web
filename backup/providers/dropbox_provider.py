@@ -37,21 +37,43 @@ class DropboxProvider(StorageProvider):
         if dropbox is None:
             raise ImportError("dropbox package is not installed. Run: pip install dropbox")
 
-        self.access_token = config.get('dropbox_access_token')
+        self.app_key = config.get('dropbox_app_key')
+        self.app_secret = config.get('dropbox_app_secret')
+        self.refresh_token = config.get('dropbox_refresh_token')
         self.backup_folder = config.get('dropbox_backup_folder', '/backups')
         self.client = None
 
-        if not self.access_token:
-            raise ValueError("Dropbox access token is required")
+        if not self.app_key:
+            raise ValueError("Dropbox app key is required")
+        if not self.app_secret:
+            raise ValueError("Dropbox app secret is required")
+        if not self.refresh_token:
+            raise ValueError("Dropbox refresh token is required")
 
         self._initialize_client()
 
     def _initialize_client(self):
-        """Initialize Dropbox client"""
+        """Initialize Dropbox client with OAuth 2.0 refresh token"""
         if not self.dry_run:
             try:
-                self.client = dropbox.Dropbox(self.access_token)
-                logger.debug("Dropbox client initialized")
+                logger.debug(f"Initializing Dropbox client with app_key: {self.app_key[:8]}...")
+                logger.debug(f"App secret length: {len(self.app_secret)} chars")
+                logger.debug(f"Refresh token length: {len(self.refresh_token)} chars")
+
+                self.client = dropbox.Dropbox(
+                    oauth2_refresh_token=self.refresh_token,
+                    app_key=self.app_key,
+                    app_secret=self.app_secret
+                )
+                logger.debug("Dropbox client initialized with OAuth 2.0 refresh token")
+            except AuthError as e:
+                logger.error(f"Dropbox authentication failed: {str(e)}")
+                logger.error("This usually means:")
+                logger.error("  1. The refresh token is invalid or expired")
+                logger.error("  2. The app key/secret don't match the app that generated the refresh token")
+                logger.error("  3. The refresh token wasn't generated with 'offline' access type")
+                logger.error("Please verify DROPBOX_APP_KEY, DROPBOX_APP_SECRET, and DROPBOX_REFRESH_TOKEN in .env")
+                raise
             except Exception as e:
                 logger.error(f"Failed to initialize Dropbox client: {str(e)}")
                 raise

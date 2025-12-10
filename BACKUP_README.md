@@ -37,31 +37,29 @@ cd /path/to/wp-web
 /usr/local/bin/python3 -m pip install -r requirements.txt --break-system-packages
 ```
 
-### 2. Configure Dropbox Access
+### 2. Configure Dropbox OAuth
 
-1. Visit https://www.dropbox.com/developers/apps
-2. Click "Create app"
-3. Choose "Scoped access" API
-4. Choose "Full Dropbox" access
-5. Name your app (e.g., "WordPress Backup")
-6. Go to the app settings page
-7. Under "OAuth 2", click "Generate" access token
-8. Copy the token
+To use Dropbox with OAuth 2.0 refresh tokens:
 
-**Required Dropbox Permissions:**
-- `files.content.write` - Upload backup files
-- `files.content.read` - List existing backups
-- `files.metadata.read` - Get file metadata
-- `files.metadata.write` - Delete old backups
+1. Follow the instructions at: https://www.codemzy.com/blog/dropbox-long-lived-access-refresh-token
+2. You will obtain:
+   - `DROPBOX_APP_KEY` (your app's key)
+   - `DROPBOX_APP_SECRET` (your app's secret)
+   - `DROPBOX_REFRESH_TOKEN` (long-lived refresh token)
+3. Add these to your `.env` file
+
+The Dropbox SDK automatically handles access token refresh using the refresh token.
 
 ### 3. Configure Environment Variables
 
 Edit `.env` file and update these values:
 
 ```bash
-# Dropbox Configuration
-DROPBOX_ACCESS_TOKEN=your_actual_dropbox_access_token_here
-
+# Dropbox OAuth Configuration
+DROPBOX_APP_KEY=your_app_key_here
+DROPBOX_APP_SECRET=your_app_secret_here
+DROPBOX_REFRESH_TOKEN=your_refresh_token_here
+```
 
 ### 4. Test the Backup Script
 
@@ -159,7 +157,9 @@ Create `/etc/logrotate.d/wordpress_backup`:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DROPBOX_ACCESS_TOKEN` | *(required)* | Dropbox API access token |
+| `DROPBOX_APP_KEY` | *(required)* | Dropbox application key |
+| `DROPBOX_APP_SECRET` | *(required)* | Dropbox application secret |
+| `DROPBOX_REFRESH_TOKEN` | *(required)* | OAuth 2.0 refresh token |
 | `DROPBOX_BACKUP_FOLDER` | `/backups` | Remote folder path in Dropbox |
 
 
