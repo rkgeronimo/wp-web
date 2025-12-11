@@ -7,7 +7,8 @@ A production-ready Python backup script that creates compressed MySQL database d
 - ✅ **Database Backup**: MySQL dump with gzip compression
 - ✅ **Uploads Backup**: Compressed tar archive of WordPress uploads folder
 - ✅ **Dropbox Integration**: Automatic upload to Dropbox with chunked upload support for large files
-- ✅ **Automatic Cleanup**: Deletes backups older than 7 days
+- ✅ **Smart Cleanup**: Deletes backups older than 7 days when uploads succeed
+- ✅ **Safety Net**: Keeps at least 1 backup of each type when uploads fail (prevents data loss)
 - ✅ **Dry-Run Mode**: Test without actual uploads or deletions
 - ✅ **Provider Abstraction**: Easy to add AWS S3, Google Drive, or other storage providers
 - ✅ **Comprehensive Logging**: Detailed logs with file sizes and progress
@@ -171,6 +172,29 @@ Backups are named with timestamps for easy identification:
 - **Uploads**: `uploads_20251209_143022.tar.gz`
 
 Format: `{name}_{YYYYMMDD}_{HHMMSS}.{ext}`
+
+## Backup Retention Policy
+
+The script automatically manages backup retention with intelligent safety rules:
+
+### When Current Backup Succeeds
+- **Clean up aggressively**: All backups older than `BACKUP_RETENTION_DAYS` (default: 7 days) are deleted
+- **No minimum retention needed**: Since fresh backups exist, old ones can be safely removed
+
+### When Current Backup Fails
+- **Safety net activated**: At least **1 database backup** and **1 uploads backup** are kept, regardless of age
+- **Prevents data loss**: Even if backups fail for weeks, you'll always have the most recent successful backup
+
+**Example scenarios:**
+
+| Scenario | Behavior |
+|----------|----------|
+| Fresh backup uploaded successfully | All backups >7 days deleted (no minimum retention) |
+| Backup upload fails for 10 days | Oldest successful backup kept despite being >7 days old |
+| Upload succeeds after failure period | Old backup (10 days) deleted, new backup kept |
+| Multiple old backups, upload fails | Deletes oldest backups but keeps newest 1 of each type |
+
+This ensures you never lose all backups due to temporary issues, while keeping storage clean when backups work normally.
 
 ## Restoration
 

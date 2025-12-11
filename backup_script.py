@@ -121,14 +121,19 @@ class BackupOrchestrator:
                 return False
 
             # Upload backups
-            if not self._upload_backups():
-                return False
+            upload_success = self._upload_backups()
 
-            # Cleanup old backups
-            self._cleanup_old_backups()
+            # Cleanup old backups (pass upload success status)
+            # If upload failed, keep at least 1 old backup as safety net
+            # If upload succeeded, clean up everything older than retention_days
+            self._cleanup_old_backups(current_backup_succeeded=upload_success)
 
             # Cleanup local temporary files
             self._cleanup_local_files()
+
+            # Return overall success status
+            if not upload_success:
+                return False
 
             self.logger.info("=" * 70)
             self.logger.info("Backup process completed successfully!")
@@ -240,15 +245,21 @@ class BackupOrchestrator:
 
         return success
 
-    def _cleanup_old_backups(self):
-        """Delete backups older than retention period"""
+    def _cleanup_old_backups(self, current_backup_succeeded: bool = True):
+        """
+        Delete backups older than retention period
+
+        Args:
+            current_backup_succeeded: Whether the current backup run was successful
+        """
         self.logger.info("")
         self.logger.info(f"Cleaning up backups older than {self.config.backup_retention_days} days...")
         self.logger.info("-" * 70)
 
         try:
             deleted_files = self.storage_provider.cleanup_old_backups(
-                self.config.backup_retention_days
+                self.config.backup_retention_days,
+                current_backup_succeeded
             )
 
             if deleted_files:
