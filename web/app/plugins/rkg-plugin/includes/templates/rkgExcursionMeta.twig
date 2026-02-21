@@ -39,7 +39,7 @@
                 <th><label for="leaders">Rezervirano za voditelje</label></th>
                 <td>
                     <select name="leaders" id="leaders">
-                        {% for i in 0..4 %}
+                        {% for i in 0..20 %}
                             <option value="{{ i }}" {{ meta.leaders == i ? 'selected' }}>{{ i }}</option>
                         {% endfor %}
                     </select>
