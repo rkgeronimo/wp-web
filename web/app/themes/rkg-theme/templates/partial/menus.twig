@@ -4,6 +4,24 @@
             <div class="rkg-profile-meni-close"></div>
             <a class="rkg-modal-logo" href="{{ function('home_url') }}"><img class="rkg-top-logo" src="{{ site.theme.link }}/assets/img/logo.png" /></a>
         </div>
+        <div class="rkg-profile-picture-section">
+            <input type="file" id="profile-picture-input" accept="image/*" style="display: none;" />
+            {% set profilePicture = function('get_user_meta', user.ID, 'profile_picture', true) %}
+            {% if profilePicture %}
+                <div class="profile-picture-preview" id="profile-picture-link">
+                    <img src="{{ profilePicture }}" class="current-profile-picture" alt="{{ user.display_name }}" />
+                    <div class="profile-picture-overlay">
+                        <i class="fas fa-camera"></i>
+                        <span>Promijeni</span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="profile-picture-preview profile-picture-empty" id="profile-picture-link">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Dodaj sliku</span>
+                </div>
+            {% endif %}
+        </div>
         <div class="rkg-profile-meni-messages">
             <p>Bok {{ user.first_name }}!</p>
             <br>
