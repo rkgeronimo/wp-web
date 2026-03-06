@@ -44,6 +44,8 @@ class Users implements InitInterface
         add_action('wp_ajax_brevet_upload', array($this, 'brevetUpload'));
         add_action('wp_ajax_nopriv_brevet_upload', array($this, 'brevetUpload'));
 
+        add_action('wp_ajax_profile_picture_upload', array($this, 'profilePictureUpload'));
+
         add_action('wp_ajax_health_survey', array($this, 'helthSurvey'));
         add_action('wp_ajax_nopriv_helth_survey', array($this, 'helthSurvey'));
 
@@ -356,6 +358,110 @@ class Users implements InitInterface
         }
         throw new \Exception('did not match data URI with image data');
 
+        wp_die();
+    }
+
+    /**
+     * profilePictureUpload
+     *
+     * Handles profile picture upload with server-side resizing.
+     * Only available to logged-in users.
+     *
+     * @return void
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     */
+    public function profilePictureUpload()
+    {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authorized');
+            wp_die();
+        }
+
+        // phpcs:disable Zend.NamingConventions.ValidVariableName.NotCamelCaps
+        global $current_user;
+        get_currentuserinfo();
+        $userLogin = $current_user->user_login;
+        $userId    = $current_user->ID;
+        // phpcs:enable Zend.NamingConventions.ValidVariableName.NotCamelCaps
+
+        $data = $_POST['image'];
+        if (preg_match('/^data:image\/(\w+);base64,/', $data, $type)) {
+            $data = substr($data, strpos($data, ',') + 1);
+            $type = strtolower($type[1]);
+
+            if (!in_array($type, array('jpg', 'jpeg', 'gif', 'png'))) {
+                wp_send_json_error('Invalid image type');
+                wp_die();
+            }
+
+            $data = base64_decode($data);
+
+            if (false === $data) {
+                wp_send_json_error('Base64 decode failed');
+                wp_die();
+            }
+
+            $uploadDir  = wp_upload_dir();
+            $uploadPath = str_replace(
+                '/',
+                DIRECTORY_SEPARATOR,
+                $uploadDir['path']
+            ).DIRECTORY_SEPARATOR;
+
+            // temp file for processing
+            $tempFile = $uploadPath.'temp_'.md5(microtime()).'.'.$type;
+            file_put_contents($tempFile, $data);
+
+            // server resize using wp image editor
+            $image = wp_get_image_editor($tempFile);
+            if (!is_wp_error($image)) {
+                // resize to 200x200 with crop (square profile picture)
+                $image->resize(200, 200, true);
+                $image->set_quality(85);
+
+                $filename       = 'profile_'.$userLogin.'.'.$type;
+                $hashedFilename = md5($filename.microtime()).'_'.$filename;
+                $finalPath      = $uploadPath.$hashedFilename;
+
+                $saved = $image->save($finalPath);
+
+                // delete temp file
+                unlink($tempFile);
+
+                if (is_wp_error($saved)) {
+                    wp_send_json_error('Image save failed');
+                    wp_die();
+                }
+
+                // delete old profile picture if exists
+                $oldPicture = get_user_meta($userId, 'profile_picture', true);
+                if ($oldPicture) {
+                    $oldPath = str_replace(
+                        $uploadDir['baseurl'],
+                        $uploadDir['basedir'],
+                        $oldPicture
+                    );
+                    if (file_exists($oldPath)) {
+                        unlink($oldPath);
+                    }
+                }
+
+                // Save URL to user meta
+                $pictureUrl = $uploadDir['url'].'/'.basename($hashedFilename);
+                update_user_meta($userId, 'profile_picture', $pictureUrl);
+
+                wp_send_json_success($pictureUrl);
+                wp_die();
+            } else {
+                unlink($tempFile);
+                wp_send_json_error('Image processing failed');
+                wp_die();
+            }
+        }
+
+        wp_send_json_error('Invalid image data');
         wp_die();
     }
 

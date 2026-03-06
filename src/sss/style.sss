@@ -399,6 +399,58 @@ button
             content: ''
             pointer-events: none
 
+.rkg-profile-picture-section
+    text-align: center
+    padding: 1vw
+    border-bottom: 1px solid $color-main
+    @media (--mobile)
+        padding: 3vw
+
+.profile-picture-preview
+    display: inline-block
+    position: relative
+    cursor: pointer
+    .current-profile-picture
+        width: 80px
+        height: 80px
+        border-radius: 50%
+        object-fit: cover
+    .profile-picture-overlay
+        @util position(absolute, 0 0 0 0)
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+        background: color(black a(50%))
+        border-radius: 50%
+        opacity: 0
+        transition: opacity 0.3s ease
+        color: white
+        font-size: 12px
+        i
+            font-size: 20px
+            margin-bottom: 4px
+    &:hover .profile-picture-overlay
+        opacity: 1
+
+.profile-picture-empty
+    width: 80px
+    height: 80px
+    margin: 0 auto
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    background: $color-title
+    border-radius: 50%
+    color: white
+    cursor: pointer
+    i
+        font-size: 32px
+    span
+        font-size: 10px
+        text-align: center
+
 .dashicons-before::before
     width: 1.1vw !important
     height: 1.1vw !important
@@ -1947,6 +1999,55 @@ h2.courses-terms-control
             display: block
     div:not(:first-child)
         margin-top: 0.5vw
+
+.user-profile-picture
+    width: 32px
+    height: 32px
+    border-radius: 50%
+    object-fit: cover
+    vertical-align: middle
+    margin-right: 8px
+
+.user-profile-picture-placeholder
+    display: inline-flex
+    width: 32px
+    height: 32px
+    border-radius: 50%
+    background: color($color-main tint(70%))
+    color: white
+    align-items: center
+    justify-content: center
+    vertical-align: middle
+    margin-right: 8px
+    font-size: 16px
+
+.user-profile-picture-large
+    width: 80px
+    height: 80px
+    border-radius: 50%
+    object-fit: cover
+    margin-bottom: 0.5vw
+    @media (--mobile)
+        width: 100px
+        height: 100px
+        margin-bottom: 2vw
+
+.user-profile-picture-large-placeholder
+    display: flex
+    width: 80px
+    height: 80px
+    border-radius: 50%
+    background: color($color-main tint(70%))
+    color: white
+    align-items: center
+    justify-content: center
+    margin: 0 auto 0.5vw
+    font-size: 40px
+    @media (--mobile)
+        width: 100px
+        height: 100px
+        margin-bottom: 2vw
+        font-size: 50px
 
 .page-excursion-container
     border: 0.2vw solid white

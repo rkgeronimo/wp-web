@@ -5,6 +5,21 @@
         {% set nameToDisplay = userDetail.display_name %}
     {% endif %}
 
+    {# Get profile picture URL if user is logged in #}
+    {% set profilePicture = null %}
+    {% if user is not empty and userDetail.ID is defined %}
+        {% set profilePicture = function('get_user_meta', userDetail.ID, 'profile_picture', true) %}
+    {% endif %}
+
+    {# Profile picture in list - only show to logged-in users #}
+    {% if user is not empty and userDetail.ID is defined %}
+        {% if profilePicture %}
+            <img src="{{ profilePicture }}" alt="{{ nameToDisplay }}" class="user-profile-picture" />
+        {% else %}
+            <span class="user-profile-picture-placeholder"><i class="fas fa-user"></i></span>
+        {% endif %}
+    {% endif %}
+
     {{ nameToDisplay }}
 
     {% if user.can('edit_excursions') %}
@@ -12,6 +27,11 @@
             <div class="rkg-info-close"></div>
             <a class="rkg-modal-logo" href="{{ function('home_url') }}"><img class="rkg-top-logo" src="{{ site.theme.link }}/assets/img/logo.png" /></a>
             <div class="rkg-user-details-flex">
+                {% if profilePicture is defined and profilePicture %}
+                    <img src="{{ profilePicture }}" alt="{{ nameToDisplay }}" class="user-profile-picture-large" />
+                {% else %}
+                    <span class="user-profile-picture-large-placeholder"><i class="fas fa-user"></i></span>
+                {% endif %}
                 <table style="text-align: left">
                     <tr class="only-mobile">
                         <th style="text-align: center" colspan="2">

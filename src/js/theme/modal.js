@@ -489,6 +489,80 @@ $('#brevet-link').on('click', (e) => {
     $('#brevet').click();
 });
 
+// Profile picture Croppie - square viewport with circle preview
+const profilePictureResize = new Croppie(document.getElementById('profile-picture-crop'), {
+    viewport: {width: 200, height: 200, type: 'circle'},
+    boundary: {width: 300, height: 300},
+    showZoomer: true,
+    enableOrientation: true,
+});
+
+$('.profile-croppie-rotate').on('click', (e) => {
+    profilePictureResize.rotate(parseInt($(e.currentTarget).data('deg'), 10));
+});
+
+function readProfilePictureURL(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            modalOpen('#rkg-modal-profile-picture', () => {
+                profilePictureResize.bind({
+                    url: e.target.result,
+                });
+                $('.profile-picture-upload-button').off('click').on('click', () => {
+                    profilePictureResize.result('base64').then((dataImg) => {
+                        const formData = new FormData();
+                        formData.append('action', 'profile_picture_upload');
+                        formData.append('image', dataImg);
+                        jQuery.ajax({
+                            url: rkgScript.ajaxUrl,
+                            type: 'POST',
+                            contentType: false,
+                            processData: false,
+                            data: formData,
+                            success(response) {
+                                if (response.success) {
+                                    // Update profile picture displays on page
+                                    $('.current-profile-picture').attr('src', response.data);
+                                    $('.user-profile-picture').attr('src', response.data);
+                                    modalStatusClass();
+                                    $('.rkg-modal-status').text('Slika profila je spremljena');
+                                    $('body').removeClass('modal-open');
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 1000);
+                                } else {
+                                    modalStatusClass(1);
+                                    $('.rkg-modal-status').text('Greška: ' + response.data);
+                                }
+                            },
+                            error(error) {
+                                console.log(error);
+                                modalStatusClass(1);
+                                $('.rkg-modal-status').text('Došlo je do greške prilikom uploada');
+                            },
+                        });
+                    });
+                });
+            });
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+$('#profile-picture-input').on('change', function () {
+    if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
+        alert('The File APIs are not fully supported in this browser.');
+        return;
+    }
+    readProfilePictureURL(this);
+});
+
+$('#profile-picture-link').on('click', (e) => {
+    e.preventDefault();
+    $('#profile-picture-input').click();
+});
+
 $('form#helth-survey').on('submit', (e) => {
     e.preventDefault();
     const formData  = new FormData($('#helth-survey').get(0));
