@@ -12,6 +12,8 @@ It depends on multiple other repositories like plugins and theme that are added 
 
 ## Setting Up Development Environment
 
+> **Using Docker?** See [DOCKER.md](DOCKER.md) for a simpler Docker-based setup that skips most of the steps below.
+
 Before running the commands make sure to install all the requirements mentioned above.
 
 To install and setup everything, run the following commands:
