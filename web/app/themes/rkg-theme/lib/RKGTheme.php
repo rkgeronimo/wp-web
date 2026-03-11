@@ -53,7 +53,8 @@ class RKGTheme
         wp_register_style(
             'rkg_css',
             get_template_directory_uri().'/style.css',
-            array('google_fonts', 'Font_Awesome')
+            array('google_fonts', 'Font_Awesome'),
+            filemtime(get_template_directory().'/style.css')
         );
         wp_enqueue_style('rkg_css');
         wp_register_script(
@@ -68,7 +69,7 @@ class RKGTheme
             'rkg-script',
             get_template_directory_uri().'/static/site.js',
             array('jquery'),
-            1.1,
+            filemtime(get_template_directory().'/static/site.js'),
             true
         );
         wp_enqueue_script('rkg-script');
