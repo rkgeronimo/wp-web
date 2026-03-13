@@ -110,6 +110,7 @@ jQuery(document).ready(($) => {
     $('.rkg-profile-meni-switch').on('click', () => {
         if (($(window).width() <= 1080) && (window.devicePixelRatio > 1.5)) {
             $('.rkg-profile-meni').css('left', '0vw');
+            $('body').addClass('modal-open');
             return;
         }
         $('.rkg-profile-meni').animate({
@@ -121,6 +122,7 @@ jQuery(document).ready(($) => {
     $('.rkg-profile-meni-close').on('click', () => {
         if (($(window).width() <= 1080) && (window.devicePixelRatio > 1.5)) {
             $('.rkg-profile-meni').css('left', '-90vw');
+            $('body').removeClass('modal-open');
             return;
         }
         $('.rkg-profile-meni').animate({
