@@ -342,14 +342,8 @@ class Inventory implements InitInterface
         foreach ($context['typeTranslation'] as $key => $value) {
             $context[$key.'s'] = $this->getAvailableInventory($key);
         }
-
+        // Masks are special case as not directly supported with typeTranslation
         $context['masks']['items'] = $this->getAvailableInventory('mask');
-        foreach ($context['reservations'] as $key => $value) {
-            $context['reservations'][$key]->user =
-                new Timber\User($context['reservations'][$key]->user_id);
-            $context['reservations'][$key]->post =
-                new Timber\Post($context['reservations'][$key]->post_id);
-        }
 
         $listTable = new Reservations();
         $listTable->prepare_items();
