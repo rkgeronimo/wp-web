@@ -15,6 +15,7 @@ global $wpdb;
 $context         = Timber::get_context();
 $post            = Timber::query_post();
 $context['post'] = $post;
+$current_user_id = !empty($context['user']->id) ? (int) $context['user']->id : 0;
 $tableName       = $wpdb->prefix."rkg_excursion_meta";
 $context['meta'] = $wpdb->get_row(
     "SELECT id, leaders, latitude, longitude, canceled, guests_limit"
@@ -25,21 +26,20 @@ $context['meta'] = $wpdb->get_row(
 );
 
 if (!empty($context['meta']->course)) {
-    $user_id = $context['user']->id;
     $course_signup_table = $wpdb->prefix . "rkg_course_signup";
     $course_meta_table = $wpdb->prefix . "rkg_course_meta";
     
     // Check if user is in course OR is the assistant
     $user_in_course = $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(*) FROM $course_signup_table WHERE user_id = %d AND course_id = %d",
-        $user_id,
+        $current_user_id,
         $context['meta']->course
     ));
     
     $is_assistant = $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(*) FROM $course_meta_table WHERE id = %d AND assistant = %d",
         $context['meta']->course,
-        $user_id
+        $current_user_id
     ));
     
     $context['user_in_reserved_course'] = ($user_in_course > 0 || $is_assistant > 0);
@@ -180,14 +180,14 @@ $replacements = $wpdb->get_col(
 );
 
 $tableName = $wpdb->prefix."rkg_excursion_gear";
-$context['gear'] = $wpdb->get_col(
-    "SELECT user_id FROM "
-    .$tableName
-    ." WHERE post_id="
-    .$post->ID
-    ." AND user_id="
-    .$context['user']->id
-);
+$context['gear'] = array();
+if ($current_user_id) {
+    $context['gear'] = $wpdb->get_col($wpdb->prepare(
+        "SELECT user_id FROM $tableName WHERE post_id = %d AND user_id = %d",
+        $post->ID,
+        $current_user_id
+    ));
+}
 
 foreach ($replacements as $value) {
     $context['replacements'][] = new Timber\User($value);
@@ -203,12 +203,12 @@ $context['guests'] = $wpdb->get_results(
 );
 
 $context['user_waiting_position'] = 0;
-if ($context['user']->id) {
+if ($current_user_id) {
     $waitingTableName = $wpdb->prefix."rkg_excursion_waiting";
     // Only compute position if the user actually has a row on the waiting list
     $created = $wpdb->get_var($wpdb->prepare(
         "SELECT created FROM $waitingTableName WHERE post_id = %d AND user_id = %d",
-        $post->ID, $context['user']->id
+        $post->ID, $current_user_id
     ));
     if ($created) {
         $context['user_waiting_position'] = (int) $wpdb->get_var($wpdb->prepare(
@@ -222,15 +222,15 @@ if ($context['user']->id) {
 }
 
 $tableName = $wpdb->prefix."rkg_excursion_guest";
-$context['myGuests'] = $wpdb->get_results(
-    "SELECT name as display_name, email as user_email, tel FROM "
-    .$tableName
-    ." WHERE post_id="
-    .$post->ID
-    ." AND user_id="
-    .$context['user']->id
-    ." ORDER BY created"
-);
+$context['myGuests'] = array();
+if ($current_user_id) {
+    $context['myGuests'] = $wpdb->get_results($wpdb->prepare(
+        "SELECT name as display_name, email as user_email, tel FROM $tableName "
+        ."WHERE post_id = %d AND user_id = %d ORDER BY created",
+        $post->ID,
+        $current_user_id
+    ));
+}
 
 if (post_password_required($post->ID)) {
     Timber::render('single-password.twig', $context);
