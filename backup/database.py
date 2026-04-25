@@ -52,6 +52,7 @@ class DatabaseBackup:
             '--quick',               # For large tables
             '--lock-tables=false',   # Don't lock tables
             '--no-tablespaces',      # Skip tablespaces (requires PROCESS privilege)
+            '--default-character-set=utf8',
             self.config.db_name
         ]
 
