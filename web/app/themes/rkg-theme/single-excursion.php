@@ -232,6 +232,29 @@ if ($current_user_id) {
     ));
 }
 
+$context['google_calendar_url'] = '';
+if (!empty($context['meta']->starttime)) {
+    $start_date = date('Ymd', strtotime($context['meta']->starttime));
+    $end_date = date('Ymd', strtotime($context['meta']->endtime . ' +1 day'));
+
+    $location_url = '';
+    if (!empty($context['meta']->latitude) && !empty($context['meta']->longitude)) {
+        $location_url = 'https://maps.google.com/maps?q='
+            . $context['meta']->latitude . ','
+            . $context['meta']->longitude;
+    }
+
+    $details_text = 'RKG Izlet: ' . $post->post_title;
+
+    $context['google_calendar_url'] = 'https://www.google.com/calendar/render'
+        . '?action=TEMPLATE'
+        . '&text=' . urlencode($post->post_title)
+        . '&dates=' . $start_date . '/' . $end_date
+        . '&details=' . urlencode($details_text)
+        . '&location=' . urlencode($location_url)
+        . '&sf=true&output=xml';
+}
+
 if (post_password_required($post->ID)) {
     Timber::render('single-password.twig', $context);
 } elseif (!current_user_can('edit_excursion')) {
