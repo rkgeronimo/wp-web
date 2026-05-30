@@ -44,7 +44,7 @@
                 <th><label for="rc">Ronilačka kategorija</label></th>
                 <td>
                     <select name="rc">
-                        {% set categories = ["", "R1", "R2", "R3", "R4", "I1", "I2", "I3", "R1T", "R2T"] %}
+                        {% set categories = ["", "R1", "R2", "R3", "R4", "I1", "I2", "I3", "R1T", "R2T", "AOWD"] %}
                         {% for i in categories %}
                             <option value="{{ i }}" {% if i == profileMeta.rc %} selected{% endif %}>{{ i }}</option>
                         {% endfor %}
