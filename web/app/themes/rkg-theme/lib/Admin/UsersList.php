@@ -273,7 +273,8 @@ class UsersList
                 );
 
                 $user = new WP_User($userId);
-                $user->set_role('user');
+                $user->remove_role('member');
+                $user->add_role('user');
             }
             $redirectTo = add_query_arg(
                 'bulk_users_processed',
