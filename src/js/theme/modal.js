@@ -647,6 +647,8 @@ $('.excursion-signout').on('click', (e) => {
 $('.excursion-signup-waiting').on('click', (e) => {
     e.preventDefault();
     const signupId = $(e.currentTarget).data('post');
+    const $btn = $(e.currentTarget);
+    $btn.css('opacity', '0.5');
 
     $.ajax({
         type: 'POST',
@@ -655,9 +657,64 @@ $('.excursion-signup-waiting').on('click', (e) => {
         data: {
             action: 'rkg_user_excursion_signup_waiting',
             post: signupId,
+            notify: 0,
         },
         success: () => {
+            $('#waiting-notify-after-signup').data('post', signupId);
+            $('#waiting-notify-after-signup').prop('checked', false);
             modalOpen('#excursion-signup-waiting-ok');
+        },
+        error: (error) => {
+            console.log(error);
+            $btn.css('opacity', '1');
+        },
+    });
+});
+
+$(document).on('change', '#waiting-notify-after-signup', function () {
+    const $cb = $(this);
+    const postId = $cb.data('post');
+    const notify = $cb.is(':checked') ? 1 : 0;
+
+    if (!postId) return;
+
+    $.ajax({
+        type: 'POST',
+        dataType: 'json',
+        url: rkgTheme.ajaxurl,
+        data: {
+            action: 'rkg_user_excursion_waiting_notify',
+            post: postId,
+            notify,
+        },
+    });
+});
+
+$(document).on('click', '.waiting-notify-toggle', function () {
+    const $icon = $(this);
+    const postId = $icon.data('post');
+    const newNotify = parseInt($icon.attr('data-notify'), 10) === 1 ? 0 : 1;
+
+    if (!postId) return;
+
+    $.ajax({
+        type: 'POST',
+        dataType: 'json',
+        url: rkgTheme.ajaxurl,
+        data: {
+            action: 'rkg_user_excursion_waiting_notify',
+            post: postId,
+            notify: newNotify,
+        },
+        success: () => {
+            $icon.attr('data-notify', newNotify);
+            $icon.toggleClass('fa-bell fa-bell-slash');
+            $icon.attr(
+                'title',
+                newNotify
+                    ? 'Isključi obavijest e-mailom'
+                    : 'Uključi obavijest e-mailom',
+            );
         },
         error: (error) => {
             console.log(error);

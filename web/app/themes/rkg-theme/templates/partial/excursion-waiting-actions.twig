@@ -1,0 +1,8 @@
+<span class="excursion-signout-waiting"
+        data-post="{{ post.ID }}"
+        data-name="{{ post.title }}"
+        data-date="{{ meta.starttime|date('j.n.Y.') }}">Odjavi se sa liste interesa</span>
+<i class="waiting-notify-toggle fas {{ user_waiting_notify ? 'fa-bell' : 'fa-bell-slash' }}"
+   data-post="{{ post.ID }}"
+   data-notify="{{ user_waiting_notify ? '1' : '0' }}"
+   title="{{ user_waiting_notify ? 'Isključi obavijest e-mailom' : 'Uključi obavijest e-mailom' }}"></i>

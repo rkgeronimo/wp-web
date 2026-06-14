@@ -763,6 +763,8 @@ class Users implements InitInterface
         // If guests count in limit, update registered number (decrease)
         if (!empty($excursionStatus->guests_limit)) {
             $wpdb->query("UPDATE $excursionTableName SET registered = registered - 1 WHERE id = {$_POST['post']};");
+
+            Excursions::notifyWaitingList((int) $_POST['post']);
         }
 
         if (!empty($result)) {

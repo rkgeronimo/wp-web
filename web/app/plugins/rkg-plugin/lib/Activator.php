@@ -265,6 +265,7 @@ class Activator
             id mediumint(9) NOT NULL AUTO_INCREMENT PRIMARY KEY,
             user_id mediumint(9) NOT NULL,
             post_id mediumint(9) NOT NULL,
+            notify tinyint(1) DEFAULT 0 NOT NULL,
             created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) $charsetCollate;";

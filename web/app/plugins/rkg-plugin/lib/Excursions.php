@@ -216,4 +216,135 @@ class Excursions implements InitInterface
 
         return $score;
     }
+
+    public static function notifyWaitingList($postId)
+    {
+        global $wpdb;
+
+        error_log('[notifyWaitingList] Called for excursion post_id=' . $postId);
+
+        $metaTable = $wpdb->prefix . 'rkg_excursion_meta';
+        $meta = $wpdb->get_row($wpdb->prepare(
+            "SELECT limitation, registered, waiting, starttime, endtime, "
+            ."deadline, canceled, guests_limit FROM {$metaTable} WHERE id = %d",
+            $postId
+        ));
+
+        if (!$meta) {
+            error_log('[notifyWaitingList] No meta found for post_id=' . $postId);
+            return 0;
+        }
+
+        error_log('[notifyWaitingList] Meta: limitation=' . $meta->limitation
+            . ' canceled=' . $meta->canceled
+            . ' endtime=' . $meta->endtime
+            . ' deadline=' . $meta->deadline);
+
+        // Don't notify if excursion is canceled, in the past, or past deadline
+        if ($meta->canceled) {
+            error_log('[notifyWaitingList] Excursion is canceled, skipping');
+            return 0;
+        }
+
+        $today = current_time('Y-m-d');
+        if ($meta->endtime < $today) {
+            error_log('[notifyWaitingList] Excursion is in the past (endtime=' . $meta->endtime . '), skipping');
+            return 0;
+        }
+        if ($meta->deadline < $today) {
+            error_log('[notifyWaitingList] Deadline has passed (deadline=' . $meta->deadline . '), skipping');
+            return 0;
+        }
+
+        // Count participants (registered includes members + guests if guests_limit)
+        // We need the actual signup count since registered is a cached counter
+        $signupTable = $wpdb->prefix . 'rkg_excursion_signup';
+        $guestTable = $wpdb->prefix . 'rkg_excursion_guest';
+
+        $registeredCount = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$signupTable} WHERE post_id = %d",
+            $postId
+        ));
+
+        if (!empty($meta->guests_limit)) {
+            $guestCount = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$guestTable} WHERE post_id = %d",
+                $postId
+            ));
+            $registeredCount += $guestCount;
+        }
+
+        $freeSpots = (int) $meta->limitation - $registeredCount;
+
+        error_log('[notifyWaitingList] registeredCount=' . $registeredCount
+            . ' freeSpots=' . $freeSpots);
+
+        // No free spots, no notification
+        if ($freeSpots <= 0) {
+            error_log('[notifyWaitingList] No free spots, skipping notification');
+            return 0;
+        }
+
+        // Get waiting list members who opted in
+        $waitingTable = $wpdb->prefix . 'rkg_excursion_waiting';
+        $users = $wpdb->get_results($wpdb->prepare(
+            "SELECT w.user_id, w.created
+            FROM {$waitingTable} w
+            WHERE w.post_id = %d AND w.notify = 1
+            ORDER BY w.created ASC",
+            $postId
+        ));
+
+        error_log('[notifyWaitingList] Waiting list users with notify=1: ' . count($users));
+
+        if (empty($users)) {
+            error_log('[notifyWaitingList] No waiting list users with notify=1, skipping');
+            return 0;
+        }
+
+        $post = get_post($postId);
+        if (!$post) {
+            error_log('[notifyWaitingList] Post not found for id=' . $postId);
+            return 0;
+        }
+
+        $excursionName = $post->post_title;
+        $permalink = get_permalink($postId);
+        $siteName = get_bloginfo('name');
+
+        $subject = sprintf(
+            "RK Geronimo - Oslobodilo se mjesto za izlet: %s",
+            $excursionName
+        );
+
+        error_log('[notifyWaitingList] Subject: ' . $subject);
+        error_log('[notifyWaitingList] Permalink: ' . $permalink);
+
+        $message = sprintf("Bok!"
+            ."\r\n\r\n"
+            ."Oslobodilo se mjesto za izlet \"%s\". Ako i dalje želiš ići možeš se prijaviti na poveznici:\r\n"
+            ."%s\r\n\r\n"
+            ."Tvoj,\r\n"
+            ."RKG web", $excursionName, $permalink);
+
+        $count = 0;
+        foreach ($users as $userRow) {
+            $user = get_userdata($userRow->user_id);
+            if (!$user || empty($user->user_email)) {
+                error_log('[notifyWaitingList] User ' . $userRow->user_id . ' has no valid email, skipping');
+                continue;
+            }
+
+            $headers = array('Content-Type: text/plain; charset=UTF-8', 'From: RK Geronimo <admin@rkg-geronimo.hr>');
+            error_log('[notifyWaitingList] Attempting wp_mail to ' . $user->user_email);
+            $sent = wp_mail($user->user_email, wp_specialchars_decode($subject), $message, $headers);
+            error_log('[notifyWaitingList] wp_mail result: ' . ($sent ? 'true' : 'false'));
+            if ($sent) {
+                $count++;
+            }
+        }
+
+        error_log('[notifyWaitingList] Notified ' . $count . ' waiting list members');
+        return $count;
+    }
 }

@@ -203,21 +203,20 @@ $context['guests'] = $wpdb->get_results(
 );
 
 $context['user_waiting_position'] = 0;
+$context['user_waiting_notify'] = false;
 if ($current_user_id) {
     $waitingTableName = $wpdb->prefix."rkg_excursion_waiting";
-    // Only compute position if the user actually has a row on the waiting list
-    $created = $wpdb->get_var($wpdb->prepare(
-        "SELECT created FROM $waitingTableName WHERE post_id = %d AND user_id = %d",
+    $waitingRow = $wpdb->get_row($wpdb->prepare(
+        "SELECT created, notify FROM $waitingTableName WHERE post_id = %d AND user_id = %d",
         $post->ID, $current_user_id
     ));
-    if ($created) {
+    if ($waitingRow) {
         $context['user_waiting_position'] = (int) $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) + 1 FROM $waitingTableName
              WHERE post_id = %d AND created < %s",
-            $post->ID, $created
+            $post->ID, $waitingRow->created
         ));
-    } else {
-        $context['user_waiting_position'] = 0;
+        $context['user_waiting_notify'] = (bool) $waitingRow->notify;
     }
 }
 

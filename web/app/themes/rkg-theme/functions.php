@@ -285,6 +285,7 @@ function rkg_user_excursion_signup_waiting()
 {
     $info           = array();
     $info['post'] = $_POST['post'];
+    $info['notify'] = !empty($_POST['notify']) ? 1 : 0;
 
     global $wpdb;
     $currentUser = wp_get_current_user();
@@ -294,16 +295,42 @@ function rkg_user_excursion_signup_waiting()
         array(
             'user_id'   => $currentUser->ID,
             'post_id' => $info['post'],
+            'notify'  => $info['notify'],
         )
     );
 
     $tableName = $wpdb->prefix."rkg_excursion_meta";
     $wpdb->query("UPDATE $tableName SET waiting = waiting + 1 WHERE id = {$info['post']};");
 
-    echo json_encode(array('update'=>true, 'message'=>__('Prijava uspješna')));
+    echo json_encode(array('update'=>true, 'message'=>__('Prijava uspješna'), 'notify'=>$info['notify']));
 
     wp_die();
 }
+
+function rkg_user_excursion_waiting_notify()
+{
+    $post_id = intval($_POST['post']);
+    $notify = !empty($_POST['notify']) ? 1 : 0;
+    $user_id = get_current_user_id();
+
+    if (!$user_id || !$post_id) {
+        echo json_encode(array('success' => false));
+        wp_die();
+    }
+
+    global $wpdb;
+    $tableName = $wpdb->prefix . 'rkg_excursion_waiting';
+    $wpdb->update(
+        $tableName,
+        array('notify' => $notify),
+        array('post_id' => $post_id, 'user_id' => $user_id)
+    );
+
+    echo json_encode(array('success' => true, 'notify' => $notify));
+    wp_die();
+}
+
+add_action('wp_ajax_rkg_user_excursion_waiting_notify', 'rkg_user_excursion_waiting_notify');
 
 add_action('wp_ajax_rkg_user_excursion_signup_waiting', 'rkg_user_excursion_signup_waiting');
 
@@ -357,6 +384,8 @@ function rkg_excursion_signout()
     if ($result) {
         $tableName = $wpdb->prefix."rkg_excursion_meta";
         $wpdb->query("UPDATE $tableName SET registered = registered - 1 WHERE id = {$info['post']};");
+
+        RKGeronimo\Excursions::notifyWaitingList($info['post']);
     
         echo json_encode(array('update'=>true, 'message'=>__('odjava uspješna')));
         wp_die();
