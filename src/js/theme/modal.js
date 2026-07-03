@@ -635,8 +635,12 @@ $('.excursion-signout').on('click', (e) => {
     signup = 'course';
     const signupId = $(e.currentTarget).data('post');
     const signoutName = $(e.currentTarget).data('name');
+    const hasGuests = $(e.currentTarget).data('has-guests');
     $('input[name="signout-excursion"]').val(signupId);
     $('.excursion-signout-name').text(signoutName);
+    // Only warn about guest removal when the user actually has guests
+    // registered for this excursion (data-has-guests is emitted by single-excursion.twig).
+    $('.excursion-signout-guest-note').toggle(hasGuests === '1' || hasGuests === 1);
     jQuery.post(rkgTheme.ajaxurl, loginStatus, (response) => {
         if (response === 'yes') {
             modalOpen('#excursion-signout-form');

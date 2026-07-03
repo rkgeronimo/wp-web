@@ -355,9 +355,46 @@ function rkg_excursion_signout()
     );
 
     if ($result) {
-        $tableName = $wpdb->prefix."rkg_excursion_meta";
-        $wpdb->query("UPDATE $tableName SET registered = registered - 1 WHERE id = {$info['post']};");
-    
+        $metaTableName = $wpdb->prefix."rkg_excursion_meta";
+        $wpdb->query("UPDATE $metaTableName SET registered = registered - 1 WHERE id = {$info['post']};");
+
+        // When the user leaves an excursion, any guests they registered must
+        // be removed too. First count the user's guests for this excursion.
+        $guestTableName = $wpdb->prefix."rkg_excursion_guest";
+        $guestCount = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $guestTableName WHERE post_id = %d AND user_id = %d",
+            $info['post'],
+            $currentUser->ID
+        ));
+
+        if ($guestCount > 0) {
+            // Delete all of the user's guests for this excursion.
+            $wpdb->delete(
+                $guestTableName,
+                array(
+                    'user_id' => $currentUser->ID,
+                    'post_id' => $info['post'],
+                )
+            );
+
+            // Guests only count towards the "registered" total when the
+            // excursion enforces a guest limit (guest sign-up in Users.php
+            // mirrors this). So only decrement "registered" by the number of
+            // removed guests in that case, otherwise the count would drift.
+            $excursionMeta = $wpdb->get_row($wpdb->prepare(
+                "SELECT guests_limit FROM $metaTableName WHERE id = %d",
+                $info['post']
+            ));
+
+            if (!empty($excursionMeta->guests_limit)) {
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE $metaTableName SET registered = registered - %d WHERE id = %d",
+                    $guestCount,
+                    $info['post']
+                ));
+            }
+        }
+
         echo json_encode(array('update'=>true, 'message'=>__('odjava uspješna')));
         wp_die();
     }

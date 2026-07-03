@@ -53,7 +53,8 @@
                     {% elseif post.ID in signups.excursions %}
                         <button class="excursion-signout course-signout-button"
                                 data-post="{{ post.ID }}"
-                                data-name="{{ post.title }}">Odjava</button>
+                                data-name="{{ post.title }}"
+                                data-has-guests="{{ myGuests is not empty ? '1' : '0' }}">Odjava</button>
                     {% elseif meta.deadline < now|date('Y-m-d') %}
                         <button class="course-disabled-button">Zaključan</button>
                         {% if post.ID in signups.excursions_waiting %}
