@@ -23,7 +23,6 @@ class MembersList
     public function init()
     {
         add_action('wp_ajax_getMembersList', array($this, 'getMembersList'));
-        add_action('wp_ajax_nopriv_getMembersList', array($this, 'getMembersList'));
     }
 
     /**
@@ -37,6 +36,13 @@ class MembersList
      */
     public function getMembersList()
     {
+        // Member directory exposes names, emails and phone numbers, so it
+        // must not be reachable by logged-out visitors.
+        if (!is_user_logged_in()) {
+            status_header(403);
+            wp_die();
+        }
+
         $context            = Timber::get_context();
         $context['members'] = get_users(array(
             'role__not_in' => array('user'),

@@ -42,7 +42,6 @@ class Users implements InitInterface
         add_action('user_profile_update_errors', array($this, 'validateUserInputs'), 10, 3);
 
         add_action('wp_ajax_brevet_upload', array($this, 'brevetUpload'));
-        add_action('wp_ajax_nopriv_brevet_upload', array($this, 'brevetUpload'));
 
         add_action('wp_ajax_profile_picture_upload', array($this, 'profilePictureUpload'));
 
@@ -317,6 +316,11 @@ class Users implements InitInterface
      */
     public function brevetUpload()
     {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authorized');
+            wp_die();
+        }
+
         // phpcs:disable Zend.NamingConventions.ValidVariableName.NotCamelCaps
         global $current_user;
         get_currentuserinfo();
