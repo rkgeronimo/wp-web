@@ -137,7 +137,10 @@ function rkg_user_additional_details()
     );
 
     $tableName = $wpdb->prefix."rkg_course_meta";
-    $wpdb->query("UPDATE $tableName SET registered = registered + 1 WHERE id = {$info['course']};");
+    $wpdb->query($wpdb->prepare(
+        "UPDATE $tableName SET registered = registered + 1 WHERE id = %d",
+        intval($info['course'])
+    ));
 
     echo json_encode(array('status' => 0, 'message' => __('Prijava uspješna')));
 
@@ -223,11 +226,17 @@ function rkg_user_excursion_signup()
 
     $tableName = $wpdb->prefix."rkg_excursion_meta";
     if ($waiting) {
-        $wpdb->query("UPDATE $tableName SET waiting = waiting - 1 WHERE id = {$info['post']};");
+        $wpdb->query($wpdb->prepare(
+            "UPDATE $tableName SET waiting = waiting - 1 WHERE id = %d",
+            intval($info['post'])
+        ));
     }
 
     if ($result) {
-        $wpdb->query("UPDATE $tableName SET registered = registered + 1 WHERE id = {$info['post']};");
+        $wpdb->query($wpdb->prepare(
+            "UPDATE $tableName SET registered = registered + 1 WHERE id = %d",
+            intval($info['post'])
+        ));
 
         $current_excursion = $wpdb->get_row($wpdb->prepare(
             "SELECT starttime, endtime FROM {$wpdb->prefix}rkg_excursion_meta WHERE id = %d",
@@ -298,7 +307,10 @@ function rkg_user_excursion_signup_waiting()
     );
 
     $tableName = $wpdb->prefix."rkg_excursion_meta";
-    $wpdb->query("UPDATE $tableName SET waiting = waiting + 1 WHERE id = {$info['post']};");
+    $wpdb->query($wpdb->prepare(
+        "UPDATE $tableName SET waiting = waiting + 1 WHERE id = %d",
+        intval($info['post'])
+    ));
 
     echo json_encode(array('update'=>true, 'message'=>__('Prijava uspješna')));
 
@@ -325,9 +337,12 @@ function rkg_course_signout()
 
     if ($result) {
         $tableName = $wpdb->prefix."rkg_course_meta";
-        $wpdb->query("UPDATE $tableName SET registered = registered - 1 WHERE id = {$info['course']};");
-    
-        echo json_encode(array('update'=>true, 'message'=>__('odjava uspješna')));   
+        $wpdb->query($wpdb->prepare(
+            "UPDATE $tableName SET registered = registered - 1 WHERE id = %d",
+            intval($info['course'])
+        ));
+
+        echo json_encode(array('update'=>true, 'message'=>__('odjava uspješna')));
         wp_die(); 
     }
 
@@ -356,7 +371,10 @@ function rkg_excursion_signout()
 
     if ($result) {
         $metaTableName = $wpdb->prefix."rkg_excursion_meta";
-        $wpdb->query("UPDATE $metaTableName SET registered = registered - 1 WHERE id = {$info['post']};");
+        $wpdb->query($wpdb->prepare(
+            "UPDATE $metaTableName SET registered = registered - 1 WHERE id = %d",
+            intval($info['post'])
+        ));
 
         // When the user leaves an excursion, any guests they registered must
         // be removed too. First count the user's guests for this excursion.
@@ -423,7 +441,10 @@ function rkg_excursion_signout_waiting()
     );
 
     $tableName = $wpdb->prefix."rkg_excursion_meta";
-    $wpdb->query("UPDATE $tableName SET waiting = waiting - 1 WHERE id = {$info['post']};");
+    $wpdb->query($wpdb->prepare(
+        "UPDATE $tableName SET waiting = waiting - 1 WHERE id = %d",
+        intval($info['post'])
+    ));
 
     echo json_encode(array('update'=>true, 'message'=>__('odjava uspješna')));
 

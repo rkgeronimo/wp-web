@@ -157,13 +157,14 @@ class Inventory implements InitInterface
         $tableName = $wpdb->prefix."rkg_excursion_gear";
         $tableName2 = $wpdb->prefix."rkg_inventory";
 
-        $originalReservation = $wpdb->get_row(
+        $originalReservation = $wpdb->get_row($wpdb->prepare(
             "
             SELECT *
             FROM $tableName
-            WHERE id = '$reservationId'
-            "
-        );
+            WHERE id = %d
+            ",
+            intval($reservationId)
+        ));
 
         // Add other data types that can be edited
         $allDataKeys = $typeTranslations + array('other' => 'komentar');
@@ -311,16 +312,16 @@ class Inventory implements InitInterface
 
         $where = "WHERE state != " . Definitions::RESERVATION_STATUS_DELETED;
         if (isset($context['request']->get['type'])) {
-            $where .= " AND type = '".$context['request']->get['type']."'";
+            $where .= $wpdb->prepare(" AND type = %s", $context['request']->get['type']);
         }
-        
+
         // optional status filter
         if (isset($context['request']->get['status'])) {
             if ($context['request']->get['status'] === 'all') {
                 // Show all including deleted
                 $where = "";
                 if (isset($context['request']->get['type'])) {
-                    $where = "WHERE type = '".$context['request']->get['type']."'";
+                    $where = $wpdb->prepare("WHERE type = %s", $context['request']->get['type']);
                 }
             } elseif ($context['request']->get['status'] === 'deleted') {
                 // Show only deleted
@@ -566,14 +567,16 @@ class Inventory implements InitInterface
         
         global $wpdb;
         $tableName                   = $wpdb->prefix."rkg_inventory";
-        $result = $wpdb->get_row(
+        $result = $wpdb->get_row($wpdb->prepare(
             "
             SELECT *
             FROM $tableName
-            WHERE id = '$id' AND state = 0
-            AND type = '$type'
-            "
-        );
+            WHERE id = %d AND state = 0
+            AND type = %s
+            ",
+            intval($id),
+            $type
+        ));
 
         if ($result) {
             return true;
@@ -650,21 +653,31 @@ class Inventory implements InitInterface
             );
         }
 
-        $context['itemEdit']         = $wpdb->get_row(
+        $editId = intval($context['request']->get['edit']);
+        $context['itemEdit']         = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM "
             .$tableName
-            ." WHERE id = '".$context['request']->get['edit']."'"
-        );
+            ." WHERE id = %d",
+            $editId
+        ));
 
         $tableName                   = $wpdb->prefix."rkg_excursion_gear";
-        $users         = $wpdb->get_results(
-            "SELECT user_id, updated FROM "
-            .$tableName
-            ." WHERE "
-            .$context['itemEdit']->type.
-            " = '".$context['request']->get['edit']."'"
-            ." LIMIT 10"
-        );
+        // Column name comes from the item record; whitelist it against known
+        // equipment types before using it as an identifier in the query.
+        $allowedTypeColumns = array_keys($this->translateTypes());
+        $typeColumn = (isset($context['itemEdit']->type)
+            && in_array($context['itemEdit']->type, $allowedTypeColumns, true))
+            ? $context['itemEdit']->type : null;
+        $users = array();
+        if ($typeColumn !== null) {
+            $users     = $wpdb->get_results($wpdb->prepare(
+                "SELECT user_id, updated FROM "
+                .$tableName
+                ." WHERE `".$typeColumn."` = %d"
+                ." LIMIT 10",
+                $editId
+            ));
+        }
 
         foreach ($users as $k => $value) {
             $user = new Timber\User($value->user_id);
@@ -706,19 +719,26 @@ class Inventory implements InitInterface
 
         if (isset($context['request']->get['action'])
             && !empty($context['request']->get['ids'])
+            && is_array($context['request']->get['ids'])
             && is_numeric($context['request']->get['action'])
             && $context['request']->get['action'] >= 0) {
-            $ids = implode("', '", $context['request']->get['ids']);
-            $query = "UPDATE $tableName
-                SET state = {$context['request']->get['action']}
-                WHERE id IN ('$ids')
-                ";
-            $wpdb->query($query);
+            $ids = array_map('intval', $context['request']->get['ids']);
+            $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+            $wpdb->query($wpdb->prepare(
+                "UPDATE $tableName
+                SET state = %d
+                WHERE id IN ($placeholders)
+                ",
+                array_merge(
+                    array(intval($context['request']->get['action'])),
+                    $ids
+                )
+            ));
         }
 
         $where = "";
         if (isset($context['request']->get['type'])) {
-            $where = "WHERE type = '".$context['request']->get['type']."'";
+            $where = $wpdb->prepare("WHERE type = %s", $context['request']->get['type']);
         }
         $context['stateCount'] = $wpdb->get_results(
             "SELECT state, COUNT(*) as num
@@ -730,24 +750,29 @@ class Inventory implements InitInterface
         $where     = "";
         $wherePart = array();
         if (isset($context['request']->get['type'])) {
-            $wherePart[] = "type = '".$context['request']->get['type']."'";
+            $wherePart[] = $wpdb->prepare("type = %s", $context['request']->get['type']);
         }
         if (isset($context['request']->get['state'])) {
-            $wherePart[] = "state = '".$context['request']->get['state']."'";
+            $wherePart[] = $wpdb->prepare("state = %d", intval($context['request']->get['state']));
         } else {
             $wherePart[] = "state != 5";
         }
         if (isset($context['request']->get['id'])) {
-            $wherePart[] = "id = '".$context['request']->get['id']."'";
+            $wherePart[] = $wpdb->prepare("id = %d", intval($context['request']->get['id']));
         }
         if (!empty($wherePart)) {
             $where = "WHERE ".implode(" AND ", $wherePart);
         }
 
-        $context['orderby'] = empty($context['request']->get['orderby'])
+        // ORDER BY identifiers cannot be parameterized; whitelist them.
+        $allowedOrderBy = array('id', 'type', 'size', 'state', 'issue_date', 'user_id');
+        $orderByInput = empty($context['request']->get['orderby'])
             ? 'id' : $context['request']->get['orderby'];
-        $context['order']   = empty($context['request']->get['order'])
-            ? 'asc' : $context['request']->get['order'];
+        $context['orderby'] = in_array($orderByInput, $allowedOrderBy, true)
+            ? $orderByInput : 'id';
+        $orderInput = strtolower(empty($context['request']->get['order'])
+            ? 'asc' : $context['request']->get['order']);
+        $context['order'] = ($orderInput === 'desc') ? 'desc' : 'asc';
 
         $context['inventoryItems'] = $wpdb->get_results(
             "

@@ -117,9 +117,9 @@ class Calendar
             $month = date("m", time());
         }
 
-        $this->currentYear  = $year;
-        $this->currentMonth = $month;
-        $this->daysInMonth  = $this->_daysInMonth($month, $year);
+        $this->currentYear  = intval($year);
+        $this->currentMonth = intval($month);
+        $this->daysInMonth  = $this->_daysInMonth($this->currentMonth, $this->currentYear);
         $this->excursions   = $this->excursions();
 
         $content  = '<div id="calendar">'.

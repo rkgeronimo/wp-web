@@ -693,12 +693,15 @@ class Users implements InitInterface
     {
         global $wpdb;
 
+        $postId = intval($_POST['post']);
         $excursionTableName = $wpdb->prefix."rkg_excursion_meta";
-        $excursionStatus = $wpdb->get_row("SELECT  guests_limit, limitation, registered FROM "
-                .$excursionTableName
-                ." WHERE id="
-                .$_POST['post']);
-        
+        $excursionStatus = $wpdb->get_row($wpdb->prepare(
+            "SELECT guests_limit, limitation, registered FROM "
+            .$excursionTableName
+            ." WHERE id = %d",
+            $postId
+        ));
+
         // If limit applies to guests, check availability
         if (!empty($excursionStatus->guests_limit) && $excursionStatus->registered+1 > $excursionStatus->limitation) {
             echo json_encode(array('update' => true, 'message' => __('Izlet je popunjen.')));
@@ -712,7 +715,7 @@ class Users implements InitInterface
             $tableName,
             array(
                 'user_id' => $currentUser->ID,
-                'post_id' => $_POST['post'],
+                'post_id' => $postId,
                 'name'    => $_POST['name'],
                 'email'   => $_POST['email'],
                 'tel'     => $_POST['tel'],
@@ -721,7 +724,10 @@ class Users implements InitInterface
 
         // If guests count in limit, update registered number (increase)
         if (!empty($excursionStatus->guests_limit)) {
-            $wpdb->query("UPDATE $excursionTableName SET registered = registered + 1 WHERE id = {$_POST['post']};");
+            $wpdb->query($wpdb->prepare(
+                "UPDATE $excursionTableName SET registered = registered + 1 WHERE id = %d",
+                $postId
+            ));
         }
 
         if (!empty($result)) {
@@ -744,25 +750,31 @@ class Users implements InitInterface
         $currentUser = wp_get_current_user();
 
         global $wpdb;
+        $postId = intval($_POST['post']);
         $tableName = $wpdb->prefix."rkg_excursion_guest";
         $result = $wpdb->delete(
             $tableName,
             array(
                 'user_id' => $currentUser->ID,
-                'post_id' => $_POST['post'],
+                'post_id' => $postId,
                 'email'   => $_POST['email'],
             )
         );
 
         $excursionTableName = $wpdb->prefix."rkg_excursion_meta";
-        $excursionStatus = $wpdb->get_row("SELECT  guests_limit, registered FROM "
-                .$excursionTableName
-                ." WHERE id="
-                .$_POST['post']);
+        $excursionStatus = $wpdb->get_row($wpdb->prepare(
+            "SELECT guests_limit, registered FROM "
+            .$excursionTableName
+            ." WHERE id = %d",
+            $postId
+        ));
 
         // If guests count in limit, update registered number (decrease)
         if (!empty($excursionStatus->guests_limit)) {
-            $wpdb->query("UPDATE $excursionTableName SET registered = registered - 1 WHERE id = {$_POST['post']};");
+            $wpdb->query($wpdb->prepare(
+                "UPDATE $excursionTableName SET registered = registered - 1 WHERE id = %d",
+                $postId
+            ));
         }
 
         if (!empty($result)) {

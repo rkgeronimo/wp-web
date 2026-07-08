@@ -123,7 +123,7 @@ class Courses implements InitInterface
         global $wpdb;
         $context = Timber::get_context();
 
-        $id = $context['request']->get['post'];
+        $id = intval($context['request']->get['post']);
         $context['post'] = new Timber\Post($id);
 
         $context['participants'] = array();
@@ -253,12 +253,12 @@ class Courses implements InitInterface
             global $wpdb;
             $context = Timber::get_context();
 
-            $id = $context['request']->get['post'];
+            $id = intval($context['request']->get['post']);
             $context['post'] = new Timber\Post($id);
 
             $where = " WHERE post_id=".$id;
             if ($context['request']->get['user']) {
-                $where .= " AND user_id=".$context['request']->get['user'];
+                $where .= " AND user_id=".intval($context['request']->get['user']);
             }
 
             $context['surveys'] = array();
@@ -301,12 +301,12 @@ class Courses implements InitInterface
             global $wpdb;
             $context = Timber::get_context();
 
-            $id = $context['request']->get['post'];
+            $id = intval($context['request']->get['post']);
             $context['post'] = new Timber\Post($id);
 
             $where = " WHERE post_id=".$id;
             if ($context['request']->get['user']) {
-                $where .= " AND user_id=".$context['request']->get['user'];
+                $where .= " AND user_id=".intval($context['request']->get['user']);
             }
 
             $context['surveys'] = array();
@@ -349,13 +349,13 @@ class Courses implements InitInterface
             global $wpdb;
             $context = Timber::get_context();
 
-            $id = $context['request']->get['post'];
+            $id = intval($context['request']->get['post']);
             $context['post'] = new Timber\Post($id);
 
             $and = "";
             if ($context['request']->get['students']) {
                 $context['generate'] = true;
-                $studentsImp = implode(',', $context['request']->get['students']);
+                $studentsImp = implode(',', array_map('intval', $context['request']->get['students']));
                 $and = " AND user_id IN ($studentsImp)";
             }
 
@@ -416,7 +416,7 @@ class Courses implements InitInterface
 
             $where = " WHERE post_id=".$id;
             if ($context['request']->get['user']) {
-                $where .= " AND user_id=".$context['request']->get['user'];
+                $where .= " AND user_id=".intval($context['request']->get['user']);
             }
 
             $templates = array( 'HRSReportSpecialty.twig' );
@@ -449,7 +449,7 @@ class Courses implements InitInterface
             $context = Timber::get_context();
             global $wpdb;
 
-            $id = $context['request']->get['post'];
+            $id = intval($context['request']->get['post']);
             $tableName = $wpdb->prefix."rkg_course_signup";
             $participants = $wpdb->get_results(
                 "SELECT * FROM "
@@ -606,22 +606,24 @@ class Courses implements InitInterface
         if (isset($this->post['submit']) && $this->post['submit'] === 'Save') {
             $context['rkgForm'] = $this->courseTemplateSave($tableName);
         } elseif (isset($this->post['submit']) && $this->post['submit'] === 'Edit') {
-            $context['rkgEdit'] = $this->wpdb->get_row(
+            $context['rkgEdit'] = $this->wpdb->get_row($this->wpdb->prepare(
                 "SELECT id, category, priority, name, location, terms, price,".
                 " limitation, special, temp_categorie, finish_categorie,"
                 ." payment_desc, payment_price, description FROM "
                 .$tableName.
-                " WHERE id = ".$this->post['id']
-            );
+                " WHERE id = %d",
+                intval($this->post['id'])
+            ));
         } elseif (isset($this->post['submit'])
             && $this->post['submit'] === 'Repeat') {
-            $context['rkgEdit'] = $this->wpdb->get_row(
+            $context['rkgEdit'] = $this->wpdb->get_row($this->wpdb->prepare(
                 "SELECT id, category, priority, name, location, terms, price,".
                 " limitation, special, temp_categorie, finish_categorie,".
                 " payment_desc, payment_price, description FROM "
                 .$tableName.
-                " WHERE id = ".$this->post['id']
-            );
+                " WHERE id = %d",
+                intval($this->post['id'])
+            ));
         } elseif (isset($this->post['submit'])
             && $this->post['submit'] === 'Delete') {
             $this->wpdb->delete($tableName, array('id' => $this->post['id']));

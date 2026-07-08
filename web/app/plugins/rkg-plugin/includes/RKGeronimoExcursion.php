@@ -225,7 +225,7 @@ class RKGeronimoExcursion
                 "SELECT registered FROM "
                 .$tableName
                 ." WHERE id = "
-                .$this->post['post_ID']
+                .intval($this->post['post_ID'])
             );
             // Count organizer as registered since added as participant
             $registered = empty($load_registered) ? 1 : $load_registered;
@@ -236,14 +236,14 @@ class RKGeronimoExcursion
                     "SELECT COUNT(*) FROM "
                     .$this->wpdb->prefix."rkg_excursion_guest"
                     ." WHERE post_id="
-                    .$this->post['post_ID']
+                    .intval($this->post['post_ID'])
                 );
 
                 $participantsNumber = $this->wpdb->get_var(
                     "SELECT COUNT(*) FROM "
                     .$this->wpdb->prefix."rkg_excursion_signup"
                     ." WHERE post_id="
-                    .$this->post['post_ID']
+                    .intval($this->post['post_ID'])
                 );
 
                 if (empty($guests_limit)) {
@@ -312,7 +312,10 @@ class RKGeronimoExcursion
                 );
                 $result = $this->wpdb->query($sql);
                 if ($result > 0) {
-                    $this->wpdb->query("UPDATE $metaTableName SET registered = registered + 1 WHERE id = {$this->post['post_ID']};");
+                    $this->wpdb->query($this->wpdb->prepare(
+                        "UPDATE $metaTableName SET registered = registered + 1 WHERE id = %d",
+                        intval($this->post['post_ID'])
+                    ));
                 }
             }
 
@@ -321,7 +324,7 @@ class RKGeronimoExcursion
 
             if ($this->post['pr1']) {
                 $userId = $this->post['pr1'];
-                $postId = $this->post['post_ID'];
+                $postId = intval($this->post['post_ID']);
 
                 // Check if user can be moved from waiting to registered
                 if ($this->moveUserFromWaitingToRegistered($userId, $postId)) {
@@ -334,13 +337,16 @@ class RKGeronimoExcursion
                     $result = $this->wpdb->query($sql);
 
                     if ($result > 0) {
-                        $this->wpdb->query("UPDATE $metaTableName SET registered = registered + 1 WHERE id = {$postId};");
+                        $this->wpdb->query($this->wpdb->prepare(
+                            "UPDATE $metaTableName SET registered = registered + 1 WHERE id = %d",
+                            intval($postId)
+                        ));
                     }
                 }
             }
             if ($this->post['pr2']) {
                 $userId = $this->post['pr2'];
-                $postId = $this->post['post_ID'];
+                $postId = intval($this->post['post_ID']);
 
                 if ($this->moveUserFromWaitingToRegistered($userId, $postId)) {
                     $sql = $this->wpdb->prepare(
@@ -352,13 +358,16 @@ class RKGeronimoExcursion
                     $result = $this->wpdb->query($sql);
 
                     if ($result > 0) {
-                        $this->wpdb->query("UPDATE $metaTableName SET registered = registered + 1 WHERE id = {$postId};");
+                        $this->wpdb->query($this->wpdb->prepare(
+                            "UPDATE $metaTableName SET registered = registered + 1 WHERE id = %d",
+                            intval($postId)
+                        ));
                     }
                 }
             }
             if ($this->post['pr3']) {
                 $userId = $this->post['pr3'];
-                $postId = $this->post['post_ID'];
+                $postId = intval($this->post['post_ID']);
 
                 if ($this->moveUserFromWaitingToRegistered($userId, $postId)) {
                     $sql = $this->wpdb->prepare(
@@ -370,13 +379,16 @@ class RKGeronimoExcursion
                     $result = $this->wpdb->query($sql);
 
                     if ($result > 0) {
-                        $this->wpdb->query("UPDATE $metaTableName SET registered = registered + 1 WHERE id = {$postId};");
+                        $this->wpdb->query($this->wpdb->prepare(
+                            "UPDATE $metaTableName SET registered = registered + 1 WHERE id = %d",
+                            intval($postId)
+                        ));
                     }
                 }
             }
             if ($this->post['pr4']) {
                 $userId = $this->post['pr4'];
-                $postId = $this->post['post_ID'];
+                $postId = intval($this->post['post_ID']);
 
                 if ($this->moveUserFromWaitingToRegistered($userId, $postId)) {
                     $sql = $this->wpdb->prepare(
@@ -388,7 +400,10 @@ class RKGeronimoExcursion
                     $result = $this->wpdb->query($sql);
 
                     if ($result > 0) {
-                        $this->wpdb->query("UPDATE $metaTableName SET registered = registered + 1 WHERE id = {$postId};");
+                        $this->wpdb->query($this->wpdb->prepare(
+                            "UPDATE $metaTableName SET registered = registered + 1 WHERE id = %d",
+                            intval($postId)
+                        ));
                     }
                 }
             }
@@ -547,7 +562,7 @@ class RKGeronimoExcursion
                 "SELECT id, name, organizer, starttime, endtime, deadline,"
                 ." limitation, price, latitude, longitude FROM "
                 .$tableName.
-                " WHERE id = ". $this->post['id']
+                " WHERE id = ".intval($this->post['id'])
             );
         } elseif (isset($this->post['submit'])
             && $this->post['submit'] == 'Repeat') {
@@ -555,7 +570,7 @@ class RKGeronimoExcursion
                 "SELECT name, organizer, limitation, price, latitude,"
                 ." longitude FROM "
                 .$tableName.
-                " WHERE id = ". $this->post['id']
+                " WHERE id = ".intval($this->post['id'])
             );
         } elseif (isset($this->post['submit'])
             && $this->post['submit'] == 'Delete') {
@@ -637,41 +652,47 @@ class RKGeronimoExcursion
         ) {
             $where = array();
             if (!empty($context['request']->post['godina'])) {
-                $where[] = "rem.endtime > '".$context['request']->post['godina']."-01-01'";
-                if ($context['request']->post['godina'] == date("Y")) {
+                $year = intval($context['request']->post['godina']);
+                $where[] = "rem.endtime > '".$year."-01-01'";
+                if ($year == date("Y")) {
                     $where[] = "rem.starttime < ".date("'Y-m-d'");
                 } else {
-                    $where[] = "rem.starttime < '".$context['request']->post['godina']."-12-31'";
+                    $where[] = "rem.starttime < '".$year."-12-31'";
                 }
             } else {
                 $where[] = "rem.endtime < ".date("'Y-m-d'");
             }
             if (!empty($context['request']->post['naziv'])) {
-                $where[] = "p.post_title LIKE '%".$context['request']->post['naziv']."%'";
+                $where[] = $wpdb->prepare(
+                    "p.post_title LIKE %s",
+                    '%'.$wpdb->esc_like($context['request']->post['naziv']).'%'
+                );
             }
             if (!empty($context['request']->post['organizator'])) {
                 $tableNameUsers = $wpdb->prefix."users";
-                $organiser = $wpdb->get_col(
+                $organiser = $wpdb->get_col($wpdb->prepare(
                     "SELECT id FROM ".$tableNameUsers
-                    ." WHERE display_name LIKE '%".$context['request']->post['organizator']."%'"
-                );
+                    ." WHERE display_name LIKE %s",
+                    '%'.$wpdb->esc_like($context['request']->post['organizator']).'%'
+                ));
 
                 if ($organiser) {
-                    $where[] = "p.post_author IN (".implode(',', $organiser).")";
+                    $where[] = "p.post_author IN (".implode(',', array_map('intval', $organiser)).")";
                 } else {
                     $where[] = "1 = 0";
                 }
             }
             if (!empty($context['request']->post['prijavljeni'])) {
                 $tableNameUsers = $wpdb->prefix."users";
-                $participant = $wpdb->get_col(
+                $participant = $wpdb->get_col($wpdb->prepare(
                     "SELECT id FROM ".$tableNameUsers
-                    ." WHERE display_name LIKE '%".$context['request']->post['prijavljeni']."%'"
-                );
+                    ." WHERE display_name LIKE %s",
+                    '%'.$wpdb->esc_like($context['request']->post['prijavljeni']).'%'
+                ));
 
                 $join = "LEFT JOIN ".$thirdJoin." AS s ON rem.id = s.post_id ";
                 if ($participant) {
-                    $where[] = "s.user_id IN (".implode(',', $participant).")";
+                    $where[] = "s.user_id IN (".implode(',', array_map('intval', $participant)).")";
                 } else {
                     $where[] = "1 = 0";
                 }
@@ -760,9 +781,12 @@ class RKGeronimoExcursion
         
         // Update waiting counter if user was on waiting list
         if ($waiting) {
-            $this->wpdb->query("UPDATE $metaTableName SET waiting = waiting - 1 WHERE id = {$postId};");
+            $this->wpdb->query($this->wpdb->prepare(
+                "UPDATE $metaTableName SET waiting = waiting - 1 WHERE id = %d",
+                intval($postId)
+            ));
         }
-        
+
         return true;
     }
 

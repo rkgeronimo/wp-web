@@ -39,7 +39,7 @@ class CourseStatus extends WP_List_Table
 
         ));
 
-        $this->post = $post;
+        $this->post = intval($post);
     }
 
     /**

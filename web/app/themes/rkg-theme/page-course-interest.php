@@ -26,12 +26,14 @@ $context         = Timber::get_context();
 $post            = new TimberPost();
 $context['post'] = $post;
 
+$courseTemplateId = intval($context['request']->get['id']);
+
 $tableName          = $wpdb->prefix."rkg_course_template";
 $context['coursePlaceholder'] = $wpdb->get_row(
     "SELECT * "
     ." FROM "
     .$tableName
-    ." WHERE id=".$context['request']->get['id']
+    ." WHERE id=".$courseTemplateId
     ." ORDER BY priority"
         );
 
@@ -42,7 +44,7 @@ $students = $wpdb->get_col(
     "SELECT user_id FROM "
     .$tableName
     ." WHERE course_template_id="
-    .$context['request']->get['id']
+    .$courseTemplateId
     ." ORDER BY created"
 );
 
@@ -58,7 +60,7 @@ $context['interested'] = $wpdb->get_var(
     "SELECT id FROM "
     .$tableName
     ." WHERE course_template_id="
-    .$context['request']->get['id']
+    .$courseTemplateId
     ." AND user_id = "
     .$currentUser->ID
 );

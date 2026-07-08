@@ -91,7 +91,7 @@ class Excursions implements InitInterface
         global $wpdb;
         $context = Timber::get_context();
 
-        $id = $context['request']->get['post'];
+        $id = intval($context['request']->get['post']);
         $context['post'] = new Timber\Post($id);
 
         $tableName = $wpdb->prefix."rkg_excursion_meta";

@@ -157,19 +157,27 @@ class Reservations extends WP_List_Table
 
         $search = ( isset( $_REQUEST['s'] ) ) ? sanitize_text_field($_REQUEST['s']) : false;
         if ($search) {
-            return $wpdb->get_results(
+            return $wpdb->get_results($wpdb->prepare(
                 "
                 SELECT r.*
                 FROM $tableName AS r
                 JOIN wp_users AS u ON r.user_id = u.ID
                 WHERE (".$statusFilter.") AND (
-                    '".$search."' = r.mask OR '".$search."' = r.regulator OR '".$search."' = r.suit
-                    OR '".$search."' = r.gloves OR '".$search."' = r.fins OR '".$search."' = r.bcd OR '".$search."' = r.lead
-                    OR u.display_name LIKE '%".$search."%'
+                    %s = r.mask OR %s = r.regulator OR %s = r.suit
+                    OR %s = r.gloves OR %s = r.fins OR %s = r.bcd OR %s = r.lead
+                    OR u.display_name LIKE %s
                 )
                 ORDER BY r.id desc
-                "
-            );
+                ",
+                $search,
+                $search,
+                $search,
+                $search,
+                $search,
+                $search,
+                $search,
+                '%'.$wpdb->esc_like($search).'%'
+            ));
         } else {
             return $wpdb->get_results(
                 "

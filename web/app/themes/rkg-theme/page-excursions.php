@@ -41,41 +41,47 @@ if (!empty($_GET['godina'])
 ) {
     $where = array();
     if (!empty($_GET['godina'])) {
-        $where[] = "rem.endtime > '".$_GET['godina']."-01-01'";
-        if ($_GET['godina'] == date("Y")) {
+        $year = intval($_GET['godina']);
+        $where[] = "rem.endtime > '".$year."-01-01'";
+        if ($year == date("Y")) {
             $where[] = "rem.starttime < ".date("'Y-m-d'");
         } else {
-            $where[] = "rem.starttime < '".$_GET['godina']."-12-31'";
+            $where[] = "rem.starttime < '".$year."-12-31'";
         }
     } else {
         $where[] = "rem.endtime < ".date("'Y-m-d'");
     }
     if (!empty($_GET['naziv'])) {
-        $where[] = "p.post_title LIKE '%".$_GET['naziv']."%'";
+        $where[] = $wpdb->prepare(
+            "p.post_title LIKE %s",
+            '%'.$wpdb->esc_like($_GET['naziv']).'%'
+        );
     }
     if (!empty($_GET['organizator'])) {
         $tableNameUsers = $wpdb->prefix."users";
-        $organiser = $wpdb->get_col(
+        $organiser = $wpdb->get_col($wpdb->prepare(
             "SELECT id FROM ".$tableNameUsers
-            ." WHERE display_name LIKE '%".$_GET['organizator']."%'"
-        );
+            ." WHERE display_name LIKE %s",
+            '%'.$wpdb->esc_like($_GET['organizator']).'%'
+        ));
 
         if ($organiser) {
-            $where[] = "p.post_author IN (".implode(',', $organiser).")";
+            $where[] = "p.post_author IN (".implode(',', array_map('intval', $organiser)).")";
         } else {
             $where[] = "1 = 0";
         }
     }
     if (!empty($_GET['prijavljeni'])) {
         $tableNameUsers = $wpdb->prefix."users";
-        $participant = $wpdb->get_col(
+        $participant = $wpdb->get_col($wpdb->prepare(
             "SELECT id FROM ".$tableNameUsers
-            ." WHERE display_name LIKE '%".$_GET['prijavljeni']."%'"
-        );
+            ." WHERE display_name LIKE %s",
+            '%'.$wpdb->esc_like($_GET['prijavljeni']).'%'
+        ));
 
         $join = "LEFT JOIN ".$thirdJoin." AS s ON rem.id = s.post_id ";
         if ($participant) {
-            $where[] = "s.user_id IN (".implode(',', $participant).")";
+            $where[] = "s.user_id IN (".implode(',', array_map('intval', $participant)).")";
         } else {
             $where[] = "1 = 0";
         }
