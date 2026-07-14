@@ -126,9 +126,13 @@ class Reservations extends WP_List_Table
         switch ($column_name) {
             case 'rkg_name':
             case 'excursion':
-                return $item[$column_name];
+                // User-controlled text (member display name, post title) — escape
+                // to prevent stored XSS in this admin list table.
+                return esc_html($item[$column_name]);
 
             default:
+                // Other columns hold intentional markup (equipment templates,
+                // action buttons, status labels) and are built server-side.
                 return $item[$column_name];
         }
     }
@@ -136,7 +140,7 @@ class Reservations extends WP_List_Table
     public function column_comment($item) {
        echo '<span class="dashicons dashicons-admin-comments rkg-popover-control"></span>';
        echo '<div class="rkg-popover">';
-       echo '<textarea name="other">'.$item['comment'].'</textarea>';
+       echo '<textarea name="other">'.esc_textarea($item['comment']).'</textarea>';
     }
 
     private function fetchData() {

@@ -631,7 +631,7 @@ class RKGeronimoExcursion
                 if (!$registered) {
                     $registered = "0";
                 }
-                echo $registered;
+                echo esc_html($registered);
                 break;
         }
     }

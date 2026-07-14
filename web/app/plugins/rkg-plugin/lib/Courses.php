@@ -951,7 +951,7 @@ class Courses implements InitInterface
                     ." WHERE id = "
                     .$postId
                 );
-                echo $registered;
+                echo esc_html($registered);
                 break;
         }
     }

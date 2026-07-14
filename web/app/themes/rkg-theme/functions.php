@@ -89,15 +89,15 @@ function rkg_user_additional_details()
 {
     $info              = array();
     $info['dob']       = date('Y-m-d', strtotime($_POST['dob']));
-    $info['pob']       = $_POST['pob'];
-    $info['oib']       = $_POST['oib'];
-    $info['tel']       = $_POST['tel'];
-    $info['course']    = $_POST['course'];
+    $info['pob']       = sanitize_text_field($_POST['pob']);
+    $info['oib']       = sanitize_text_field($_POST['oib']);
+    $info['tel']       = sanitize_text_field($_POST['tel']);
+    $info['course']    = intval($_POST['course']);
 
-    $info['weight']    = $_POST['weight'];
-    $info['height']    = $_POST['height'];
-    $info['shoe_size']    = $_POST['shoe_size'];
-    $info['shirt_size']    = $_POST['shirt_size'];
+    $info['weight']    = sanitize_text_field($_POST['weight']);
+    $info['height']    = sanitize_text_field($_POST['height']);
+    $info['shoe_size']    = sanitize_text_field($_POST['shoe_size']);
+    $info['shirt_size']    = sanitize_text_field($_POST['shirt_size']);
 
     $currentUser = wp_get_current_user();
     update_user_meta(

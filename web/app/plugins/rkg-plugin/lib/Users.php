@@ -654,8 +654,8 @@ class Users implements InitInterface
             $tableName,
             array(
                 'user_id'   => $currentUser->ID,
-                'post_id' => $_POST['post'],
-                'other' => $_POST['other'],
+                'post_id' => intval($_POST['post']),
+                'other' => sanitize_text_field($_POST['other']),
             )
         );
 
@@ -720,9 +720,9 @@ class Users implements InitInterface
             array(
                 'user_id' => $currentUser->ID,
                 'post_id' => $postId,
-                'name'    => $_POST['name'],
-                'email'   => $_POST['email'],
-                'tel'     => $_POST['tel'],
+                'name'    => sanitize_text_field($_POST['name']),
+                'email'   => sanitize_email($_POST['email']),
+                'tel'     => sanitize_text_field($_POST['tel']),
             )
         );
 
@@ -761,7 +761,7 @@ class Users implements InitInterface
             array(
                 'user_id' => $currentUser->ID,
                 'post_id' => $postId,
-                'email'   => $_POST['email'],
+                'email'   => sanitize_email($_POST['email']),
             )
         );
 

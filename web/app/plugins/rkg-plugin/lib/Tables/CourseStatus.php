@@ -139,18 +139,24 @@ class CourseStatus extends WP_List_Table
     public function column_default($item, $column_name)
     {
         switch ($column_name) {
+            // User-controlled plain-text columns — escape to prevent stored XSS.
             case 'rkg_name':
             case 'rkg_gsm':
             // case 'questionaire':
             case 'email':
-            case 'health':
-            case 'liability':
-            case 'brevet':
-            case 'newbrevet':
             case 'weight':
             case 'height':
             case 'shoe_size':
             case 'shirt_size':
+                return esc_html($item[$column_name]);
+
+            // Columns holding intentional server-built markup (links, inputs,
+            // buttons, image). The user values inside them are escaped where
+            // they are assembled in table_data().
+            case 'health':
+            case 'liability':
+            case 'brevet':
+            case 'newbrevet':
             case 'payed':
             case 'actions':
                 return $item[$column_name];
@@ -247,11 +253,11 @@ class CourseStatus extends WP_List_Table
 
             $brevet = "&nbsp;";
             if (isset($userData->userMeta['brevet']) && $userData->userMeta['brevet']) {
-                $brevet = "<img src='".$userData->userMeta['brevet'][0]."' style='max-width: 100%' />";
+                $brevet = "<img src='".esc_url($userData->userMeta['brevet'][0])."' style='max-width: 100%' />";
             }
             $newBrevet = '<input type="text" style="width: 90%" '
-                .'value="'.$value->new_card.'" '
-                .'name="new_card['.$value->user_id.']"'
+                .'value="'.esc_attr($value->new_card).'" '
+                .'name="new_card['.intval($value->user_id).']"'
                 .'>';
             $payed = '<input type="checkbox" name="payed['.$value->user_id.']"';
             if ($value->payed) {
@@ -260,9 +266,9 @@ class CourseStatus extends WP_List_Table
             $payed = $payed.'>';
 
             $unregisterButton = '<button type="button" class="button button-small rkg-unregister-btn"
-                data-user-id="'.$value->user_id.'"
-                data-course-id="'.$this->post.'"
-                data-user-name="'.$user->data->display_name.'"
+                data-user-id="'.intval($value->user_id).'"
+                data-course-id="'.intval($this->post).'"
+                data-user-name="'.esc_attr($user->data->display_name).'"
                 style="background-color: #dc3232; color: white; border-color: #dc3232;">
                 Odjavi
             </button>';
