@@ -46,7 +46,6 @@ class Users implements InitInterface
         add_action('wp_ajax_profile_picture_upload', array($this, 'profilePictureUpload'));
 
         add_action('wp_ajax_health_survey', array($this, 'helthSurvey'));
-        add_action('wp_ajax_nopriv_helth_survey', array($this, 'helthSurvey'));
 
         add_action('profile_update', array($this, 'updateUserName'));
 
@@ -60,16 +59,12 @@ class Users implements InitInterface
         );
 
         add_action('wp_ajax_gear_reserve', array($this, 'gearReserve'));
-        add_action('wp_ajax_nopriv_gear_reserve', array($this, 'gearReserve'));
 
         add_action('wp_ajax_gear_reserve_no', array($this, 'gearReserveNo'));
-        add_action('wp_ajax_nopriv_gear_reserve_no', array($this, 'gearReserveNo'));
 
         add_action('wp_ajax_guest_invite', array($this, 'guestInvite'));
-        add_action('wp_ajax_nopriv_guest_invite', array($this, 'guestInvite'));
 
         add_action('wp_ajax_guest_uninvite', array($this, 'guestUninvite'));
-        add_action('wp_ajax_nopriv_guest_uninvite', array($this, 'guestUninvite'));
     }
 
     public function createMemberRegistry()
@@ -629,6 +624,9 @@ class Users implements InitInterface
      */
     public function gearReserve()
     {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authorized');
+        }
 
         $currentUser = wp_get_current_user();
         $userId = $currentUser->ID;
@@ -671,6 +669,10 @@ class Users implements InitInterface
      */
     public function gearReserveNo()
     {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authorized');
+        }
+
         $currentUser = wp_get_current_user();
 
         global $wpdb;
@@ -695,6 +697,10 @@ class Users implements InitInterface
      */
     public function guestInvite()
     {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authorized');
+        }
+
         global $wpdb;
 
         $postId = intval($_POST['post']);
@@ -750,6 +756,9 @@ class Users implements InitInterface
      */
     public function guestUninvite()
     {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authorized');
+        }
 
         $currentUser = wp_get_current_user();
 
@@ -858,6 +867,7 @@ class Users implements InitInterface
         $context            = Timber::get_context();
         if(!current_user_can('edit_users')) {
             Timber::render('single-no-pasaran.twig', $context);
+            return;
         }
 
         global $wpdb;
