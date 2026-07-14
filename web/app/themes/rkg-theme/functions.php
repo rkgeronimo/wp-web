@@ -90,6 +90,7 @@ function rkg_user_additional_details()
     if (!is_user_logged_in()) {
         wp_send_json_error('Not authorized');
     }
+    check_ajax_referer('rkg', 'nonce');
 
     $info              = array();
     $info['dob']       = date('Y-m-d', strtotime($_POST['dob']));
@@ -158,6 +159,7 @@ function rkg_course_interest_signup()
     if (!is_user_logged_in()) {
         wp_send_json_error('Not authorized');
     }
+    check_ajax_referer('rkg', 'nonce');
 
     $course      = $_POST['course'];
     $currentUser = wp_get_current_user();
@@ -185,6 +187,7 @@ function rkg_course_not_interest_signup()
     if (!is_user_logged_in()) {
         wp_send_json_error('Not authorized');
     }
+    check_ajax_referer('rkg', 'nonce');
 
     $course      = $_POST['course'];
     $currentUser = wp_get_current_user();
@@ -333,6 +336,7 @@ function rkg_course_signout()
     if (!is_user_logged_in()) {
         wp_send_json_error('Not authorized');
     }
+    check_ajax_referer('rkg', 'nonce');
 
     $info           = array();
     $info['course'] = $_POST['course'];
@@ -370,6 +374,7 @@ function rkg_excursion_signout()
     if (!is_user_logged_in()) {
         wp_send_json_error('Not authorized');
     }
+    check_ajax_referer('rkg', 'nonce');
 
     $info           = array();
     $info['post'] = $_POST['post'];
@@ -444,6 +449,7 @@ function rkg_excursion_signout_waiting()
     if (!is_user_logged_in()) {
         wp_send_json_error('Not authorized');
     }
+    check_ajax_referer('rkg', 'nonce');
 
     $info           = array();
     $info['post'] = $_POST['post'];

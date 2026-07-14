@@ -627,6 +627,7 @@ class Users implements InitInterface
         if (!is_user_logged_in()) {
             wp_send_json_error('Not authorized');
         }
+        check_ajax_referer('rkg', 'nonce');
 
         $currentUser = wp_get_current_user();
         $userId = $currentUser->ID;
@@ -672,6 +673,7 @@ class Users implements InitInterface
         if (!is_user_logged_in()) {
             wp_send_json_error('Not authorized');
         }
+        check_ajax_referer('rkg', 'nonce');
 
         $currentUser = wp_get_current_user();
 
@@ -700,6 +702,7 @@ class Users implements InitInterface
         if (!is_user_logged_in()) {
             wp_send_json_error('Not authorized');
         }
+        check_ajax_referer('rkg', 'nonce');
 
         global $wpdb;
 
@@ -759,6 +762,7 @@ class Users implements InitInterface
         if (!is_user_logged_in()) {
             wp_send_json_error('Not authorized');
         }
+        check_ajax_referer('rkg', 'nonce');
 
         $currentUser = wp_get_current_user();
 

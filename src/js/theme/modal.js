@@ -339,6 +339,7 @@ $('form#additional-details-form').on('submit', (e) => {
         url: rkgTheme.ajaxurl,
         data: {
             action: 'rkg_user_additional_details',
+            nonce: rkgTheme.nonce,
             pob: $('form#additional-details-form #pob').val(),
             dob: $('form#additional-details-form #dob').val(),
             oib: $('form#additional-details-form #oib').val(),
@@ -694,6 +695,7 @@ $('form#excursion-signout-form').on('submit', (e) => {
         url: rkgTheme.ajaxurl,
         data: {
             action: 'rkg_excursion_signout',
+            nonce: rkgTheme.nonce,
             post: $('form#excursion-signout-form #signout-excursion').val(),
         },
         success: (data) => {
@@ -712,6 +714,7 @@ $('form#excursion-signout-waiting-form').on('submit', (e) => {
         url: rkgTheme.ajaxurl,
         data: {
             action: 'rkg_excursion_signout_waiting',
+            nonce: rkgTheme.nonce,
             post: $('form#excursion-signout-form #signout-excursion').val(),
         },
         success: (data) => {
@@ -726,6 +729,7 @@ $('form#gear-form').on('submit', (e) => {
     e.preventDefault();
     const formData  = new FormData($('#gear-form').get(0));
     formData.append('action', 'gear_reserve');
+    formData.append('nonce', rkgTheme.nonce);
 
     jQuery.ajax({
         url: rkgTheme.ajaxurl,
@@ -751,6 +755,7 @@ $('#no-gear').on('click', (e) => {
         url: rkgTheme.ajaxurl,
         data: {
             action: 'gear_reserve_no',
+            nonce: rkgTheme.nonce,
             post: gearId,
         },
         success: () => {
@@ -768,6 +773,7 @@ $('form#excursion-guest-form').on('submit', (e) => {
     e.preventDefault();
     const formData  = new FormData($('#excursion-guest-form').get(0));
     formData.append('action', 'guest_invite');
+    formData.append('nonce', rkgTheme.nonce);
 
     jQuery.ajax({
         url: rkgTheme.ajaxurl,
@@ -797,6 +803,7 @@ $('form#excursion-guest-remove-form').on('submit', (e) => {
     e.preventDefault();
     const formData  = new FormData($('#excursion-guest-remove-form').get(0));
     formData.append('action', 'guest_uninvite');
+    formData.append('nonce', rkgTheme.nonce);
 
     jQuery.ajax({
         url: rkgTheme.ajaxurl,
@@ -822,6 +829,7 @@ $('.course-interested').on('click', (e) => {
         url: rkgTheme.ajaxurl,
         data: {
             action: 'course_interest',
+            nonce: rkgTheme.nonce,
             course,
         },
         success() {
@@ -842,6 +850,7 @@ $('.course-not-interested').on('click', (e) => {
         url: rkgTheme.ajaxurl,
         data: {
             action: 'course_not_interest',
+            nonce: rkgTheme.nonce,
             course,
         },
         success() {

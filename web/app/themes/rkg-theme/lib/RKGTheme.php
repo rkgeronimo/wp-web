@@ -78,6 +78,7 @@ class RKGTheme
             'rkgTheme',
             array(
                 'ajaxurl'        => admin_url('admin-ajax.php'),
+                'nonce'          => wp_create_nonce('rkg'),
             )
         );
     }
