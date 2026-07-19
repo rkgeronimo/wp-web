@@ -178,6 +178,7 @@ jQuery(document).ready(($) => {
             url: rkgTheme.ajaxurl,
             data: {
                 action: 'rkg_course_signout',
+                nonce: rkgTheme.nonce,
                 course: $('form#course-signout-form #signout-course').val(),
             },
             success: (data) => {

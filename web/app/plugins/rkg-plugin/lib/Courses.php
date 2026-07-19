@@ -126,6 +126,10 @@ class Courses implements InitInterface
         $id = intval($context['request']->get['post']);
         $context['post'] = new Timber\Post($id);
 
+        if ($context['request']->post && !current_user_can('edit_courses')) {
+            wp_die('Nedovoljna prava', 403);
+        }
+
         $context['participants'] = array();
         $tableName = $wpdb->prefix."rkg_course_signup";
         $participants = $wpdb->get_results(
@@ -645,8 +649,9 @@ class Courses implements InitInterface
     public function courseInterestPage()
     {
         $context            = Timber::get_context();
-        if(!current_user_can('edit_course')) {
+        if(!current_user_can('edit_courses')) {
             Timber::render('single-no-pasaran.twig', $context);
+            return;
         }
 
         $tableName          = $this->wpdb->prefix."rkg_course_interest";

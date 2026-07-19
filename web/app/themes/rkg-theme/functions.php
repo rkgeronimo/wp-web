@@ -87,6 +87,11 @@ add_action('wp_ajax_nopriv_is_user_logged_in', 'ajax_check_user_logged_in');
 
 function rkg_user_additional_details()
 {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authorized');
+    }
+    check_ajax_referer('rkg', 'nonce');
+
     $info              = array();
     $info['dob']       = date('Y-m-d', strtotime($_POST['dob']));
     $info['pob']       = sanitize_text_field($_POST['pob']);
@@ -148,10 +153,14 @@ function rkg_user_additional_details()
 }
 
 add_action('wp_ajax_rkg_user_additional_details', 'rkg_user_additional_details');
-add_action('wp_ajax_nopriv_rkg_user_additional_details', 'rkg_user_additional_details');
 
 function rkg_course_interest_signup()
 {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authorized');
+    }
+    check_ajax_referer('rkg', 'nonce');
+
     $course      = $_POST['course'];
     $currentUser = wp_get_current_user();
 
@@ -172,10 +181,14 @@ function rkg_course_interest_signup()
 }
 
 add_action('wp_ajax_course_interest', 'rkg_course_interest_signup');
-add_action('wp_ajax_nopriv_course_interest', 'rkg_course_interest_signup');
 
 function rkg_course_not_interest_signup()
 {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authorized');
+    }
+    check_ajax_referer('rkg', 'nonce');
+
     $course      = $_POST['course'];
     $currentUser = wp_get_current_user();
 
@@ -195,7 +208,6 @@ function rkg_course_not_interest_signup()
 }
 
 add_action('wp_ajax_course_not_interest', 'rkg_course_not_interest_signup');
-add_action('wp_ajax_nopriv_course_not_interest', 'rkg_course_not_interest_signup');
 
 function rkg_user_excursion_signup()
 {
@@ -321,6 +333,11 @@ add_action('wp_ajax_rkg_user_excursion_signup_waiting', 'rkg_user_excursion_sign
 
 function rkg_course_signout()
 {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authorized');
+    }
+    check_ajax_referer('rkg', 'nonce');
+
     $info           = array();
     $info['course'] = $_POST['course'];
 
@@ -351,10 +368,14 @@ function rkg_course_signout()
 }
 
 add_action('wp_ajax_rkg_course_signout', 'rkg_course_signout');
-add_action('wp_ajax_nopriv_rkg_course_signout', 'rkg_course_signout');
 
 function rkg_excursion_signout()
 {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authorized');
+    }
+    check_ajax_referer('rkg', 'nonce');
+
     $info           = array();
     $info['post'] = $_POST['post'];
 
@@ -422,10 +443,14 @@ function rkg_excursion_signout()
 }
 
 add_action('wp_ajax_rkg_excursion_signout', 'rkg_excursion_signout');
-add_action('wp_ajax_nopriv_rkg_excursion_signout', 'rkg_excursion_signout');
 
 function rkg_excursion_signout_waiting()
 {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authorized');
+    }
+    check_ajax_referer('rkg', 'nonce');
+
     $info           = array();
     $info['post'] = $_POST['post'];
 
@@ -452,13 +477,15 @@ function rkg_excursion_signout_waiting()
 }
 
 add_action('wp_ajax_rkg_excursion_signout_waiting', 'rkg_excursion_signout_waiting');
-add_action('wp_ajax_nopriv_rkg_excursion_signout_waiting', 'rkg_excursion_signout_waiting');
 
 if(is_admin()){
   remove_action("admin_color_scheme_picker", "admin_color_scheme_picker");
 }
 
 add_filter('show_admin_bar', '__return_false');
+
+// Hide the WordPress version from the generator meta tag
+remove_action('wp_head', 'wp_generator');
 
 add_action( 'admin_menu', 'Wps_remove_tools', 99 );
 function Wps_remove_tools(){
