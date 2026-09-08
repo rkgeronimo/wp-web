@@ -6,7 +6,7 @@ jQuery(document).ready(($) => {
         return `${strArray[2]}.${strArray[1]}.${strArray[0]}.`;
     };
     const layer = L.tileLayer.grayscale(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_32fr_1_8fd00b1f39d5f20b45ee2a57',
         {
             maxZoom: 18,
             attribution:
