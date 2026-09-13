@@ -2,6 +2,7 @@
 namespace RKGeronimo;
 
 use RKGeronimo\Interfaces\InitInterface;
+use RKGeronimo\Helpers\Definitions;
 use RKGeronimo\Helpers\OIB;
 use Timber;
 
@@ -649,14 +650,44 @@ class Users implements InitInterface
 
         global $wpdb;
         $tableName = $wpdb->prefix."rkg_excursion_gear";
-        $wpdb->replace(
-            $tableName,
-            array(
-                'user_id'   => $currentUser->ID,
-                'post_id' => intval($_POST['post']),
-                'other' => sanitize_text_field($_POST['other']),
+        $postId    = isset($_POST['post']) ? absint($_POST['post']) : 0;
+        $other     = isset($_POST['other'])
+            ? sanitize_textarea_field(wp_unslash($_POST['other']))
+            : '';
+
+        $existing = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT id, state FROM $tableName
+                WHERE user_id = %d AND post_id = %d
+                ORDER BY id DESC LIMIT 1",
+                $userId,
+                $postId
             )
         );
+
+        if ($existing) {
+            $update = array('other' => $other);
+            if ((int) $existing->state
+                === Definitions::RESERVATION_STATUS_DELETED
+            ) {
+                $update['state'] = Definitions::RESERVATION_STATUS_PENDING;
+            }
+            $wpdb->update(
+                $tableName,
+                $update,
+                array('id' => $existing->id)
+            );
+        } else {
+            $wpdb->insert(
+                $tableName,
+                array(
+                    'user_id' => $userId,
+                    'post_id' => $postId,
+                    'other'   => $other,
+                    'state'   => Definitions::RESERVATION_STATUS_PENDING,
+                )
+            );
+        }
 
         echo json_encode(array('update' => true, 'message' => __('Spremljeno')));
 
