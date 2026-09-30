@@ -36,12 +36,24 @@ return [
             ADD INDEX idx_state (state)
         ");
 
-        // Add deleted_at timestamp column to track when reservation was deleted
-        $wpdb->query("
-            ALTER TABLE {$tableName}
-            ADD COLUMN deleted_at datetime NULL DEFAULT NULL
-            COMMENT 'Timestamp when reservation was soft deleted'
-        ");
+        $deletedAt = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = %s
+                AND TABLE_NAME = %s
+                AND COLUMN_NAME = 'deleted_at'",
+                DB_NAME,
+                $tableName
+            )
+        );
+
+        if (empty($deletedAt)) {
+            $wpdb->query("
+                ALTER TABLE {$tableName}
+                ADD COLUMN deleted_at datetime NULL DEFAULT NULL
+                COMMENT 'Timestamp when reservation was soft deleted'
+            ");
+        }
 
         // Update existing reservations to have proper status based on current state
         // If all equipment is returned, mark as completed (state=2)

@@ -423,12 +423,121 @@ class Inventory implements InitInterface
             wp_die();
         }
 
+        $reservationId = isset($_POST['reservation_id'])
+            ? intval($_POST['reservation_id'])
+            : 0;
+        $result = $this->softDeleteReservation($reservationId);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(array(
+                'message' => $result->get_error_message(),
+            ));
+            wp_die();
+        }
+
+        wp_send_json_success(array(
+            'message' => 'Reservation deleted successfully',
+        ));
+        wp_die();
+    }
+
+    /**
+     * Assign ciphers or return states on an existing reservation.
+     *
+     * Same write as the Izdavanje opreme save button.
+     *
+     * @param int   $reservationId Reservation id.
+     * @param array $data          Posted equipment fields.
+     *
+     * @return true|\WP_Error
+     */
+    public function issueReservation($reservationId, $data)
+    {
         global $wpdb;
-        $reservationId = isset($_POST['reservation_id']) ? intval($_POST['reservation_id']) : 0;
+        $tableName = $wpdb->prefix."rkg_excursion_gear";
+        $reservation = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $tableName WHERE id = %d",
+            intval($reservationId)
+        ));
+
+        if (!$reservation) {
+            return new \WP_Error(
+                'rkg_not_found',
+                'Reservation not found',
+                array('status' => 404)
+            );
+        }
+
+        if ((int) $reservation->state
+            === Definitions::RESERVATION_STATUS_DELETED
+        ) {
+            return new \WP_Error(
+                'rkg_deleted',
+                'Reservation is deleted',
+                array('status' => 404)
+            );
+        }
+
+        $unavailable = array();
+        foreach (array_keys($this->translateTypes()) as $type) {
+            $returnKey = $type.'_returned';
+            if (isset($data[$returnKey])
+                && ($reservation->$type === null || $reservation->$type === '')
+            ) {
+                unset($data[$returnKey]);
+            }
+
+            if (empty($data[$type])) {
+                continue;
+            }
+            if ((string) $reservation->$type === (string) $data[$type]) {
+                unset($data[$type]);
+                continue;
+            }
+            if (!$this->isInventoryAvailable($data[$type], $type)) {
+                $unavailable[] = $type;
+            }
+        }
+
+        if (!empty($unavailable)) {
+            return new \WP_Error(
+                'rkg_unavailable',
+                'Equipment is not available',
+                array(
+                    'status'    => 400,
+                    'equipment' => $unavailable,
+                )
+            );
+        }
+
+        $data['user_id'] = $reservation->user_id;
+        $this->saveReservation(
+            $reservationId,
+            $this->translateTypes(),
+            $data
+        );
+
+        return true;
+    }
+
+    /**
+     * Soft-delete a reservation and release issued equipment.
+     *
+     * @param int $reservationId Reservation id.
+     *
+     * @return true|\WP_Error
+     */
+    public function softDeleteReservation($reservationId)
+    {
+        global $wpdb;
+        $reservationId = intval($reservationId);
 
         if (!$reservationId) {
-            wp_send_json_error(array('message' => 'Invalid reservation ID'));
-            wp_die();
+            return new \WP_Error(
+                'rkg_invalid',
+                'Invalid reservation ID',
+                array('status' => 400)
+            );
         }
 
         $reservationTable = $wpdb->prefix . 'rkg_excursion_gear';
@@ -440,8 +549,11 @@ class Inventory implements InitInterface
         );
 
         if (!$reservation) {
-            wp_send_json_error(array('message' => 'Reservation not found'));
-            wp_die();
+            return new \WP_Error(
+                'rkg_not_found',
+                'Reservation not found',
+                array('status' => 404)
+            );
         }
 
         // Equipment types to check
@@ -490,6 +602,7 @@ class Inventory implements InitInterface
         }
 
         // Soft delete the reservation: set state to 3 (deleted) and record deletion time
+        $showErrors = $wpdb->hide_errors();
         $result = $wpdb->update(
             $reservationTable,
             array(
@@ -498,14 +611,19 @@ class Inventory implements InitInterface
             ),
             array('id' => $reservationId)
         );
-
-        if ($result === false) {
-            wp_send_json_error(array('message' => 'Failed to delete reservation'));
-            wp_die();
+        if ($showErrors) {
+            $wpdb->show_errors();
         }
 
-        wp_send_json_success(array('message' => 'Reservation deleted successfully'));
-        wp_die();
+        if ($result === false) {
+            return new \WP_Error(
+                'rkg_delete_failed',
+                'Failed to delete reservation',
+                array('status' => 500)
+            );
+        }
+
+        return true;
     }
 
     // Used when adding new reservation from admin panel (not requested by user)

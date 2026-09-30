@@ -197,6 +197,7 @@ class RKGeronimo
             'Blocks',
             'News',
             'Inventory',
+            'Api\\EquipmentReservation',
         );
         foreach ($components as $component) {
             $namespaceComponent = 'RKGeronimo\\'.$component;

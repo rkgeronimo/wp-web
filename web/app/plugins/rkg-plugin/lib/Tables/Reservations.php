@@ -229,7 +229,21 @@ class Reservations extends WP_List_Table
                     $hidden = 1;
                 }
                 $size = '&nbsp;';
-                if (is_array($valueItem['size'])
+                if ($keyItem === 'lead') {
+                    $leadSize = $value->lead_size;
+                    if ($leadSize === null || $leadSize === '') {
+                        $leadSize = get_user_meta(
+                            $value->user_id,
+                            'lead_size',
+                            true
+                        );
+                    }
+                    if ($leadSize !== null && $leadSize !== ''
+                        && $leadSize !== false
+                    ) {
+                        $size = $leadSize;
+                    }
+                } elseif (is_array($valueItem['size'])
                     && property_exists($user, $keyItem.'_size')) {
                     $size = $user->{$keyItem.'_size'};
                 }

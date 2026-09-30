@@ -654,6 +654,9 @@ class Users implements InitInterface
         $other     = isset($_POST['other'])
             ? sanitize_textarea_field(wp_unslash($_POST['other']))
             : '';
+        $leadSize  = isset($_POST['lead_size'])
+            ? sanitize_text_field(wp_unslash($_POST['lead_size']))
+            : '';
 
         $existing = $wpdb->get_row(
             $wpdb->prepare(
@@ -666,7 +669,10 @@ class Users implements InitInterface
         );
 
         if ($existing) {
-            $update = array('other' => $other);
+            $update = array(
+                'other'     => $other,
+                'lead_size' => $leadSize,
+            );
             if ((int) $existing->state
                 === Definitions::RESERVATION_STATUS_DELETED
             ) {
@@ -681,10 +687,11 @@ class Users implements InitInterface
             $wpdb->insert(
                 $tableName,
                 array(
-                    'user_id' => $userId,
-                    'post_id' => $postId,
-                    'other'   => $other,
-                    'state'   => Definitions::RESERVATION_STATUS_PENDING,
+                    'user_id'   => $userId,
+                    'post_id'   => $postId,
+                    'other'     => $other,
+                    'lead_size' => $leadSize,
+                    'state'     => Definitions::RESERVATION_STATUS_PENDING,
                 )
             );
         }
