@@ -42,6 +42,17 @@ class EquipmentReservation implements InitInterface
                 'methods'             => 'GET',
                 'callback'            => array($this, 'listReservations'),
                 'permission_callback' => array($this, 'permissions'),
+                'args'                => array(
+                    'state' => array(
+                        'description' => 'Reservation status id.',
+                        'type'        => 'integer',
+                        'required'    => true,
+                        'enum'        => array(
+                            Definitions::RESERVATION_STATUS_PENDING,
+                            Definitions::RESERVATION_STATUS_ACTIVE,
+                        ),
+                    ),
+                ),
             )
         );
 
@@ -83,21 +94,36 @@ class EquipmentReservation implements InitInterface
     }
 
     /**
-     * Valjane rezervacije: created on or after the floor date.
+     * Reservations of one status, on or after the floor date.
+     * state 0 is Na čekanju, state 1 is Aktivno.
      *
-     * @return \WP_REST_Response|WP_Error
+     * @param WP_REST_Request $request Request.
+     *
+     * @return \WP_REST_Response
      */
-    public function listReservations()
+    public function listReservations(WP_REST_Request $request)
+    {
+        return $this->listByState(intval($request->get_param('state')));
+    }
+
+    /**
+     * Valjane rezervacije: created on or after the floor date,
+     * one reservation status.
+     *
+     * @param int $state Reservation state.
+     *
+     * @return \WP_REST_Response
+     */
+    private function listByState($state)
     {
         global $wpdb;
         $tableName = $wpdb->prefix.'rkg_excursion_gear';
-        $deleted = Definitions::RESERVATION_STATUS_DELETED;
         $rows = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM $tableName
-            WHERE created >= %s AND state != %d
+            WHERE created >= %s AND state = %d
             ORDER BY id DESC",
             self::FLOOR_CREATED,
-            $deleted
+            $state
         ));
 
         $items = array();
@@ -109,7 +135,8 @@ class EquipmentReservation implements InitInterface
     }
 
     /**
-     * Spremi. Same body as GET. Only equipment.*.returned changes.
+     * Spremi. Full reservation writes ciphers. Returned-only body
+     * updates return status.
      *
      * @param WP_REST_Request $request Request.
      *
@@ -224,12 +251,19 @@ class EquipmentReservation implements InitInterface
             ) {
                 $piece = $params['equipment'][$type];
             }
-            if (is_array($piece)
-                && array_key_exists('returned', $piece)
-                && $piece['returned'] !== null
-                && $piece['returned'] !== ''
-            ) {
-                $returned = $piece['returned'];
+            if (is_array($piece)) {
+                if (isset($piece['code'])
+                    && $piece['code'] !== null
+                    && $piece['code'] !== ''
+                ) {
+                    $data[$type] = sanitize_text_field($piece['code']);
+                }
+                if (array_key_exists('returned', $piece)
+                    && $piece['returned'] !== null
+                    && $piece['returned'] !== ''
+                ) {
+                    $returned = $piece['returned'];
+                }
             }
 
             if ($returned === null) {
@@ -305,12 +339,14 @@ class EquipmentReservation implements InitInterface
             ) {
                 $size = $row->lead_size;
             }
+            $declined = get_user_meta($row->user_id, $type, true);
             $equipment[$type] = array(
                 'label'    => $meta['name'],
                 'size'     => ($size === '' || $size === false) ? null : $size,
                 'code'     => ($row->$type === null || $row->$type === '')
                     ? null
                     : (string) $row->$type,
+                'needed'   => ($declined === '' || $declined === false),
                 'returned' => ($returned === null || $returned === '')
                     ? null
                     : (int) $returned,
