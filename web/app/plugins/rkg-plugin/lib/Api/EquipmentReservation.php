@@ -37,21 +37,38 @@ class EquipmentReservation implements InitInterface
     {
         register_rest_route(
             'rkg/v1',
-            '/reservations',
+            '/users',
             array(
                 'methods'             => 'GET',
-                'callback'            => array($this, 'listReservations'),
+                'callback'            => array($this, 'listUsers'),
                 'permission_callback' => array($this, 'permissions'),
-                'args'                => array(
-                    'state' => array(
-                        'description' => 'Reservation status id.',
-                        'type'        => 'integer',
-                        'required'    => true,
-                        'enum'        => array(
-                            Definitions::RESERVATION_STATUS_PENDING,
-                            Definitions::RESERVATION_STATUS_ACTIVE,
+            )
+        );
+
+        register_rest_route(
+            'rkg/v1',
+            '/reservations',
+            array(
+                array(
+                    'methods'             => 'GET',
+                    'callback'            => array($this, 'listReservations'),
+                    'permission_callback' => array($this, 'permissions'),
+                    'args'                => array(
+                        'state' => array(
+                            'description' => 'Reservation status id.',
+                            'type'        => 'integer',
+                            'required'    => true,
+                            'enum'        => array(
+                                Definitions::RESERVATION_STATUS_PENDING,
+                                Definitions::RESERVATION_STATUS_ACTIVE,
+                            ),
                         ),
                     ),
+                ),
+                array(
+                    'methods'             => 'POST',
+                    'callback'            => array($this, 'create'),
+                    'permission_callback' => array($this, 'permissions'),
                 ),
             )
         );
@@ -91,6 +108,164 @@ class EquipmentReservation implements InitInterface
         }
 
         return true;
+    }
+
+    /**
+     * Members, plus attendees of a current R1 course.
+     * Same picker as Izdavanje bez rezervacije.
+     *
+     * @return \WP_REST_Response
+     */
+    public function listUsers()
+    {
+        $users = get_users(array(
+            'role'    => 'member',
+            'orderby' => 'display_name',
+            'order'   => 'ASC',
+        ));
+        $byId = array();
+        foreach ($users as $user) {
+            $byId[(int) $user->ID] = $user;
+        }
+        foreach ($this->courseAttendeeIds() as $id) {
+            if (isset($byId[$id])) {
+                continue;
+            }
+            $user = get_user_by('id', $id);
+            if ($user) {
+                $byId[(int) $user->ID] = $user;
+            }
+        }
+
+        $items = array();
+        foreach ($byId as $user) {
+            $items[] = array(
+                'id'        => (int) $user->ID,
+                'user_name' => $user->display_name,
+            );
+        }
+        usort(
+            $items,
+            function ($left, $right) {
+                return strcasecmp($left['user_name'], $right['user_name']);
+            }
+        );
+
+        return rest_ensure_response($items);
+    }
+
+    /**
+     * New reservation without an excursion. Same as the admin form.
+     *
+     * @param WP_REST_Request $request Request.
+     *
+     * @return \WP_REST_Response|WP_Error
+     */
+    public function create(WP_REST_Request $request)
+    {
+        global $wpdb;
+        $params = $request->get_json_params();
+        if (!is_array($params) || count($params) === 0) {
+            $params = $request->get_body_params();
+        }
+        if (!is_array($params)) {
+            $params = array();
+        }
+
+        $userId = isset($params['user_id']) ? intval($params['user_id']) : 0;
+        if (!$userId || !get_userdata($userId)) {
+            return new WP_Error(
+                'rkg_invalid',
+                'Invalid user',
+                array('status' => 400)
+            );
+        }
+
+        $comment = '';
+        if (isset($params['comment'])) {
+            $comment = sanitize_textarea_field($params['comment']);
+        } elseif (isset($params['other'])) {
+            $comment = sanitize_textarea_field($params['other']);
+        }
+
+        $tableName = $wpdb->prefix.'rkg_excursion_gear';
+        $inserted = $wpdb->insert(
+            $tableName,
+            array(
+                'user_id' => $userId,
+                'other'   => $comment,
+                'state'   => Definitions::RESERVATION_STATUS_PENDING,
+            )
+        );
+        if (!$inserted) {
+            return new WP_Error(
+                'rkg_create_failed',
+                'Failed to create reservation',
+                array('status' => 500)
+            );
+        }
+
+        $reservationId = (int) $wpdb->insert_id;
+        $data = $this->issueData($request);
+        if (is_wp_error($data)) {
+            $wpdb->delete($tableName, array('id' => $reservationId));
+            return $data;
+        }
+        if (isset($params['comment']) && !isset($data['other'])) {
+            $data['other'] = $comment;
+        }
+
+        $inventory = new Inventory();
+        $result = $inventory->issueReservation($reservationId, $data);
+        if (is_wp_error($result)) {
+            $wpdb->delete($tableName, array('id' => $reservationId));
+            return $result;
+        }
+
+        $issued = array();
+        foreach (array_keys((new Definitions())->defineEquipment()) as $type) {
+            if (empty($data[$type])) {
+                continue;
+            }
+            $issued[$type.'_returned'] = Definitions::EQUIPMENT_STATUS_ISSUED;
+        }
+        if (count($issued) > 0) {
+            $wpdb->update(
+                $tableName,
+                $issued,
+                array('id' => $reservationId)
+            );
+        }
+
+        return rest_ensure_response($this->load($reservationId));
+    }
+
+    /**
+     * User ids signed up to an R1 course that has not ended.
+     *
+     * @return int[]
+     */
+    private function courseAttendeeIds()
+    {
+        global $wpdb;
+        $signup = $wpdb->prefix.'rkg_course_signup';
+        $meta = $wpdb->prefix.'rkg_course_meta';
+        $posts = $wpdb->posts;
+        $ids = $wpdb->get_col($wpdb->prepare(
+            "SELECT signup.user_id
+            FROM $signup AS signup
+            LEFT JOIN $meta AS meta ON signup.course_id = meta.id
+            LEFT JOIN $posts AS posts ON posts.ID = meta.id
+            WHERE meta.endtime >= %s
+            AND posts.post_title LIKE %s",
+            current_time('Y-m-d'),
+            '%R1%'
+        ));
+        if (!is_array($ids)) {
+            return array();
+        }
+
+        return array_map('intval', $ids);
     }
 
     /**
