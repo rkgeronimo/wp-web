@@ -9,11 +9,12 @@ use WP_REST_Request;
 /**
  * REST inventory list for the Android app.
  *
+ * @author Josip Razov <joso.razov@gmail.com>
  * @see InitInterface
  *
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class Inventory implements InitInterface
+class Inventory extends ApiEndpoint implements InitInterface
 {
     /**
      * init
@@ -33,14 +34,7 @@ class Inventory implements InitInterface
     public function registerRoutes()
     {
         $definitions = new Definitions();
-        $states = array(
-            Definitions::EQUIPMENT_STATUS_AVAILABLE,
-            Definitions::EQUIPMENT_STATUS_ISSUED,
-            Definitions::EQUIPMENT_STATUS_DAMAGED,
-            Definitions::EQUIPMENT_STATUS_LOST,
-            Definitions::EQUIPMENT_STATUS_WRITTEN_OFF,
-            Definitions::EQUIPMENT_STATUS_DELETED,
-        );
+        $states      = $definitions->getEquipmentStatusValues();
 
         register_rest_route(
             'rkg/v1',
@@ -64,6 +58,19 @@ class Inventory implements InitInterface
                         'required'    => false,
                         'enum'        => $states,
                     ),
+                    'per_page' => array(
+                        'description' => 'Maximum number of items.',
+                        'type'        => 'integer',
+                        'default'     => 200,
+                        'minimum'     => 1,
+                        'maximum'     => 500,
+                    ),
+                    'page' => array(
+                        'description' => 'One-based page of items.',
+                        'type'        => 'integer',
+                        'default'     => 1,
+                        'minimum'     => 1,
+                    ),
                 ),
             )
         );
@@ -81,21 +88,8 @@ class Inventory implements InitInterface
 
     /**
      * Staff only, same capability as the inventory screen.
-     *
-     * @return true|WP_Error
+     * See ApiEndpoint::permissions().
      */
-    public function permissions()
-    {
-        if (!current_user_can('manage_equipment')) {
-            return new WP_Error(
-                'rkg_forbidden',
-                'Unauthorized',
-                array('status' => 401)
-            );
-        }
-
-        return true;
-    }
 
     /**
      * Inventory rows. Deleted (state 5) are omitted unless state=5.
@@ -107,36 +101,55 @@ class Inventory implements InitInterface
     public function listItems(WP_REST_Request $request)
     {
         global $wpdb;
-        $tableName = $wpdb->prefix.'rkg_inventory';
-        $where = array();
-        $args = array();
+        $tableName = $this->inventoryTable();
+        $where     = array();
+        $args      = array();
 
         $type = $request->get_param('type');
         if ($type) {
             $where[] = 'type = %s';
-            $args[] = $type;
+            $args[]  = $type;
         }
 
         $state = $request->get_param('state');
         if ($state === null || $state === '') {
             $where[] = 'state != %d';
-            $args[] = Definitions::EQUIPMENT_STATUS_DELETED;
+            $args[]  = Definitions::EQUIPMENT_STATUS_DELETED;
         } else {
             $where[] = 'state = %d';
-            $args[] = intval($state);
+            $args[]  = intval($state);
         }
 
-        $sql = "SELECT * FROM $tableName WHERE "
-            .implode(' AND ', $where)
-            .' ORDER BY id ASC';
-        $rows = $wpdb->get_results($wpdb->prepare($sql, $args));
+        $filters = implode(' AND ', $where);
+        $total   = intval($wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $tableName WHERE $filters",
+            $args
+        )));
+
+        $perPage = max(1, min(500, intval($request->get_param('per_page'))));
+        $page    = max(1, intval($request->get_param('page')));
+        $args[]  = $perPage;
+        $args[]  = ($page - 1) * $perPage;
+        $rows    = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM $tableName WHERE $filters
+            ORDER BY id ASC
+            LIMIT %d OFFSET %d",
+            $args
+        ));
 
         $items = array();
         foreach ($rows as $row) {
             $items[] = $this->present($row);
         }
 
-        return rest_ensure_response($items);
+        $response = rest_ensure_response($items);
+        $response->header('X-WP-Total', (string) $total);
+        $response->header(
+            'X-WP-TotalPages',
+            (string) ceil($total / $perPage)
+        );
+
+        return $response;
     }
 
     /**
@@ -150,7 +163,7 @@ class Inventory implements InitInterface
     public function updateItem(WP_REST_Request $request)
     {
         global $wpdb;
-        $id = sanitize_text_field($request['id']);
+        $id  = sanitize_text_field($request['id']);
         $row = $this->find($id);
         if (!$row) {
             return new WP_Error(
@@ -165,8 +178,8 @@ class Inventory implements InitInterface
             return $update;
         }
 
-        $tableName = $wpdb->prefix.'rkg_inventory';
-        $result = $wpdb->update(
+        $tableName = $this->inventoryTable();
+        $result    = $wpdb->update(
             $tableName,
             $update,
             array('id' => $id)
@@ -190,7 +203,7 @@ class Inventory implements InitInterface
     private function find($id)
     {
         global $wpdb;
-        $tableName = $wpdb->prefix.'rkg_inventory';
+        $tableName = $this->inventoryTable();
 
         return $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $tableName WHERE id = %s",
@@ -207,25 +220,12 @@ class Inventory implements InitInterface
      */
     private function updateFields(WP_REST_Request $request)
     {
-        $params = $request->get_json_params();
-        if (!is_array($params)) {
-            $params = $request->get_body_params();
-        }
-        if (!is_array($params)) {
-            $params = array();
-        }
+        $params = $this->jsonParams($request);
 
         $definitions = new Definitions();
-        $types = array_keys($definitions->defineEquipment());
-        $states = array(
-            Definitions::EQUIPMENT_STATUS_AVAILABLE,
-            Definitions::EQUIPMENT_STATUS_ISSUED,
-            Definitions::EQUIPMENT_STATUS_DAMAGED,
-            Definitions::EQUIPMENT_STATUS_LOST,
-            Definitions::EQUIPMENT_STATUS_WRITTEN_OFF,
-            Definitions::EQUIPMENT_STATUS_DELETED,
-        );
-        $update = array();
+        $types       = array_keys($definitions->defineEquipment());
+        $states      = $definitions->getEquipmentStatusValues();
+        $update      = array();
 
         if (array_key_exists('type', $params)) {
             $type = sanitize_text_field($params['type']);
@@ -267,7 +267,7 @@ class Inventory implements InitInterface
         }
 
         if (array_key_exists('note', $params)) {
-            $note = $params['note'];
+            $note           = $params['note'];
             $update['note'] = ($note === null)
                 ? ''
                 : sanitize_textarea_field($note);
@@ -292,11 +292,11 @@ class Inventory implements InitInterface
     private function present($row)
     {
         $definitions = new Definitions();
-        $types = $definitions->defineEquipment();
-        $labels = $definitions->getEquipmentStatusLabels();
-        $state = (int) $row->state;
-        $user = $row->user_id ? get_userdata($row->user_id) : null;
-        $type = $row->type;
+        $types       = $definitions->defineEquipment();
+        $labels      = $definitions->getEquipmentStatusLabels();
+        $state       = (int) $row->state;
+        $user        = $row->user_id ? get_userdata($row->user_id) : null;
+        $type        = $row->type;
 
         return array(
             'id'         => (string) $row->id,

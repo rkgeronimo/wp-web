@@ -2,6 +2,7 @@
 namespace RKGeronimo\Api;
 
 use RKGeronimo\Helpers\Definitions;
+use RKGeronimo\Helpers\EquipmentSize;
 use RKGeronimo\Interfaces\InitInterface;
 use RKGeronimo\Inventory;
 use WP_Error;
@@ -10,11 +11,12 @@ use WP_REST_Request;
 /**
  * REST reservations for the Android app.
  *
+ * @author Josip Razov <joso.razov@gmail.com>
  * @see InitInterface
  *
  * @SuppressWarnings(PHPMD.StaticAccess)
  */
-class EquipmentReservation implements InitInterface
+class EquipmentReservation extends ApiEndpoint implements InitInterface
 {
     const FLOOR_CREATED = '2026-09-25 00:00:00';
 
@@ -63,6 +65,19 @@ class EquipmentReservation implements InitInterface
                                 Definitions::RESERVATION_STATUS_ACTIVE,
                             ),
                         ),
+                        'per_page' => array(
+                            'description' => 'Maximum number of items.',
+                            'type'        => 'integer',
+                            'default'     => 100,
+                            'minimum'     => 1,
+                            'maximum'     => 200,
+                        ),
+                        'page' => array(
+                            'description' => 'One-based page of items.',
+                            'type'        => 'integer',
+                            'default'     => 1,
+                            'minimum'     => 1,
+                        ),
                     ),
                 ),
                 array(
@@ -92,25 +107,6 @@ class EquipmentReservation implements InitInterface
     }
 
     /**
-     * Staff only, same capability as the admin screen.
-     * Application Passwords authenticate the REST user.
-     *
-     * @return true|WP_Error
-     */
-    public function permissions()
-    {
-        if (!current_user_can('manage_equipment')) {
-            return new WP_Error(
-                'rkg_forbidden',
-                'Unauthorized',
-                array('status' => 401)
-            );
-        }
-
-        return true;
-    }
-
-    /**
      * Members, plus attendees of a current R1 course.
      * Same picker as Izdavanje bez rezervacije.
      *
@@ -123,7 +119,7 @@ class EquipmentReservation implements InitInterface
             'orderby' => 'display_name',
             'order'   => 'ASC',
         ));
-        $byId = array();
+        $byId  = array();
         foreach ($users as $user) {
             $byId[(int) $user->ID] = $user;
         }
@@ -164,13 +160,7 @@ class EquipmentReservation implements InitInterface
     public function create(WP_REST_Request $request)
     {
         global $wpdb;
-        $params = $request->get_json_params();
-        if (!is_array($params) || count($params) === 0) {
-            $params = $request->get_body_params();
-        }
-        if (!is_array($params)) {
-            $params = array();
-        }
+        $params = $this->jsonParams($request);
 
         $userId = isset($params['user_id']) ? intval($params['user_id']) : 0;
         if (!$userId || !get_userdata($userId)) {
@@ -188,8 +178,12 @@ class EquipmentReservation implements InitInterface
             $comment = sanitize_textarea_field($params['other']);
         }
 
-        $tableName = $wpdb->prefix.'rkg_excursion_gear';
-        $inserted = $wpdb->insert(
+        // The reservation row and the issued inventory rows commit or roll
+        // back together, so a failure cannot leave an orphan reservation
+        // or a phantom equipment claim.
+        $wpdb->query('START TRANSACTION');
+        $tableName = $this->gearTable();
+        $inserted  = $wpdb->insert(
             $tableName,
             array(
                 'user_id' => $userId,
@@ -198,6 +192,8 @@ class EquipmentReservation implements InitInterface
             )
         );
         if (!$inserted) {
+            $wpdb->query('ROLLBACK');
+
             return new WP_Error(
                 'rkg_create_failed',
                 'Failed to create reservation',
@@ -206,9 +202,10 @@ class EquipmentReservation implements InitInterface
         }
 
         $reservationId = (int) $wpdb->insert_id;
-        $data = $this->issueData($request);
+        $data          = $this->issueData($request);
         if (is_wp_error($data)) {
-            $wpdb->delete($tableName, array('id' => $reservationId));
+            $wpdb->query('ROLLBACK');
+
             return $data;
         }
         if (isset($params['comment']) && !isset($data['other'])) {
@@ -216,12 +213,16 @@ class EquipmentReservation implements InitInterface
         }
 
         $inventory = new Inventory();
-        $result = $inventory->issueReservation($reservationId, $data);
+        $result    = $inventory->issueReservation($reservationId, $data);
         if (is_wp_error($result)) {
-            $wpdb->delete($tableName, array('id' => $reservationId));
+            $wpdb->query('ROLLBACK');
+
             return $result;
         }
 
+        // By convention returned = ISSUED marks the equipment as handed
+        // out and not returned yet; softDeleteReservation reads the same
+        // convention.
         $issued = array();
         foreach (array_keys((new Definitions())->defineEquipment()) as $type) {
             if (empty($data[$type])) {
@@ -230,12 +231,23 @@ class EquipmentReservation implements InitInterface
             $issued[$type.'_returned'] = Definitions::EQUIPMENT_STATUS_ISSUED;
         }
         if (count($issued) > 0) {
-            $wpdb->update(
+            $updated = $wpdb->update(
                 $tableName,
                 $issued,
                 array('id' => $reservationId)
             );
+            if ($updated === false) {
+                $wpdb->query('ROLLBACK');
+
+                return new WP_Error(
+                    'rkg_create_failed',
+                    'Failed to create reservation',
+                    array('status' => 500)
+                );
+            }
         }
+
+        $wpdb->query('COMMIT');
 
         return rest_ensure_response($this->load($reservationId));
     }
@@ -249,9 +261,9 @@ class EquipmentReservation implements InitInterface
     {
         global $wpdb;
         $signup = $wpdb->prefix.'rkg_course_signup';
-        $meta = $wpdb->prefix.'rkg_course_meta';
-        $posts = $wpdb->posts;
-        $ids = $wpdb->get_col($wpdb->prepare(
+        $meta   = $wpdb->prefix.'rkg_course_meta';
+        $posts  = $wpdb->posts;
+        $ids    = $wpdb->get_col($wpdb->prepare(
             "SELECT signup.user_id
             FROM $signup AS signup
             LEFT JOIN $meta AS meta ON signup.course_id = meta.id
@@ -278,27 +290,47 @@ class EquipmentReservation implements InitInterface
      */
     public function listReservations(WP_REST_Request $request)
     {
-        return $this->listByState(intval($request->get_param('state')));
+        return $this->listByState(
+            intval($request->get_param('state')),
+            intval($request->get_param('per_page')),
+            intval($request->get_param('page'))
+        );
     }
 
     /**
      * Valjane rezervacije: created on or after the floor date,
      * one reservation status.
      *
-     * @param int $state Reservation state.
+     * @param int $state   Reservation state.
+     * @param int $perPage Items per page.
+     * @param int $page    One-based page.
      *
      * @return \WP_REST_Response
      */
-    private function listByState($state)
+    private function listByState($state, $perPage = 100, $page = 1)
     {
         global $wpdb;
-        $tableName = $wpdb->prefix.'rkg_excursion_gear';
+        $tableName = $this->gearTable();
+        $perPage   = max(1, min(200, $perPage));
+        $page      = max(1, $page);
+        $offset    = ($page - 1) * $perPage;
+
+        $total = intval($wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $tableName
+            WHERE created >= %s AND state = %d",
+            self::FLOOR_CREATED,
+            $state
+        )));
+
         $rows = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM $tableName
             WHERE created >= %s AND state = %d
-            ORDER BY id DESC",
+            ORDER BY id DESC
+            LIMIT %d OFFSET %d",
             self::FLOOR_CREATED,
-            $state
+            $state,
+            $perPage,
+            $offset
         ));
 
         $items = array();
@@ -306,7 +338,14 @@ class EquipmentReservation implements InitInterface
             $items[] = $this->present($row);
         }
 
-        return rest_ensure_response($items);
+        $response = rest_ensure_response($items);
+        $response->header('X-WP-Total', (string) $total);
+        $response->header(
+            'X-WP-TotalPages',
+            (string) ceil($total / $perPage)
+        );
+
+        return $response;
     }
 
     /**
@@ -320,7 +359,7 @@ class EquipmentReservation implements InitInterface
     public function issue(WP_REST_Request $request)
     {
         $reservationId = intval($request['id']);
-        $guard = $this->guard($reservationId);
+        $guard         = $this->guard($reservationId);
         if (is_wp_error($guard)) {
             return $guard;
         }
@@ -331,7 +370,7 @@ class EquipmentReservation implements InitInterface
         }
 
         $inventory = new Inventory();
-        $result = $inventory->issueReservation($reservationId, $data);
+        $result    = $inventory->issueReservation($reservationId, $data);
         if (is_wp_error($result)) {
             return $result;
         }
@@ -349,13 +388,13 @@ class EquipmentReservation implements InitInterface
     public function delete(WP_REST_Request $request)
     {
         $reservationId = intval($request['id']);
-        $guard = $this->guard($reservationId);
+        $guard         = $this->guard($reservationId);
         if (is_wp_error($guard)) {
             return $guard;
         }
 
         $inventory = new Inventory();
-        $result = $inventory->softDeleteReservation($reservationId);
+        $result    = $inventory->softDeleteReservation($reservationId);
         if (is_wp_error($result)) {
             return $result;
         }
@@ -376,8 +415,8 @@ class EquipmentReservation implements InitInterface
     private function guard($reservationId)
     {
         global $wpdb;
-        $tableName = $wpdb->prefix.'rkg_excursion_gear';
-        $created = $wpdb->get_var($wpdb->prepare(
+        $tableName = $this->gearTable();
+        $created   = $wpdb->get_var($wpdb->prepare(
             "SELECT created FROM $tableName WHERE id = %d",
             $reservationId
         ));
@@ -400,14 +439,15 @@ class EquipmentReservation implements InitInterface
      */
     private function issueData(WP_REST_Request $request)
     {
-        $params = $request->get_json_params();
-        if (!is_array($params) || count($params) === 0) {
-            $params = $request->get_body_params();
-        }
+        $params = $this->jsonParams($request);
 
         $definitions = new Definitions();
-        $data = array();
-        $allowed = array(0, 1, 3);
+        $data        = array();
+        $allowed     = array(
+            Definitions::EQUIPMENT_STATUS_AVAILABLE,
+            Definitions::EQUIPMENT_STATUS_ISSUED,
+            Definitions::EQUIPMENT_STATUS_LOST,
+        );
 
         foreach (array_keys($definitions->defineEquipment()) as $type) {
             if (isset($params[$type]) && $params[$type] !== '') {
@@ -415,7 +455,7 @@ class EquipmentReservation implements InitInterface
             }
 
             $returnKey = $type.'_returned';
-            $returned = null;
+            $returned  = null;
             if (isset($params[$returnKey]) && $params[$returnKey] !== '') {
                 $returned = $params[$returnKey];
             }
@@ -473,8 +513,8 @@ class EquipmentReservation implements InitInterface
     private function load($reservationId)
     {
         global $wpdb;
-        $tableName = $wpdb->prefix.'rkg_excursion_gear';
-        $row = $wpdb->get_row($wpdb->prepare(
+        $tableName = $this->gearTable();
+        $row       = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $tableName WHERE id = %d",
             intval($reservationId)
         ));
@@ -498,26 +538,20 @@ class EquipmentReservation implements InitInterface
     private function present($row)
     {
         $definitions = new Definitions();
-        $labels = $definitions->getReservationStatusLabels();
-        $state = (int) $row->state;
-        $user = get_userdata($row->user_id);
-        $excursion = $row->post_id ? get_the_title($row->post_id) : null;
-        $equipment = array();
+        $labels      = $definitions->getReservationStatusLabels();
+        $state       = (int) $row->state;
+        $user        = get_userdata($row->user_id);
+        $excursion   = $row->post_id ? get_the_title($row->post_id) : null;
+        $equipment   = array();
 
         foreach ($definitions->defineEquipment() as $type => $meta) {
-            $returnedKey = $type.'_returned';
-            $returned = $row->$returnedKey;
-            $size = get_user_meta($row->user_id, $type.'_size', true);
-            if ($type === 'lead'
-                && $row->lead_size !== null
-                && $row->lead_size !== ''
-            ) {
-                $size = $row->lead_size;
-            }
-            $declined = get_user_meta($row->user_id, $type, true);
+            $returnedKey      = $type.'_returned';
+            $returned         = $row->$returnedKey;
+            $size             = EquipmentSize::resolve($row, $row->user_id, $type);
+            $declined         = get_user_meta($row->user_id, $type, true);
             $equipment[$type] = array(
                 'label'    => $meta['name'],
-                'size'     => ($size === '' || $size === false) ? null : $size,
+                'size'     => $size,
                 'code'     => ($row->$type === null || $row->$type === '')
                     ? null
                     : (string) $row->$type,

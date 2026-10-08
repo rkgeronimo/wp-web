@@ -685,12 +685,17 @@ class Inventory implements InitInterface
         
         global $wpdb;
         $tableName                   = $wpdb->prefix."rkg_inventory";
+        // FOR UPDATE holds the row lock until the surrounding transaction
+        // commits, so two concurrent reservations cannot claim the same
+        // available piece. Outside a transaction the lock is released
+        // with the statement and the check behaves like a plain SELECT.
         $result = $wpdb->get_row($wpdb->prepare(
             "
             SELECT *
             FROM $tableName
             WHERE id = %d AND state = 0
             AND type = %s
+            FOR UPDATE
             ",
             intval($id),
             $type

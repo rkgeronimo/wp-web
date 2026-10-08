@@ -3,6 +3,7 @@ namespace RKGeronimo\Tables;
 
 use WP_List_Table;
 use RKGeronimo\Helpers\Definitions;
+use RKGeronimo\Helpers\EquipmentSize;
 use Timber;
 
 /**
@@ -230,17 +231,12 @@ class Reservations extends WP_List_Table
                 }
                 $size = '&nbsp;';
                 if ($keyItem === 'lead') {
-                    $leadSize = $value->lead_size;
-                    if ($leadSize === null || $leadSize === '') {
-                        $leadSize = get_user_meta(
-                            $value->user_id,
-                            'lead_size',
-                            true
-                        );
-                    }
-                    if ($leadSize !== null && $leadSize !== ''
-                        && $leadSize !== false
-                    ) {
+                    $leadSize = EquipmentSize::resolve(
+                        $value,
+                        $value->user_id,
+                        'lead'
+                    );
+                    if ($leadSize !== null) {
                         $size = $leadSize;
                     }
                 } elseif (is_array($valueItem['size'])
