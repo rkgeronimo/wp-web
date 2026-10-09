@@ -727,45 +727,6 @@ class Inventory implements InitInterface
         wp_die();
     }
 
-    /**
-     * Issuing and taking back go through reservations, which keep the
-     * reservation row and the inventory row in step. Used by the inventory
-     * API; the admin edit form may still override the state by hand.
-     *
-     * @param object $row    Locked inventory row.
-     * @param array  $update New field values, type and state optional.
-     *
-     * @return true|\WP_Error
-     */
-    public function reservationConflict($row, $update)
-    {
-        $issued    = Definitions::EQUIPMENT_STATUS_ISSUED;
-        $isIssued  = ((int) $row->state === $issued);
-        $newState  = array_key_exists('state', $update)
-            ? (int) $update['state']
-            : (int) $row->state;
-        $typeMoves = array_key_exists('type', $update)
-            && $update['type'] !== $row->type;
-
-        if (!$isIssued && $newState === $issued) {
-            return new \WP_Error(
-                'rkg_issue_via_reservation',
-                'Equipment is issued through a reservation',
-                array('status' => 400)
-            );
-        }
-
-        if ($isIssued && ($newState !== $issued || $typeMoves)) {
-            return new \WP_Error(
-                'rkg_conflict',
-                'Equipment is issued, return it through its reservation',
-                array('status' => 409)
-            );
-        }
-
-        return true;
-    }
-
     private function isInventoryAvailable($id, $type) {
         if (in_array($type, array('lead', 'lead_belt', 'other', 'comment'))) {
             return true;
