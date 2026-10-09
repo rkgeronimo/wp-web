@@ -218,33 +218,6 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
             return $result;
         }
 
-        // By convention returned = ISSUED marks the equipment as handed
-        // out and not returned yet; softDeleteReservation reads the same
-        // convention.
-        $issued = array();
-        foreach (array_keys((new Definitions())->defineEquipment()) as $type) {
-            if (empty($data[$type])) {
-                continue;
-            }
-            $issued[$type.'_returned'] = Definitions::EQUIPMENT_STATUS_ISSUED;
-        }
-        if (count($issued) > 0) {
-            $updated = $wpdb->update(
-                $tableName,
-                $issued,
-                array('id' => $reservationId)
-            );
-            if ($updated === false) {
-                $wpdb->query('ROLLBACK');
-
-                return new WP_Error(
-                    'rkg_create_failed',
-                    'Failed to create reservation',
-                    array('status' => 500)
-                );
-            }
-        }
-
         $wpdb->query('COMMIT');
 
         return rest_ensure_response($this->load($reservationId));

@@ -180,6 +180,7 @@ class Inventory implements InitInterface
 
         foreach ($allDataKeys as $key => $value) {
             $returnKey = $key.'_returned';
+            $issuedNew = false;
 
             // New type of inventory is being rented (not only status change for existing entries)
             if (!empty($data[$key])) {
@@ -217,12 +218,20 @@ class Inventory implements InitInterface
                         )) === false) || $failed;
                     }
 
-                    // Update reservations data
+                    // Update reservations data. A newly issued piece is out,
+                    // so reset a return flag left over from the previous
+                    // piece, otherwise the reservation reads as completed.
+                    $reservationUpdate = array(
+                        $key => $data[$key],
+                    );
+                    if (isset($typeTranslations[$key])) {
+                        $reservationUpdate[$returnKey]
+                            = Definitions::EQUIPMENT_STATUS_ISSUED;
+                        $issuedNew = true;
+                    }
                     $failed = ($wpdb->update(
                         $tableName,
-                        array(
-                            $key => $data[$key],
-                        ),
+                        $reservationUpdate,
                         array('id' => $reservationId)
                     ) === false) || $failed;
                     // Update inventory status
@@ -241,15 +250,19 @@ class Inventory implements InitInterface
             }
 
             if (isset($data[$returnKey])) {
-                // Update reservations data
-                $failed = ($wpdb->update(
-                    $tableName,
-                    array(
-                        $returnKey => $data[$returnKey],
-                    ),
-                    array('id' => $reservationId)
-                ) === false) || $failed;
-                // Update inventory status
+                // Update reservations data. When a new piece was issued in
+                // the same request, the return status belongs to the old
+                // piece only and the flag stays "out" for the new one.
+                if (!$issuedNew) {
+                    $failed = ($wpdb->update(
+                        $tableName,
+                        array(
+                            $returnKey => $data[$returnKey],
+                        ),
+                        array('id' => $reservationId)
+                    ) === false) || $failed;
+                }
+                // Update inventory status of the original piece
                 $failed = ($wpdb->update(
                     $tableName2,
                     array(
@@ -631,7 +644,11 @@ class Inventory implements InitInterface
                             'user_id' => null,
                             'issue_date' => null,
                         ),
-                        array('id' => $equipmentId)
+                        array(
+                            'id' => $equipmentId,
+                            'state' => Definitions::EQUIPMENT_STATUS_ISSUED,
+                            'user_id' => $reservation->user_id,
+                        )
                     );
                 }
                 // If equipment is marked as lost (returned=3), update inventory to lost state
