@@ -664,8 +664,8 @@ class Inventory implements InitInterface
 
     public function checkInventory()
     {
-        $id        = $_POST['id'];
-        $type      = $_POST['type'];
+        $id        = sanitize_text_field(wp_unslash($_POST['id']));
+        $type      = sanitize_text_field(wp_unslash($_POST['type']));
         
 
         $result = $this->isInventoryAvailable($id, $type);
@@ -693,11 +693,11 @@ class Inventory implements InitInterface
             "
             SELECT *
             FROM $tableName
-            WHERE id = %d AND state = 0
+            WHERE id = %s AND state = 0
             AND type = %s
             FOR UPDATE
             ",
-            intval($id),
+            (string) $id,
             $type
         ));
 
@@ -765,22 +765,25 @@ class Inventory implements InitInterface
             $wpdb->update(
                 $tableName,
                 array(
-                    'type' => $post['type'],
-                    'size' => $post['size'],
-                    'state' => $post['status'],
-                    'note' => $post['note'],
+                    'type' => sanitize_text_field(wp_unslash($post['type'])),
+                    'size' => sanitize_text_field(wp_unslash($post['size'])),
+                    'state' => intval($post['status']),
+                    'note' => sanitize_textarea_field(wp_unslash($post['note'])),
                 ),
                 array(
-                    'id' => $post['id'],
+                    'id' => sanitize_text_field(wp_unslash($post['id'])),
                 )
             );
         }
 
-        $editId = intval($context['request']->get['edit']);
+        // Item ids are alphanumeric ciphers (J11, A3201), keep them as
+        // strings; intval() would collapse them to 0 and MySQL type
+        // coercion would then match unrelated rows.
+        $editId = sanitize_text_field(wp_unslash($context['request']->get['edit']));
         $context['itemEdit']         = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM "
             .$tableName
-            ." WHERE id = %d",
+            ." WHERE id = %s",
             $editId
         ));
 
@@ -796,7 +799,7 @@ class Inventory implements InitInterface
             $users     = $wpdb->get_results($wpdb->prepare(
                 "SELECT user_id, updated FROM "
                 .$tableName
-                ." WHERE `".$typeColumn."` = %d"
+                ." WHERE `".$typeColumn."` = %s"
                 ." LIMIT 10",
                 $editId
             ));
@@ -845,8 +848,11 @@ class Inventory implements InitInterface
             && is_array($context['request']->get['ids'])
             && is_numeric($context['request']->get['action'])
             && $context['request']->get['action'] >= 0) {
-            $ids = array_map('intval', $context['request']->get['ids']);
-            $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+            $ids = array_map(
+                'sanitize_text_field',
+                wp_unslash($context['request']->get['ids'])
+            );
+            $placeholders = implode(',', array_fill(0, count($ids), '%s'));
             $wpdb->query($wpdb->prepare(
                 "UPDATE $tableName
                 SET state = %d
@@ -881,7 +887,10 @@ class Inventory implements InitInterface
             $wherePart[] = "state != 5";
         }
         if (isset($context['request']->get['id'])) {
-            $wherePart[] = $wpdb->prepare("id = %d", intval($context['request']->get['id']));
+            $wherePart[] = $wpdb->prepare(
+                "id = %s",
+                sanitize_text_field(wp_unslash($context['request']->get['id']))
+            );
         }
         if (!empty($wherePart)) {
             $where = "WHERE ".implode(" AND ", $wherePart);
@@ -975,12 +984,11 @@ class Inventory implements InitInterface
             return;
         }
 
-        $sanitizedIds = array_map('sanitize_text_field', $ids);
-        $sanitizedIds = array_map('intval', $sanitizedIds);
+        $sanitizedIds = array_map('sanitize_text_field', wp_unslash($ids));
 
         global $wpdb;
         $tableName = $wpdb->prefix . 'rkg_inventory';
-        $placeholders = implode(',', array_fill(0, count($sanitizedIds), '%d'));
+        $placeholders = implode(',', array_fill(0, count($sanitizedIds), '%s'));
         
         $result = $wpdb->query($wpdb->prepare(
             "DELETE FROM $tableName WHERE id IN ($placeholders) AND state = 5",
