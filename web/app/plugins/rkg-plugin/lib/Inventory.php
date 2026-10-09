@@ -618,6 +618,14 @@ class Inventory implements InitInterface
             );
         }
 
+        // Already deleted: its equipment was released the first time and
+        // may be issued to someone else by now, so a retry must not touch it.
+        if ((int) $reservation->state
+            === Definitions::RESERVATION_STATUS_DELETED
+        ) {
+            return true;
+        }
+
         // Equipment types to check
         $equipmentTypes = array('mask', 'regulator', 'suit', 'boots', 'gloves', 'fins', 'bcd', 'lead');
 
@@ -636,7 +644,9 @@ class Inventory implements InitInterface
                 // release it back to available (state=0)
                 // If equipment is lost (returned=3), keep it as lost
                 if ($returnedStatus === null || $returnedStatus == 1) {
-                    // Release equipment: set state to 0 (available), clear user_id and issue_date
+                    // Release equipment: set state to 0 (available), clear user_id and issue_date.
+                    // Only while the piece is still issued to this member,
+                    // it may have been reassigned in the meantime.
                     $wpdb->update(
                         $inventoryTable,
                         array(
