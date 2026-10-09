@@ -3,6 +3,7 @@ namespace RKGeronimo\Api;
 
 use RKGeronimo\Helpers\Definitions;
 use RKGeronimo\Interfaces\InitInterface;
+use RKGeronimo\Inventory as InventoryRules;
 use WP_Error;
 use WP_REST_Request;
 
@@ -61,7 +62,7 @@ class Inventory extends ApiEndpoint implements InitInterface
                     'per_page' => array(
                         'description' => 'Maximum number of items.',
                         'type'        => 'integer',
-                        'default'     => 200,
+                        'default'     => 500,
                         'minimum'     => 1,
                         'maximum'     => 500,
                     ),
@@ -163,9 +164,23 @@ class Inventory extends ApiEndpoint implements InitInterface
     public function updateItem(WP_REST_Request $request)
     {
         global $wpdb;
-        $id  = sanitize_text_field($request['id']);
-        $row = $this->find($id);
+        $id     = sanitize_text_field($request['id']);
+        $update = $this->updateFields($request);
+        if (is_wp_error($update)) {
+            return $update;
+        }
+
+        // Lock the row like the reservation availability check does, so
+        // an item cannot change while a reservation is claiming it.
+        $tableName = $this->inventoryTable();
+        $wpdb->query('START TRANSACTION');
+        $row = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $tableName WHERE id = %s FOR UPDATE",
+            $id
+        ));
         if (!$row) {
+            $wpdb->query('ROLLBACK');
+
             return new WP_Error(
                 'rkg_not_found',
                 'Inventory item not found',
@@ -173,24 +188,29 @@ class Inventory extends ApiEndpoint implements InitInterface
             );
         }
 
-        $update = $this->updateFields($request);
-        if (is_wp_error($update)) {
-            return $update;
+        $inventory = new InventoryRules();
+        $conflict  = $inventory->reservationConflict($row, $update);
+        if (is_wp_error($conflict)) {
+            $wpdb->query('ROLLBACK');
+
+            return $conflict;
         }
 
-        $tableName = $this->inventoryTable();
-        $result    = $wpdb->update(
+        $result = $wpdb->update(
             $tableName,
             $update,
             array('id' => $id)
         );
         if ($result === false) {
+            $wpdb->query('ROLLBACK');
+
             return new WP_Error(
                 'rkg_update_failed',
                 'Failed to update inventory item',
                 array('status' => 500)
             );
         }
+        $wpdb->query('COMMIT');
 
         return rest_ensure_response($this->present($this->find($id)));
     }

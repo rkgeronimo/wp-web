@@ -178,6 +178,14 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
             $comment = sanitize_textarea_field($params['other']);
         }
 
+        $data = $this->issueData($request);
+        if (is_wp_error($data)) {
+            return $data;
+        }
+        if (isset($params['comment']) && !isset($data['other'])) {
+            $data['other'] = $comment;
+        }
+
         // The reservation row and the issued inventory rows commit or roll
         // back together, so a failure cannot leave an orphan reservation
         // or a phantom equipment claim.
@@ -202,16 +210,6 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
         }
 
         $reservationId = (int) $wpdb->insert_id;
-        $data          = $this->issueData($request);
-        if (is_wp_error($data)) {
-            $wpdb->query('ROLLBACK');
-
-            return $data;
-        }
-        if (isset($params['comment']) && !isset($data['other'])) {
-            $data['other'] = $comment;
-        }
-
         $inventory = new Inventory();
         $result    = $inventory->issueReservation($reservationId, $data);
         if (is_wp_error($result)) {
@@ -358,6 +356,7 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
      */
     public function issue(WP_REST_Request $request)
     {
+        global $wpdb;
         $reservationId = intval($request['id']);
         $guard         = $this->guard($reservationId);
         if (is_wp_error($guard)) {
@@ -369,11 +368,18 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
             return $data;
         }
 
+        // The availability check locks inventory rows with FOR UPDATE, which
+        // only holds until commit inside a transaction. Without it two
+        // requests could claim the same piece.
+        $wpdb->query('START TRANSACTION');
         $inventory = new Inventory();
         $result    = $inventory->issueReservation($reservationId, $data);
         if (is_wp_error($result)) {
+            $wpdb->query('ROLLBACK');
+
             return $result;
         }
+        $wpdb->query('COMMIT');
 
         return rest_ensure_response($this->load($reservationId));
     }
