@@ -21,6 +21,20 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
     const FLOOR_CREATED = '2026-09-25 00:00:00';
 
     /**
+     * Equipment definitions, built once per request for present().
+     *
+     * @var array|null
+     */
+    private $equipmentMeta;
+
+    /**
+     * Reservation status labels, built once per request for present().
+     *
+     * @var array|null
+     */
+    private $reservationLabels;
+
+    /**
      * init
      *
      * @return void
@@ -518,14 +532,18 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
      */
     private function present($row)
     {
-        $definitions = new Definitions();
-        $labels      = $definitions->getReservationStatusLabels();
+        if ($this->equipmentMeta === null) {
+            $definitions             = new Definitions();
+            $this->equipmentMeta     = $definitions->defineEquipment();
+            $this->reservationLabels = $definitions->getReservationStatusLabels();
+        }
+        $labels      = $this->reservationLabels;
         $state       = (int) $row->state;
         $user        = get_userdata($row->user_id);
         $excursion   = $row->post_id ? get_the_title($row->post_id) : null;
         $equipment   = array();
 
-        foreach ($definitions->defineEquipment() as $type => $meta) {
+        foreach ($this->equipmentMeta as $type => $meta) {
             $returnedKey      = $type.'_returned';
             $returned         = $row->$returnedKey;
             $size             = EquipmentSize::resolve($row, $row->user_id, $type);
