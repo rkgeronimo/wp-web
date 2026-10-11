@@ -40,37 +40,44 @@ class Inventory extends ApiEndpoint implements InitInterface
             'rkg/v1',
             '/inventory',
             array(
-                'methods'             => 'GET',
-                'callback'            => array($this, 'listItems'),
-                'permission_callback' => array($this, 'permissions'),
-                'args'                => array(
-                    'type'  => array(
-                        'description' => 'Equipment type key.',
-                        'type'        => 'string',
-                        'required'    => false,
-                        'enum'        => array_keys(
-                            $definitions->defineEquipment()
+                array(
+                    'methods'             => 'GET',
+                    'callback'            => array($this, 'listItems'),
+                    'permission_callback' => array($this, 'permissions'),
+                    'args'                => array(
+                        'type'  => array(
+                            'description' => 'Equipment type key.',
+                            'type'        => 'string',
+                            'required'    => false,
+                            'enum'        => array_keys(
+                                $definitions->defineEquipment()
+                            ),
+                        ),
+                        'state' => array(
+                            'description' => 'Inventory status id.',
+                            'type'        => 'integer',
+                            'required'    => false,
+                            'enum'        => $states,
+                        ),
+                        'per_page' => array(
+                            'description' => 'Maximum number of items.',
+                            'type'        => 'integer',
+                            'default'     => 500,
+                            'minimum'     => 1,
+                            'maximum'     => 500,
+                        ),
+                        'page' => array(
+                            'description' => 'One-based page of items.',
+                            'type'        => 'integer',
+                            'default'     => 1,
+                            'minimum'     => 1,
                         ),
                     ),
-                    'state' => array(
-                        'description' => 'Inventory status id.',
-                        'type'        => 'integer',
-                        'required'    => false,
-                        'enum'        => $states,
-                    ),
-                    'per_page' => array(
-                        'description' => 'Maximum number of items.',
-                        'type'        => 'integer',
-                        'default'     => 500,
-                        'minimum'     => 1,
-                        'maximum'     => 500,
-                    ),
-                    'page' => array(
-                        'description' => 'One-based page of items.',
-                        'type'        => 'integer',
-                        'default'     => 1,
-                        'minimum'     => 1,
-                    ),
+                ),
+                array(
+                    'methods'             => 'POST',
+                    'callback'            => array($this, 'createItem'),
+                    'permission_callback' => array($this, 'permissions'),
                 ),
             )
         );
@@ -148,6 +155,76 @@ class Inventory extends ApiEndpoint implements InitInterface
             'X-WP-TotalPages',
             (string) ceil($total / $perPage)
         );
+
+        return $response;
+    }
+
+    /**
+     * Add one item. Same fields as the inventory add form:
+     * id, type, size, plus an optional note. New items start available.
+     *
+     * @param WP_REST_Request $request Request.
+     *
+     * @return \WP_REST_Response|WP_Error
+     */
+    public function createItem(WP_REST_Request $request)
+    {
+        global $wpdb;
+        $params = $this->jsonParams($request);
+        $id     = isset($params['id']) && is_scalar($params['id'])
+            ? trim((string) $params['id'])
+            : '';
+        if (!preg_match('/^[A-Za-z0-9]{1,60}$/', $id)) {
+            return new WP_Error(
+                'rkg_invalid',
+                'Invalid inventory id',
+                array('status' => 400)
+            );
+        }
+        if (!array_key_exists('type', $params)) {
+            return new WP_Error(
+                'rkg_invalid',
+                'Invalid equipment type',
+                array('status' => 400)
+            );
+        }
+
+        $fields = $this->updateFields($request);
+        if (is_wp_error($fields)) {
+            return $fields;
+        }
+
+        if ($this->find($id)) {
+            return new WP_Error(
+                'rkg_exists',
+                'Inventory item already exists',
+                array('status' => 409)
+            );
+        }
+
+        $fields['state'] = Definitions::EQUIPMENT_STATUS_AVAILABLE;
+        $result          = $wpdb->insert(
+            $this->inventoryTable(),
+            array_merge(
+                array(
+                    'id'        => $id,
+                    'size'      => '',
+                    'thickness' => '',
+                    'note'      => '',
+                ),
+                $fields
+            )
+        );
+        if (!$result) {
+            return new WP_Error(
+                'rkg_create_failed',
+                'Failed to create inventory item',
+                array('status' => 500)
+            );
+        }
+
+        $response = rest_ensure_response($this->present($this->find($id)));
+        $response->set_status(201);
 
         return $response;
     }
