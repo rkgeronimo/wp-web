@@ -30,7 +30,12 @@ return [
             COMMENT 'Reservation status: 0=Pending, 1=Active, 2=Completed, 3=Deleted'
         ");
 
-        // Add index on state column for better query performance
+        // Add index on state column for better query performance.
+        // INFORMATION_SCHEMA.STATISTICS returns one row per existing index,
+        // so a non-empty result means idx_state is already present. We only
+        // run ADD INDEX when the lookup is empty; MySQL has no
+        // "ADD INDEX IF NOT EXISTS", and re-adding an existing index throws
+        // "Duplicate key name", which would abort a re-run of this migration.
         $idxState = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS
