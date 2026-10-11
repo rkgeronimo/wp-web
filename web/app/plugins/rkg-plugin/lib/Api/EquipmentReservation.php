@@ -171,20 +171,21 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
             );
         }
 
+        $data = $this->issueData($request);
+        if (is_wp_error($data)) {
+            return $data;
+        }
+
+        // Single source of truth for the comment. `comment` is the app's
+        // field name and wins over the `other` alias issueData() may have
+        // read; both the reservation row and $data use this one value.
         $comment = '';
         if (isset($params['comment'])) {
             $comment = sanitize_textarea_field($params['comment']);
         } elseif (isset($params['other'])) {
             $comment = sanitize_textarea_field($params['other']);
         }
-
-        $data = $this->issueData($request);
-        if (is_wp_error($data)) {
-            return $data;
-        }
-        if (isset($params['comment']) && !isset($data['other'])) {
-            $data['other'] = $comment;
-        }
+        $data['other'] = $comment;
 
         // The reservation row and the issued inventory rows commit or roll
         // back together, so a failure cannot leave an orphan reservation
@@ -309,14 +310,7 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
             $items[] = $this->present($row);
         }
 
-        $response = rest_ensure_response($items);
-        $response->header('X-WP-Total', (string) $total);
-        $response->header(
-            'X-WP-TotalPages',
-            (string) ceil($total / $perPage)
-        );
-
-        return $response;
+        return $this->paginatedResponse($items, $total, $perPage);
     }
 
     /**

@@ -76,4 +76,27 @@ abstract class ApiEndpoint
 
         return $wpdb->prefix.'rkg_inventory';
     }
+
+    /**
+     * List response carrying the WP pagination headers the app reads.
+     *
+     * @param array $items   Presented rows.
+     * @param int   $total   Total rows matching the query.
+     * @param int   $perPage Items per page, already clamped to >= 1.
+     *
+     * @return \WP_REST_Response
+     */
+    protected function paginatedResponse(array $items, $total, $perPage)
+    {
+        $total    = (int) $total;
+        $perPage  = max(1, (int) $perPage);
+        $response = rest_ensure_response($items);
+        $response->header('X-WP-Total', (string) $total);
+        $response->header(
+            'X-WP-TotalPages',
+            (string) (int) ceil($total / $perPage)
+        );
+
+        return $response;
+    }
 }

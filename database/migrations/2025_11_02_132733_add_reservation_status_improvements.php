@@ -31,10 +31,23 @@ return [
         ");
 
         // Add index on state column for better query performance
-        $wpdb->query("
-            ALTER TABLE {$tableName}
-            ADD INDEX idx_state (state)
-        ");
+        $idxState = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS
+                WHERE TABLE_SCHEMA = %s
+                AND TABLE_NAME = %s
+                AND INDEX_NAME = 'idx_state'",
+                DB_NAME,
+                $tableName
+            )
+        );
+
+        if (empty($idxState)) {
+            $wpdb->query("
+                ALTER TABLE {$tableName}
+                ADD INDEX idx_state (state)
+            ");
+        }
 
         $deletedAt = $wpdb->get_results(
             $wpdb->prepare(
