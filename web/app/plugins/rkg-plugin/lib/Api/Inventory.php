@@ -149,14 +149,7 @@ class Inventory extends ApiEndpoint implements InitInterface
             $items[] = $this->present($row);
         }
 
-        $response = rest_ensure_response($items);
-        $response->header('X-WP-Total', (string) $total);
-        $response->header(
-            'X-WP-TotalPages',
-            (string) ceil($total / $perPage)
-        );
-
-        return $response;
+        return $this->paginatedResponse($items, $total, $perPage);
     }
 
     /**
