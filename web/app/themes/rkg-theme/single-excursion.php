@@ -183,9 +183,11 @@ $tableName = $wpdb->prefix."rkg_excursion_gear";
 $context['gear'] = array();
 if ($current_user_id) {
     $context['gear'] = $wpdb->get_col($wpdb->prepare(
-        "SELECT user_id FROM $tableName WHERE post_id = %d AND user_id = %d",
+        "SELECT user_id FROM $tableName
+        WHERE post_id = %d AND user_id = %d AND state != %d",
         $post->ID,
-        $current_user_id
+        $current_user_id,
+        \RKGeronimo\Helpers\Definitions::RESERVATION_STATUS_DELETED
     ));
 }
 

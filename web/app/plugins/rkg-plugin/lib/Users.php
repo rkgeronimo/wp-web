@@ -654,6 +654,9 @@ class Users implements InitInterface
         $other     = isset($_POST['other'])
             ? sanitize_textarea_field(wp_unslash($_POST['other']))
             : '';
+        $leadSize  = isset($_POST['lead_size'])
+            ? sanitize_text_field(wp_unslash($_POST['lead_size']))
+            : '';
 
         $existing = $wpdb->get_row(
             $wpdb->prepare(
@@ -666,11 +669,21 @@ class Users implements InitInterface
         );
 
         if ($existing) {
-            $update = array('other' => $other);
+            $update = array(
+                'other'     => $other,
+                'lead_size' => $leadSize,
+            );
             if ((int) $existing->state
                 === Definitions::RESERVATION_STATUS_DELETED
             ) {
                 $update['state'] = Definitions::RESERVATION_STATUS_PENDING;
+                // Deleting released the pieces, so the revived reservation
+                // starts empty instead of showing ciphers it no longer holds.
+                $definitions = new Definitions();
+                foreach (array_keys($definitions->defineEquipment()) as $type) {
+                    $update[$type]             = null;
+                    $update[$type.'_returned'] = null;
+                }
             }
             $wpdb->update(
                 $tableName,
@@ -681,10 +694,11 @@ class Users implements InitInterface
             $wpdb->insert(
                 $tableName,
                 array(
-                    'user_id' => $userId,
-                    'post_id' => $postId,
-                    'other'   => $other,
-                    'state'   => Definitions::RESERVATION_STATUS_PENDING,
+                    'user_id'   => $userId,
+                    'post_id'   => $postId,
+                    'other'     => $other,
+                    'lead_size' => $leadSize,
+                    'state'     => Definitions::RESERVATION_STATUS_PENDING,
                 )
             );
         }
@@ -709,14 +723,47 @@ class Users implements InitInterface
         $currentUser = wp_get_current_user();
 
         global $wpdb;
-        $tableName = $wpdb->prefix."rkg_excursion_gear";
-        $wpdb->delete(
-            $tableName,
-            array(
-                'user_id'   => $currentUser->ID,
-                'post_id' => $_POST['post'],
+        $tableName    = $wpdb->prefix."rkg_excursion_gear";
+        $postId       = isset($_POST['post']) ? absint($_POST['post']) : 0;
+        $reservations = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM $tableName
+                WHERE user_id = %d AND post_id = %d AND state != %d",
+                $currentUser->ID,
+                $postId,
+                Definitions::RESERVATION_STATUS_DELETED
             )
         );
+
+        // A reservation with equipment handed out stays, otherwise the
+        // pieces would be left issued with nothing pointing at them. Rows
+        // older than the status column can hold ciphers while still pending.
+        $definitions = new Definitions();
+        $types       = array_keys($definitions->defineEquipment());
+        foreach ($reservations as $reservation) {
+            $issued = (int) $reservation->state
+                !== Definitions::RESERVATION_STATUS_PENDING;
+            foreach ($types as $type) {
+                if (!empty($reservation->$type)) {
+                    $issued = true;
+                }
+            }
+            if ($issued) {
+                echo json_encode(array(
+                    'update'  => false,
+                    'message' => __(
+                        'Oprema ti je već izdana, rezervaciju nije moguće otkazati.'
+                    ),
+                ));
+
+                wp_die();
+            }
+        }
+
+        $inventory = new Inventory();
+        foreach ($reservations as $reservation) {
+            $inventory->softDeleteReservation($reservation->id);
+        }
 
         echo json_encode(array('update' => true, 'message' => __('Spremljeno')));
 
