@@ -17,6 +17,20 @@ use WP_REST_Request;
 class Inventory extends ApiEndpoint implements InitInterface
 {
     /**
+     * Equipment type definitions, built once per request for present().
+     *
+     * @var array|null
+     */
+    private $equipmentTypes;
+
+    /**
+     * Equipment status labels, built once per request for present().
+     *
+     * @var array|null
+     */
+    private $equipmentLabels;
+
+    /**
      * init
      *
      * @return void
@@ -361,9 +375,13 @@ class Inventory extends ApiEndpoint implements InitInterface
      */
     private function present($row)
     {
-        $definitions = new Definitions();
-        $types       = $definitions->defineEquipment();
-        $labels      = $definitions->getEquipmentStatusLabels();
+        if ($this->equipmentTypes === null) {
+            $definitions           = new Definitions();
+            $this->equipmentTypes  = $definitions->defineEquipment();
+            $this->equipmentLabels = $definitions->getEquipmentStatusLabels();
+        }
+        $types       = $this->equipmentTypes;
+        $labels      = $this->equipmentLabels;
         $state       = (int) $row->state;
         $user        = $row->user_id ? get_userdata($row->user_id) : null;
         $type        = $row->type;
