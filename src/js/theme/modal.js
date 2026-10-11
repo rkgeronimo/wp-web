@@ -758,7 +758,12 @@ $('#no-gear').on('click', (e) => {
             nonce: rkgTheme.nonce,
             post: gearId,
         },
-        success: () => {
+        success: (response) => {
+            if (response && response.update === false) {
+                alert(response.message);
+
+                return;
+            }
             window.location.reload();
         },
     });

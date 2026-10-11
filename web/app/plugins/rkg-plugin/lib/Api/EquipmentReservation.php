@@ -366,17 +366,25 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
      */
     public function delete(WP_REST_Request $request)
     {
+        global $wpdb;
         $reservationId = intval($request['id']);
         $guard         = $this->guard($reservationId);
         if (is_wp_error($guard)) {
             return $guard;
         }
 
+        // Releasing the equipment and marking the reservation deleted
+        // commit or roll back together, so a failed delete cannot leave
+        // an active reservation whose pieces are back in stock.
+        $wpdb->query('START TRANSACTION');
         $inventory = new Inventory();
         $result    = $inventory->softDeleteReservation($reservationId);
         if (is_wp_error($result)) {
+            $wpdb->query('ROLLBACK');
+
             return $result;
         }
+        $wpdb->query('COMMIT');
 
         return rest_ensure_response(array(
             'deleted' => true,
