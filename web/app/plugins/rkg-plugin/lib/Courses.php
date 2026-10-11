@@ -243,7 +243,7 @@ class Courses implements InitInterface
     public function addMedicalReport()
     {
         $hook = add_submenu_page(
-            null,
+            '',
             'Tečaj - izvještaj',
             'Tečaj - izvještaj',
             'edit_courses',
@@ -291,7 +291,7 @@ class Courses implements InitInterface
     public function addLiabilityReport()
     {
         $hook = add_submenu_page(
-            null,
+            '',
             'Tečaj - izjava o odgovornosti',
             'Tečaj - izjava o odgovornosti',
             'edit_courses',
@@ -339,7 +339,7 @@ class Courses implements InitInterface
     public function addHRSReport()
     {
         $hook = add_submenu_page(
-            null,
+            '',
             'Tečaj - izvještaj HRS-u',
             'Tečaj - izvještaj HRS-u',
             'edit_courses',
@@ -441,7 +441,7 @@ class Courses implements InitInterface
     public function addBrevetDownload()
     {
         $hook = add_submenu_page(
-            null,
+            '',
             'Tečaj - breveti',
             'Tečaj - breveti',
             'edit_courses',

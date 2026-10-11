@@ -152,8 +152,17 @@ class Inventory implements InitInterface
         );
     }
 
+    /**
+     * Writes ciphers and return states, then recalculates the state.
+     *
+     * Admin callers ignore the result.
+     *
+     * @return true|\WP_Error WP_Error when a write failed or a piece was
+     *                        taken in the meantime.
+     */
     private function saveReservation($reservationId, $typeTranslations, $data) {
         global $wpdb;
+        $failed = false;
         $tableName = $wpdb->prefix."rkg_excursion_gear";
         $tableName2 = $wpdb->prefix."rkg_inventory";
 
@@ -171,21 +180,72 @@ class Inventory implements InitInterface
 
         foreach ($allDataKeys as $key => $value) {
             $returnKey = $key.'_returned';
+            $issuedNew = false;
+            $holderId = intval($originalReservation->user_id);
+            $previous = $originalReservation->$key;
+            // No return flag yet means the piece is still out.
+            $previousReturned = isset($originalReservation->$returnKey)
+                ? (int) $originalReservation->$returnKey
+                : Definitions::EQUIPMENT_STATUS_ISSUED;
+            // The forms post a return status for every issued piece on
+            // every save, "still out" included, so only a real change
+            // may touch the inventory row.
+            $returned = null;
+            if (isset($data[$returnKey]) && is_numeric($data[$returnKey])) {
+                $returned = (int) $data[$returnKey];
+            }
 
             // New type of inventory is being rented (not only status change for existing entries)
             if (!empty($data[$key])) {
-                // Server-side validation to prevent overwriting inventory rent 
-                if ($this->isInventoryAvailable($data[$key], $key)) {
-                    // Update reservations data
-                    $wpdb->update(
-                        $tableName,
-                        array(
-                            $key => $data[$key],
-                        ),
-                        array('id' => $reservationId)
+                // Server-side validation to prevent overwriting inventory rent
+                if (!$this->isInventoryAvailable($data[$key], $key)) {
+                    $failed = true;
+                } else {
+                    // A replaced piece goes back to stock, but only while
+                    // this reservation still holds it. Already returned or
+                    // reported pieces may be issued to someone else by now.
+                    // Rows saved before the holder was kept have no user.
+                    if (isset($typeTranslations[$key])
+                        && !empty($previous)
+                        && (string) $previous !== (string) $data[$key]
+                        && ($returned === null
+                            || $returned === Definitions::EQUIPMENT_STATUS_ISSUED)
+                        && $previousReturned
+                            === Definitions::EQUIPMENT_STATUS_ISSUED
+                    ) {
+                        $failed = ($wpdb->query($wpdb->prepare(
+                            "
+                            UPDATE $tableName2
+                            SET state = %d, issue_date = NULL, user_id = NULL
+                            WHERE id = %s AND type = %s AND state = %d
+                            AND (user_id = %d OR user_id IS NULL)
+                            ",
+                            Definitions::EQUIPMENT_STATUS_AVAILABLE,
+                            (string) $previous,
+                            $key,
+                            Definitions::EQUIPMENT_STATUS_ISSUED,
+                            $holderId
+                        )) === false) || $failed;
+                    }
+
+                    // Update reservations data. A newly issued piece is out,
+                    // so reset a return flag left over from the previous
+                    // piece, otherwise the reservation reads as completed.
+                    $reservationUpdate = array(
+                        $key => $data[$key],
                     );
+                    if (isset($typeTranslations[$key])) {
+                        $reservationUpdate[$returnKey]
+                            = Definitions::EQUIPMENT_STATUS_ISSUED;
+                        $issuedNew = true;
+                    }
+                    $failed = ($wpdb->update(
+                        $tableName,
+                        $reservationUpdate,
+                        array('id' => $reservationId)
+                    ) === false) || $failed;
                     // Update inventory status
-                    $wpdb->update(
+                    $failed = ($wpdb->update(
                         $tableName2,
                         array(
                             'state' => 1,
@@ -195,31 +255,49 @@ class Inventory implements InitInterface
                         array(
                             'id' => $data[$key],
                         )
-                    );
+                    ) === false) || $failed;
                 }
             }
 
-            if (isset($data[$returnKey])) {
-                // Update reservations data
-                $wpdb->update(
-                    $tableName,
-                    array(
-                        $returnKey => $data[$returnKey],
-                    ),
-                    array('id' => $reservationId)
-                );
-                // Update inventory status
-                $wpdb->update(
-                    $tableName2,
-                    array(
-                        'state' => $data[$returnKey],
-                        'issue_date' => null,
-                        'user_id' => null,
-                    ),
-                    array(
-                        'id' => $originalReservation->$key,
-                    )
-                );
+            if ($returned !== null) {
+                // Update reservations data. When a new piece was issued in
+                // the same request, the return status belongs to the old
+                // piece only and the flag stays "out" for the new one.
+                if (!$issuedNew) {
+                    $failed = ($wpdb->update(
+                        $tableName,
+                        array(
+                            $returnKey => $returned,
+                        ),
+                        array('id' => $reservationId)
+                    ) === false) || $failed;
+                }
+                // Update inventory status of the original piece, but only
+                // when the status changed and the piece is still where this
+                // reservation left it. A returned piece may be issued to
+                // someone else by now.
+                if (!empty($previous) && $returned !== $previousReturned) {
+                    $assign = 'issue_date = NULL, user_id = NULL';
+                    if ($returned === Definitions::EQUIPMENT_STATUS_ISSUED) {
+                        $assign = $wpdb->prepare(
+                            'issue_date = %s, user_id = %d',
+                            date("Y-m-d H:i:s"),
+                            $holderId
+                        );
+                    }
+                    $failed = ($wpdb->query($wpdb->prepare(
+                        "
+                        UPDATE $tableName2
+                        SET state = %d, $assign
+                        WHERE id = %s AND state = %d
+                        AND (user_id = %d OR user_id IS NULL)
+                        ",
+                        $returned,
+                        (string) $previous,
+                        $previousReturned,
+                        $holderId
+                    )) === false) || $failed;
+                }
             }
         }
 
@@ -271,13 +349,23 @@ class Inventory implements InitInterface
         }
 
         // Update the reservation state
-        $wpdb->update(
+        $failed = ($wpdb->update(
             $tableName,
             array(
                 'state' => $newState,
             ),
             array('id' => $reservationId)
-        );
+        ) === false) || $failed;
+
+        if ($failed) {
+            return new \WP_Error(
+                'rkg_save_failed',
+                'Failed to save reservation',
+                array('status' => 500)
+            );
+        }
+
+        return true;
     }
 
     /**
@@ -423,12 +511,119 @@ class Inventory implements InitInterface
             wp_die();
         }
 
+        $reservationId = isset($_POST['reservation_id'])
+            ? intval($_POST['reservation_id'])
+            : 0;
+        $result = $this->softDeleteReservation($reservationId);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(array(
+                'message' => $result->get_error_message(),
+            ));
+            wp_die();
+        }
+
+        wp_send_json_success(array(
+            'message' => 'Reservation deleted successfully',
+        ));
+        wp_die();
+    }
+
+    /**
+     * Assign ciphers or return states on an existing reservation.
+     *
+     * Same write as the Izdavanje opreme save button.
+     *
+     * @param int   $reservationId Reservation id.
+     * @param array $data          Posted equipment fields.
+     *
+     * @return true|\WP_Error
+     */
+    public function issueReservation($reservationId, $data)
+    {
         global $wpdb;
-        $reservationId = isset($_POST['reservation_id']) ? intval($_POST['reservation_id']) : 0;
+        $tableName = $wpdb->prefix."rkg_excursion_gear";
+        $reservation = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $tableName WHERE id = %d",
+            intval($reservationId)
+        ));
+
+        if (!$reservation) {
+            return new \WP_Error(
+                'rkg_not_found',
+                'Reservation not found',
+                array('status' => 404)
+            );
+        }
+
+        if ((int) $reservation->state
+            === Definitions::RESERVATION_STATUS_DELETED
+        ) {
+            return new \WP_Error(
+                'rkg_deleted',
+                'Reservation is deleted',
+                array('status' => 404)
+            );
+        }
+
+        $unavailable = array();
+        foreach (array_keys($this->translateTypes()) as $type) {
+            $returnKey = $type.'_returned';
+            if (isset($data[$returnKey])
+                && ($reservation->$type === null || $reservation->$type === '')
+            ) {
+                unset($data[$returnKey]);
+            }
+
+            if (empty($data[$type])) {
+                continue;
+            }
+            if ((string) $reservation->$type === (string) $data[$type]) {
+                unset($data[$type]);
+                continue;
+            }
+            if (!$this->isInventoryAvailable($data[$type], $type)) {
+                $unavailable[] = $type;
+            }
+        }
+
+        if (!empty($unavailable)) {
+            return new \WP_Error(
+                'rkg_unavailable',
+                'Equipment is not available',
+                array(
+                    'status'    => 400,
+                    'equipment' => $unavailable,
+                )
+            );
+        }
+
+        $data['user_id'] = $reservation->user_id;
+        return $this->saveReservation(
+            $reservationId,
+            $this->translateTypes(),
+            $data
+        );
+    }
+
+    /**
+     * Soft-delete a reservation and release issued equipment.
+     *
+     * @param int $reservationId Reservation id.
+     *
+     * @return true|\WP_Error
+     */
+    public function softDeleteReservation($reservationId)
+    {
+        global $wpdb;
+        $reservationId = intval($reservationId);
 
         if (!$reservationId) {
-            wp_send_json_error(array('message' => 'Invalid reservation ID'));
-            wp_die();
+            return new \WP_Error(
+                'rkg_invalid',
+                'Invalid reservation ID',
+                array('status' => 400)
+            );
         }
 
         $reservationTable = $wpdb->prefix . 'rkg_excursion_gear';
@@ -440,12 +635,24 @@ class Inventory implements InitInterface
         );
 
         if (!$reservation) {
-            wp_send_json_error(array('message' => 'Reservation not found'));
-            wp_die();
+            return new \WP_Error(
+                'rkg_not_found',
+                'Reservation not found',
+                array('status' => 404)
+            );
+        }
+
+        // Already deleted: its equipment was released the first time and
+        // may be issued to someone else by now, so a retry must not touch it.
+        if ((int) $reservation->state
+            === Definitions::RESERVATION_STATUS_DELETED
+        ) {
+            return true;
         }
 
         // Equipment types to check
         $equipmentTypes = array('mask', 'regulator', 'suit', 'boots', 'gloves', 'fins', 'bcd', 'lead');
+        $failed = false;
 
         // Release all issued equipment back to available state
         foreach ($equipmentTypes as $type) {
@@ -462,20 +669,26 @@ class Inventory implements InitInterface
                 // release it back to available (state=0)
                 // If equipment is lost (returned=3), keep it as lost
                 if ($returnedStatus === null || $returnedStatus == 1) {
-                    // Release equipment: set state to 0 (available), clear user_id and issue_date
-                    $wpdb->update(
-                        $inventoryTable,
-                        array(
-                            'state' => Definitions::EQUIPMENT_STATUS_AVAILABLE,
-                            'user_id' => null,
-                            'issue_date' => null,
-                        ),
-                        array('id' => $equipmentId)
-                    );
+                    // Release equipment: set state to 0 (available), clear user_id and issue_date.
+                    // Only while the piece is still issued to this member,
+                    // it may have been reassigned in the meantime. Rows
+                    // saved before the holder was kept have no user.
+                    $failed = ($wpdb->query($wpdb->prepare(
+                        "
+                        UPDATE $inventoryTable
+                        SET state = %d, issue_date = NULL, user_id = NULL
+                        WHERE id = %s AND state = %d
+                        AND (user_id = %d OR user_id IS NULL)
+                        ",
+                        Definitions::EQUIPMENT_STATUS_AVAILABLE,
+                        (string) $equipmentId,
+                        Definitions::EQUIPMENT_STATUS_ISSUED,
+                        intval($reservation->user_id)
+                    )) === false) || $failed;
                 }
                 // If equipment is marked as lost (returned=3), update inventory to lost state
                 elseif ($returnedStatus == 3) {
-                    $wpdb->update(
+                    $failed = ($wpdb->update(
                         $inventoryTable,
                         array(
                             'state' => Definitions::EQUIPMENT_STATUS_LOST,
@@ -483,13 +696,14 @@ class Inventory implements InitInterface
                             'issue_date' => null,
                         ),
                         array('id' => $equipmentId)
-                    );
+                    ) === false) || $failed;
                 }
                 // If returned=0, equipment is already returned, no action needed
             }
         }
 
         // Soft delete the reservation: set state to 3 (deleted) and record deletion time
+        $showErrors = $wpdb->hide_errors();
         $result = $wpdb->update(
             $reservationTable,
             array(
@@ -498,14 +712,19 @@ class Inventory implements InitInterface
             ),
             array('id' => $reservationId)
         );
-
-        if ($result === false) {
-            wp_send_json_error(array('message' => 'Failed to delete reservation'));
-            wp_die();
+        if ($showErrors) {
+            $wpdb->show_errors();
         }
 
-        wp_send_json_success(array('message' => 'Reservation deleted successfully'));
-        wp_die();
+        if ($result === false || $failed) {
+            return new \WP_Error(
+                'rkg_delete_failed',
+                'Failed to delete reservation',
+                array('status' => 500)
+            );
+        }
+
+        return true;
     }
 
     // Used when adding new reservation from admin panel (not requested by user)
@@ -546,8 +765,8 @@ class Inventory implements InitInterface
 
     public function checkInventory()
     {
-        $id        = $_POST['id'];
-        $type      = $_POST['type'];
+        $id        = sanitize_text_field(wp_unslash($_POST['id']));
+        $type      = sanitize_text_field(wp_unslash($_POST['type']));
         
 
         $result = $this->isInventoryAvailable($id, $type);
@@ -567,14 +786,19 @@ class Inventory implements InitInterface
         
         global $wpdb;
         $tableName                   = $wpdb->prefix."rkg_inventory";
+        // FOR UPDATE holds the row lock until the surrounding transaction
+        // commits, so two concurrent reservations cannot claim the same
+        // available piece. Outside a transaction the lock is released
+        // with the statement and the check behaves like a plain SELECT.
         $result = $wpdb->get_row($wpdb->prepare(
             "
             SELECT *
             FROM $tableName
-            WHERE id = %d AND state = 0
+            WHERE id = %s AND state = 0
             AND type = %s
+            FOR UPDATE
             ",
-            intval($id),
+            (string) $id,
             $type
         ));
 
@@ -642,22 +866,25 @@ class Inventory implements InitInterface
             $wpdb->update(
                 $tableName,
                 array(
-                    'type' => $post['type'],
-                    'size' => $post['size'],
-                    'state' => $post['status'],
-                    'note' => $post['note'],
+                    'type' => sanitize_text_field(wp_unslash($post['type'])),
+                    'size' => sanitize_text_field(wp_unslash($post['size'])),
+                    'state' => intval($post['status']),
+                    'note' => sanitize_textarea_field(wp_unslash($post['note'])),
                 ),
                 array(
-                    'id' => $post['id'],
+                    'id' => sanitize_text_field(wp_unslash($post['id'])),
                 )
             );
         }
 
-        $editId = intval($context['request']->get['edit']);
+        // Item ids are alphanumeric ciphers (J11, A3201), keep them as
+        // strings; intval() would collapse them to 0 and MySQL type
+        // coercion would then match unrelated rows.
+        $editId = sanitize_text_field(wp_unslash($context['request']->get['edit']));
         $context['itemEdit']         = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM "
             .$tableName
-            ." WHERE id = %d",
+            ." WHERE id = %s",
             $editId
         ));
 
@@ -673,7 +900,7 @@ class Inventory implements InitInterface
             $users     = $wpdb->get_results($wpdb->prepare(
                 "SELECT user_id, updated FROM "
                 .$tableName
-                ." WHERE `".$typeColumn."` = %d"
+                ." WHERE `".$typeColumn."` = %s"
                 ." LIMIT 10",
                 $editId
             ));
@@ -722,8 +949,11 @@ class Inventory implements InitInterface
             && is_array($context['request']->get['ids'])
             && is_numeric($context['request']->get['action'])
             && $context['request']->get['action'] >= 0) {
-            $ids = array_map('intval', $context['request']->get['ids']);
-            $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+            $ids = array_map(
+                'sanitize_text_field',
+                wp_unslash($context['request']->get['ids'])
+            );
+            $placeholders = implode(',', array_fill(0, count($ids), '%s'));
             $wpdb->query($wpdb->prepare(
                 "UPDATE $tableName
                 SET state = %d
@@ -758,7 +988,10 @@ class Inventory implements InitInterface
             $wherePart[] = "state != 5";
         }
         if (isset($context['request']->get['id'])) {
-            $wherePart[] = $wpdb->prepare("id = %d", intval($context['request']->get['id']));
+            $wherePart[] = $wpdb->prepare(
+                "id = %s",
+                sanitize_text_field(wp_unslash($context['request']->get['id']))
+            );
         }
         if (!empty($wherePart)) {
             $where = "WHERE ".implode(" AND ", $wherePart);
@@ -852,12 +1085,11 @@ class Inventory implements InitInterface
             return;
         }
 
-        $sanitizedIds = array_map('sanitize_text_field', $ids);
-        $sanitizedIds = array_map('intval', $sanitizedIds);
+        $sanitizedIds = array_map('sanitize_text_field', wp_unslash($ids));
 
         global $wpdb;
         $tableName = $wpdb->prefix . 'rkg_inventory';
-        $placeholders = implode(',', array_fill(0, count($sanitizedIds), '%d'));
+        $placeholders = implode(',', array_fill(0, count($sanitizedIds), '%s'));
         
         $result = $wpdb->query($wpdb->prepare(
             "DELETE FROM $tableName WHERE id IN ($placeholders) AND state = 5",

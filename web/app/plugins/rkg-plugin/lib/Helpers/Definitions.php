@@ -9,18 +9,18 @@ namespace RKGeronimo\Helpers;
 class Definitions
 {
     // Reservation status constants
-    const RESERVATION_STATUS_PENDING = 0;   // Created but no equipment issued yet
-    const RESERVATION_STATUS_ACTIVE = 1;    // Equipment issued, waiting return
+    const RESERVATION_STATUS_PENDING   = 0;   // Created but no equipment issued yet
+    const RESERVATION_STATUS_ACTIVE    = 1;    // Equipment issued, waiting return
     const RESERVATION_STATUS_COMPLETED = 2; // All equipment returned
-    const RESERVATION_STATUS_DELETED = 3;   // Soft deleted
+    const RESERVATION_STATUS_DELETED   = 3;   // Soft deleted
 
     // Equipment status constants (for inventory items)
-    const EQUIPMENT_STATUS_AVAILABLE = 0;   // Available
-    const EQUIPMENT_STATUS_ISSUED = 1;      // Issued
-    const EQUIPMENT_STATUS_DAMAGED = 2;     // Damaged
-    const EQUIPMENT_STATUS_LOST = 3;        // Lost
+    const EQUIPMENT_STATUS_AVAILABLE   = 0;   // Available
+    const EQUIPMENT_STATUS_ISSUED      = 1;      // Issued
+    const EQUIPMENT_STATUS_DAMAGED     = 2;     // Damaged
+    const EQUIPMENT_STATUS_LOST        = 3;        // Lost
     const EQUIPMENT_STATUS_WRITTEN_OFF = 4; // Written off
-    const EQUIPMENT_STATUS_DELETED = 5;     // Soft deleted
+    const EQUIPMENT_STATUS_DELETED     = 5;     // Soft deleted
 
     /**
      * Get reservation status labels
@@ -34,6 +34,23 @@ class Definitions
             self::RESERVATION_STATUS_ACTIVE    => 'Aktivno',       // Active
             self::RESERVATION_STATUS_COMPLETED => 'Vraćeno',       // Completed
             self::RESERVATION_STATUS_DELETED   => 'Obrisano',      // Deleted
+        );
+    }
+
+    /**
+     * All equipment status values, for request validation.
+     *
+     * @return array
+     */
+    public function getEquipmentStatusValues()
+    {
+        return array(
+            self::EQUIPMENT_STATUS_AVAILABLE,
+            self::EQUIPMENT_STATUS_ISSUED,
+            self::EQUIPMENT_STATUS_DAMAGED,
+            self::EQUIPMENT_STATUS_LOST,
+            self::EQUIPMENT_STATUS_WRITTEN_OFF,
+            self::EQUIPMENT_STATUS_DELETED,
         );
     }
 
