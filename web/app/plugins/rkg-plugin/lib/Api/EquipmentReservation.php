@@ -217,11 +217,6 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
         }
         $data['other'] = $comment;
 
-        $donation = $this->donationData($params);
-        if (is_wp_error($donation)) {
-            return $donation;
-        }
-
         // The reservation row and the issued inventory rows commit or roll
         // back together, so a failure cannot leave an orphan reservation
         // or a phantom equipment claim.
@@ -252,16 +247,6 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
             $wpdb->query('ROLLBACK');
 
             return $result;
-        }
-
-        if (!$this->saveDonation($reservationId, $donation)) {
-            $wpdb->query('ROLLBACK');
-
-            return new WP_Error(
-                'rkg_update_failed',
-                'Failed to save donation',
-                array('status' => 500)
-            );
         }
 
         $wpdb->query('COMMIT');
@@ -446,8 +431,7 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
     }
 
     /**
-     * Archive or restore. An active reservation still holds issued
-     * equipment, so it cannot be archived until the pieces are returned.
+     * Archive or restore. Works in any status.
      *
      * @param WP_REST_Request $request Request.
      *
@@ -469,14 +453,6 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
                 'rkg_not_found',
                 'Reservation not found',
                 array('status' => 404)
-            );
-        }
-
-        if ($archived && (int) $state === Definitions::RESERVATION_STATUS_ACTIVE) {
-            return new WP_Error(
-                'rkg_has_equipment',
-                'Reservation still has issued equipment',
-                array('status' => 409)
             );
         }
 
