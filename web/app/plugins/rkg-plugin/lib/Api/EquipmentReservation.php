@@ -2,6 +2,7 @@
 namespace RKGeronimo\Api;
 
 use RKGeronimo\Helpers\Definitions;
+use RKGeronimo\Helpers\Donation;
 use RKGeronimo\Helpers\EquipmentSize;
 use RKGeronimo\Interfaces\InitInterface;
 use RKGeronimo\Inventory;
@@ -18,8 +19,6 @@ use WP_REST_Request;
  */
 class EquipmentReservation extends ApiEndpoint implements InitInterface
 {
-    const FLOOR_CREATED = '2026-09-25 00:00:00';
-
     /**
      * Equipment definitions, built once per request for present().
      *
@@ -71,12 +70,12 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
                     'permission_callback' => array($this, 'permissions'),
                     'args'                => array(
                         'state' => array(
-                            'description' => 'Reservation status id.',
+                            'description' => 'Reservation status id. Omit for all statuses.',
                             'type'        => 'integer',
-                            'required'    => true,
                             'enum'        => array(
                                 Definitions::RESERVATION_STATUS_PENDING,
                                 Definitions::RESERVATION_STATUS_ACTIVE,
+                                Definitions::RESERVATION_STATUS_COMPLETED,
                             ),
                         ),
                         'per_page' => array(
@@ -115,6 +114,23 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
                     'methods'             => 'DELETE',
                     'callback'            => array($this, 'delete'),
                     'permission_callback' => array($this, 'permissions'),
+                ),
+            )
+        );
+
+        register_rest_route(
+            'rkg/v1',
+            '/reservations/(?P<id>\d+)/archive',
+            array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'archive'),
+                'permission_callback' => array($this, 'permissions'),
+                'args'                => array(
+                    'archived' => array(
+                        'description' => 'true archives, false restores.',
+                        'type'        => 'boolean',
+                        'required'    => true,
+                    ),
                 ),
             )
         );
@@ -201,6 +217,11 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
         }
         $data['other'] = $comment;
 
+        $donation = $this->donationData($params);
+        if (is_wp_error($donation)) {
+            return $donation;
+        }
+
         // The reservation row and the issued inventory rows commit or roll
         // back together, so a failure cannot leave an orphan reservation
         // or a phantom equipment claim.
@@ -231,6 +252,16 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
             $wpdb->query('ROLLBACK');
 
             return $result;
+        }
+
+        if (!$this->saveDonation($reservationId, $donation)) {
+            $wpdb->query('ROLLBACK');
+
+            return new WP_Error(
+                'rkg_update_failed',
+                'Failed to save donation',
+                array('status' => 500)
+            );
         }
 
         $wpdb->query('COMMIT');
@@ -267,8 +298,8 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
     }
 
     /**
-     * Reservations of one status, on or after the floor date.
-     * state 0 is Na čekanju, state 1 is Aktivno.
+     * Reservations that are not archived and not deleted. With `state`
+     * only that status is returned: 0 Na čekanju, 1 Aktivno, 2 Vraćeno.
      *
      * @param WP_REST_Request $request Request.
      *
@@ -276,24 +307,25 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
      */
     public function listReservations(WP_REST_Request $request)
     {
+        $state = $request->get_param('state');
+
         return $this->listByState(
-            intval($request->get_param('state')),
+            $state === null ? null : intval($state),
             intval($request->get_param('per_page')),
             intval($request->get_param('page'))
         );
     }
 
     /**
-     * Valjane rezervacije: created on or after the floor date,
-     * one reservation status.
+     * Valjane rezervacije: not archived, not deleted, optionally one status.
      *
-     * @param int $state   Reservation state.
-     * @param int $perPage Items per page.
-     * @param int $page    One-based page.
+     * @param int|null $state   Reservation state, null for all statuses.
+     * @param int      $perPage Items per page.
+     * @param int      $page    One-based page.
      *
      * @return \WP_REST_Response
      */
-    private function listByState($state, $perPage = 100, $page = 1)
+    private function listByState($state = null, $perPage = 100, $page = 1)
     {
         global $wpdb;
         $tableName = $this->gearTable();
@@ -301,20 +333,18 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
         $page      = max(1, $page);
         $offset    = ($page - 1) * $perPage;
 
-        $total = intval($wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $tableName
-            WHERE created >= %s AND state = %d",
-            self::FLOOR_CREATED,
-            $state
-        )));
+        $where = "archived = 0 AND state != ".Definitions::RESERVATION_STATUS_DELETED;
+        if ($state !== null) {
+            $where .= $wpdb->prepare(' AND state = %d', $state);
+        }
+
+        $total = intval($wpdb->get_var("SELECT COUNT(*) FROM $tableName WHERE $where"));
 
         $rows = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM $tableName
-            WHERE created >= %s AND state = %d
+            WHERE $where
             ORDER BY id DESC
             LIMIT %d OFFSET %d",
-            self::FLOOR_CREATED,
-            $state,
             $perPage,
             $offset
         ));
@@ -349,6 +379,11 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
             return $data;
         }
 
+        $donation = $this->donationData($this->jsonParams($request));
+        if (is_wp_error($donation)) {
+            return $donation;
+        }
+
         // The availability check locks inventory rows with FOR UPDATE, which
         // only holds until commit inside a transaction. Without it two
         // requests could claim the same piece.
@@ -360,13 +395,23 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
 
             return $result;
         }
+
+        if (!$this->saveDonation($reservationId, $donation)) {
+            $wpdb->query('ROLLBACK');
+
+            return new WP_Error(
+                'rkg_update_failed',
+                'Failed to save donation',
+                array('status' => 500)
+            );
+        }
         $wpdb->query('COMMIT');
 
         return rest_ensure_response($this->load($reservationId));
     }
 
     /**
-     * Obriši. Does not pull reservations created before the floor.
+     * Obriši. Archived reservations are not found.
      *
      * @param WP_REST_Request $request Request.
      *
@@ -401,7 +446,104 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
     }
 
     /**
-     * 404 when the row is missing or created before the floor date.
+     * Archive or restore. An active reservation still holds issued
+     * equipment, so it cannot be archived until the pieces are returned.
+     *
+     * @param WP_REST_Request $request Request.
+     *
+     * @return \WP_REST_Response|WP_Error
+     */
+    public function archive(WP_REST_Request $request)
+    {
+        global $wpdb;
+        $reservationId = intval($request['id']);
+        $archived      = rest_sanitize_boolean($request->get_param('archived'));
+        $tableName     = $this->gearTable();
+        $state         = $wpdb->get_var($wpdb->prepare(
+            "SELECT state FROM $tableName WHERE id = %d",
+            $reservationId
+        ));
+
+        if ($state === null || (int) $state === Definitions::RESERVATION_STATUS_DELETED) {
+            return new WP_Error(
+                'rkg_not_found',
+                'Reservation not found',
+                array('status' => 404)
+            );
+        }
+
+        if ($archived && (int) $state === Definitions::RESERVATION_STATUS_ACTIVE) {
+            return new WP_Error(
+                'rkg_has_equipment',
+                'Reservation still has issued equipment',
+                array('status' => 409)
+            );
+        }
+
+        $result = $wpdb->update(
+            $tableName,
+            array('archived' => $archived ? 1 : 0),
+            array('id' => $reservationId)
+        );
+        if ($result === false) {
+            return new WP_Error(
+                'rkg_update_failed',
+                'Failed to update reservation',
+                array('status' => 500)
+            );
+        }
+
+        return rest_ensure_response($this->load($reservationId));
+    }
+
+    /**
+     * Donation from the request body. Empty array when the key is absent,
+     * so the stored value stays as it is.
+     *
+     * @param array $params Request body.
+     *
+     * @return array|WP_Error
+     */
+    private function donationData($params)
+    {
+        if (!array_key_exists('donation_amount', $params)) {
+            return array();
+        }
+
+        $amount = Donation::parse($params['donation_amount']);
+        if ($amount === false) {
+            return new WP_Error(
+                'rkg_invalid_donation',
+                'Invalid donation amount',
+                array('status' => 400)
+            );
+        }
+
+        return array('donation_amount' => $amount);
+    }
+
+    /**
+     * @param int   $reservationId Reservation id.
+     * @param array $donation      Result of donationData().
+     *
+     * @return bool False when the write failed.
+     */
+    private function saveDonation($reservationId, $donation)
+    {
+        global $wpdb;
+        if (empty($donation)) {
+            return true;
+        }
+
+        return $wpdb->update(
+            $this->gearTable(),
+            $donation,
+            array('id' => $reservationId)
+        ) !== false;
+    }
+
+    /**
+     * 404 when the row is missing or archived.
      *
      * @param int $reservationId Reservation id.
      *
@@ -411,12 +553,12 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
     {
         global $wpdb;
         $tableName = $this->gearTable();
-        $created   = $wpdb->get_var($wpdb->prepare(
-            "SELECT created FROM $tableName WHERE id = %d",
+        $found     = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM $tableName WHERE id = %d AND archived = 0",
             $reservationId
         ));
 
-        if (!$created || $created < self::FLOOR_CREATED) {
+        if (!$found) {
             return new WP_Error(
                 'rkg_not_found',
                 'Reservation not found',
@@ -569,6 +711,10 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
             'excursion'     => $excursion ? $excursion : null,
             'state'         => $state,
             'status'        => isset($labels[$state]) ? $labels[$state] : null,
+            'archived'      => (bool) $row->archived,
+            'donation_amount' => $row->donation_amount === null
+                ? null
+                : (float) $row->donation_amount,
             'comment'       => $row->other,
             'equipment'     => $equipment,
         );

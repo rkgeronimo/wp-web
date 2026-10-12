@@ -300,6 +300,8 @@ class Activator
             other_returned BOOLEAN,
             lead_size_returned tinyint(1) NOT NULL,
             state tinyint(1) NOT NULL,
+            archived BOOLEAN NOT NULL DEFAULT 0,
+            donation_amount DECIMAL(10,2) NULL DEFAULT NULL,
             created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) $charsetCollate;";
