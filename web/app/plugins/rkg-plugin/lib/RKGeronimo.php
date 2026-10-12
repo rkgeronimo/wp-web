@@ -114,7 +114,10 @@ class RKGeronimo
             'rkg-js',
             WP_PLUGIN_URL.'/rkg-plugin/js/script.js',
             array ('jquery', 'leaflet-tile', 'slick', 'leaflet-gestures'),
-            1.1,
+            // File time as version, so browsers load a rebuilt bundle
+            (file_exists(WP_PLUGIN_DIR.'/rkg-plugin/js/script.js')
+                ? filemtime(WP_PLUGIN_DIR.'/rkg-plugin/js/script.js')
+                : 1.1),
             true
         );
         wp_localize_script(

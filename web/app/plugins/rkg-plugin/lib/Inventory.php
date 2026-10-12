@@ -3,6 +3,7 @@ namespace RKGeronimo;
 
 use RKGeronimo\Interfaces\InitInterface;
 use RKGeronimo\Helpers\Definitions;
+use RKGeronimo\Helpers\Donation;
 use RKGeronimo\Tables\Reservations;
 use Timber;
 
@@ -454,12 +455,41 @@ class Inventory implements InitInterface
         $context                     = Timber::get_context();
         $context['typeTranslation']  = $this->translateTypes();
 
+        $post          = $context['request']->post;
+        $reservationId = intval($post['reservation']);
+
+        // Donation and archive flag are validated before anything is written
+        $donation = null;
+        if (array_key_exists('donation_amount', $post)) {
+            $donation = Donation::parse(wp_unslash($post['donation_amount']));
+            if ($donation === false) {
+                wp_send_json_error(array(
+                    'message' => 'Neispravan iznos donacije.',
+                ), 400);
+            }
+        }
+
         // Editing already made reservation by user
         $this->saveReservation(
-            $context['request']->post['reservation'],
+            $reservationId,
             $context['typeTranslation'],
-            $context['request']->post
+            $post
         );
+
+        if (array_key_exists('donation_amount', $post)) {
+            $wpdb->update(
+                $tableName,
+                array('donation_amount' => $donation),
+                array('id' => $reservationId)
+            );
+        }
+        if (array_key_exists('archived', $post)) {
+            $wpdb->update(
+                $tableName,
+                array('archived' => $post['archived'] === '1' ? 1 : 0),
+                array('id' => $reservationId)
+            );
+        }
 
         return json_encode("ok");
     }

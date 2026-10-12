@@ -746,6 +746,10 @@ jQuery(document).ready(($) => {
         const comment = reservationEl.find('.column-comment textarea');;
         data.append('other', comment.val());
 
+        // Empty donation clears it; the server treats '' as no donation
+        data.append('donation_amount', reservationEl.find('.column-donation input').val() || '');
+        data.append('archived', reservationEl.find('.column-archived input').is(':checked') ? '1' : '0');
+
         data.append('action', 'edit_reservation');
         jQuery.ajax({
             url: rkgScript.ajaxUrl,
