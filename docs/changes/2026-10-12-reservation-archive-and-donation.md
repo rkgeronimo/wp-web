@@ -68,7 +68,6 @@ Fresh installs get the same columns from `Activator.php`.
   4. Add an archive action that posts to `POST /reservations/{id}/archive`.
   5. Handle `400 rkg_invalid_donation` and `404 rkg_not_found` in the UI.
 - Any client that assumed `state` was required on `GET /reservations` must still send it, or accept all statuses.
-- Full endpoint guide (Croatian, pre-dates this process): `docs/mobile-reservations-api.md`.
 
 ## Files
 
@@ -77,4 +76,3 @@ Fresh installs get the same columns from `Activator.php`.
 - `web/app/plugins/rkg-plugin/lib/Activator.php`: new columns in the table definition for fresh installs
 - `database/migrations/2026_10_12_120000_add_archived_to_excursion_gear.php` (new)
 - `database/migrations/2026_10_12_120100_add_donation_amount_to_excursion_gear.php` (new)
-- `docs/mobile-reservations-api.md` (new): Croatian endpoint guide, not updated by this entry
