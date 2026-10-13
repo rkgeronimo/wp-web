@@ -2,7 +2,7 @@
 
 - Date: 2026-10-12
 - Branch: dev
-- Commits: this commit (see `git log`)
+- Commits: cd463d3
 - Area: backend (admin)
 - Breaking: no
 

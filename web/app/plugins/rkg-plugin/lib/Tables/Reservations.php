@@ -265,8 +265,13 @@ class Reservations extends WP_List_Table
                 $dataSingle['donation'] = '-';
                 $dataSingle['archived'] = '-';
             } else {
-                $dataSingle['donation'] = '<input type="number" class="reservation-donation" min="0" step="0.01" style="width: 90px" value="'.esc_attr((string) $value->donation_amount).'" />';
-                $dataSingle['archived'] = '<input type="checkbox" class="reservation-archived" '.checked((int) $value->archived, 1, false).' />';
+                $dataSingle['donation'] = '<input type="number"'
+                    .' class="reservation-donation" min="0" step="0.01"'
+                    .' style="width: 90px" value="'
+                    .esc_attr((string) $value->donation_amount).'" />';
+                $dataSingle['archived'] = '<input type="checkbox"'
+                    .' class="reservation-archived" '
+                    .checked((int) $value->archived, 1, false).' />';
             }
 
             // actions buttons

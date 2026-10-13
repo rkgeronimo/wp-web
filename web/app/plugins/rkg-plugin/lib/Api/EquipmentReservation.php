@@ -381,7 +381,7 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
             return $result;
         }
 
-        if (!$this->saveDonation($reservationId, $donation)) {
+        if (!$inventory->saveReservationExtras($reservationId, $donation)) {
             $wpdb->query('ROLLBACK');
 
             return new WP_Error(
@@ -406,7 +406,8 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
     {
         global $wpdb;
         $reservationId = intval($request['id']);
-        $guard         = $this->guard($reservationId);
+        // Deleting twice stays a success, so a retried request is safe
+        $guard         = $this->guard($reservationId, false, true);
         if (is_wp_error($guard)) {
             return $guard;
         }
@@ -439,29 +440,19 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
      */
     public function archive(WP_REST_Request $request)
     {
-        global $wpdb;
         $reservationId = intval($request['id']);
         $archived      = rest_sanitize_boolean($request->get_param('archived'));
-        $tableName     = $this->gearTable();
-        $state         = $wpdb->get_var($wpdb->prepare(
-            "SELECT state FROM $tableName WHERE id = %d",
-            $reservationId
-        ));
-
-        if ($state === null || (int) $state === Definitions::RESERVATION_STATUS_DELETED) {
-            return new WP_Error(
-                'rkg_not_found',
-                'Reservation not found',
-                array('status' => 404)
-            );
+        $guard         = $this->guard($reservationId, true);
+        if (is_wp_error($guard)) {
+            return $guard;
         }
 
-        $result = $wpdb->update(
-            $tableName,
-            array('archived' => $archived ? 1 : 0),
-            array('id' => $reservationId)
+        $inventory = new Inventory();
+        $saved     = $inventory->saveReservationExtras(
+            $reservationId,
+            array('archived' => $archived)
         );
-        if ($result === false) {
+        if (!$saved) {
             return new WP_Error(
                 'rkg_update_failed',
                 'Failed to update reservation',
@@ -499,42 +490,32 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
     }
 
     /**
-     * @param int   $reservationId Reservation id.
-     * @param array $donation      Result of donationData().
+     * 404 when the row is missing, archived or deleted.
      *
-     * @return bool False when the write failed.
-     */
-    private function saveDonation($reservationId, $donation)
-    {
-        global $wpdb;
-        if (empty($donation)) {
-            return true;
-        }
-
-        return $wpdb->update(
-            $this->gearTable(),
-            $donation,
-            array('id' => $reservationId)
-        ) !== false;
-    }
-
-    /**
-     * 404 when the row is missing or archived.
-     *
-     * @param int $reservationId Reservation id.
+     * @param int  $reservationId Reservation id.
+     * @param bool $allowArchived Archived reservations pass.
+     * @param bool $allowDeleted  Deleted reservations pass.
      *
      * @return true|WP_Error
      */
-    private function guard($reservationId)
-    {
+    private function guard(
+        $reservationId,
+        $allowArchived = false,
+        $allowDeleted = false
+    ) {
         global $wpdb;
         $tableName = $this->gearTable();
-        $found     = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $tableName WHERE id = %d AND archived = 0",
+        $row       = $wpdb->get_row($wpdb->prepare(
+            "SELECT state, archived FROM $tableName WHERE id = %d",
             $reservationId
         ));
 
-        if (!$found) {
+        $deleted = $row
+            && (int) $row->state === Definitions::RESERVATION_STATUS_DELETED;
+        if (!$row
+            || (!$allowArchived && (int) $row->archived === 1)
+            || (!$allowDeleted && $deleted)
+        ) {
             return new WP_Error(
                 'rkg_not_found',
                 'Reservation not found',

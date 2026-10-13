@@ -41,6 +41,21 @@ return [
     'down' => function($wpdb) {
         $tableName = $wpdb->prefix . 'rkg_excursion_gear';
 
-        $wpdb->query("ALTER TABLE {$tableName} DROP COLUMN IF EXISTS donation_amount");
+        // Check if column exists before trying to drop it. MySQL has no
+        // DROP COLUMN IF EXISTS
+        $column = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = %s
+                AND TABLE_NAME = %s
+                AND COLUMN_NAME = 'donation_amount'",
+                DB_NAME,
+                $tableName
+            )
+        );
+
+        if (!empty($column)) {
+            $wpdb->query("ALTER TABLE {$tableName} DROP COLUMN donation_amount");
+        }
     }
 ];
