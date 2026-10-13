@@ -267,7 +267,7 @@ class Reservations extends WP_List_Table
             } else {
                 $dataSingle['donation'] = '<input type="number"'
                     .' class="reservation-donation" min="0" step="0.01"'
-                    .' style="width: 90px" value="'
+                    .' style="width: 80%" value="'
                     .esc_attr((string) $value->donation_amount).'" />';
                 $dataSingle['archived'] = '<input type="checkbox"'
                     .' class="reservation-archived" '
