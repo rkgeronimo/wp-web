@@ -136,3 +136,22 @@ python3 backup_script.py --dry-run --verbose
 - Keep changes scoped to the requested behavior and avoid unrelated formatting churn.
 - Do not overwrite generated assets, lockfiles, uploads, or environment files unless the task explicitly requires it.
 - If local shell startup fails with an `nvm` npm prefix warning, rerun commands without loading shell startup files.
+
+## Cross-Agent Change Log
+
+Agents working on other parts of the product (for example the mobile app) read
+this repository's changes through `docs/changes/`. After any change to
+backend behaviour, API, data model, migrations, or deployment steps:
+
+- Add one entry in `docs/changes/` named `YYYY-MM-DD-short-slug.md`, copied
+  from `docs/changes/TEMPLATE.md`.
+- Write the entry in English, even when the user writes in another language.
+- Fill every section. Write `none` where a section does not apply.
+- List API routes, request and response fields, status codes, and migration
+  commands exactly as they are in code.
+- Add the entry in the same commit as the change. Set `Commits` to the commit
+  hash, or to `pending` before committing and update it in a follow-up commit
+  only if the user asks.
+- Do not edit or delete entries written by other agents. Add a new entry that
+  supersedes an old one.
+- Do not record secrets, credentials, or personal data in entries.

@@ -88,6 +88,8 @@ class Reservations extends WP_List_Table
             $columns[$key] = $value['name'];
         }
 
+        $columns['donation'] = 'Donacija (EUR)';
+        $columns['archived'] = 'Arhivirano';
         $columns['comment'] = 'Komentar';
         $columns['actions'] = 'Akcije';
 
@@ -257,8 +259,23 @@ class Reservations extends WP_List_Table
             }
             $dataSingle['comment'] = $value->other;
 
+            // Donation and archive flag are edited with the row's Spremi button
+            $isDeleted = $value->state == Definitions::RESERVATION_STATUS_DELETED;
+            if ($isDeleted) {
+                $dataSingle['donation'] = '-';
+                $dataSingle['archived'] = '-';
+            } else {
+                $dataSingle['donation'] = '<input type="number"'
+                    .' class="reservation-donation" min="0" step="0.01"'
+                    .' style="width: 90px" value="'
+                    .esc_attr((string) $value->donation_amount).'" />';
+                $dataSingle['archived'] = '<input type="checkbox"'
+                    .' class="reservation-archived" '
+                    .checked((int) $value->archived, 1, false).' />';
+            }
+
             // actions buttons
-            if ($value->state == Definitions::RESERVATION_STATUS_DELETED) {
+            if ($isDeleted) {
                 // For deleted reservations, show deletion timestamp instead of actions
                 $deletedAt = !empty($value->deleted_at) ? date('d.m.Y H:i', strtotime($value->deleted_at)) : '-';
                 $dataSingle['actions'] = '<span style="color: #999; font-style: italic;">Obrisano: ' . $deletedAt . '</span>';

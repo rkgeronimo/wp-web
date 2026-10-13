@@ -3,6 +3,7 @@ namespace RKGeronimo;
 
 use RKGeronimo\Interfaces\InitInterface;
 use RKGeronimo\Helpers\Definitions;
+use RKGeronimo\Helpers\Donation;
 use RKGeronimo\Tables\Reservations;
 use Timber;
 
@@ -155,7 +156,7 @@ class Inventory implements InitInterface
     /**
      * Writes ciphers and return states, then recalculates the state.
      *
-     * Admin callers ignore the result.
+     * addCustomReservation() ignores the result.
      *
      * @return true|\WP_Error WP_Error when a write failed or a piece was
      *                        taken in the meantime.
@@ -450,18 +451,88 @@ class Inventory implements InitInterface
         }
 
         global $wpdb;
-        $tableName                   = $wpdb->prefix."rkg_excursion_gear";
         $context                     = Timber::get_context();
         $context['typeTranslation']  = $this->translateTypes();
 
+        $post          = $context['request']->post;
+        $reservationId = intval($post['reservation']);
+
+        // Donation and archive flag are validated before anything is written
+        $donation = null;
+        if (array_key_exists('donation_amount', $post)) {
+            $donation = Donation::parse(wp_unslash($post['donation_amount']));
+            if ($donation === false) {
+                wp_send_json_error(array(
+                    'message' => 'Neispravan iznos donacije.',
+                ), 400);
+            }
+        }
+
+        // The form posts these only when they were changed, so values set
+        // elsewhere since the page was loaded stay as they are
+        $extra = array();
+        if (array_key_exists('donation_amount', $post)) {
+            $extra['donation_amount'] = $donation;
+        }
+        if (array_key_exists('archived', $post)) {
+            $extra['archived'] = $post['archived'] === '1';
+        }
+
+        // Equipment, donation and archive flag are saved together or not
+        // at all
+        $wpdb->query('START TRANSACTION');
         // Editing already made reservation by user
-        $this->saveReservation(
-            $context['request']->post['reservation'],
+        $saved = !is_wp_error($this->saveReservation(
+            $reservationId,
             $context['typeTranslation'],
-            $context['request']->post
-        );
+            $post
+        ));
+        if ($saved) {
+            $saved = $this->saveReservationExtras($reservationId, $extra);
+        }
+        if (!$saved) {
+            $wpdb->query('ROLLBACK');
+            wp_send_json_error(array(
+                'message' => 'Spremanje rezervacije nije uspjelo.',
+            ), 500);
+        }
+        $wpdb->query('COMMIT');
 
         return json_encode("ok");
+    }
+
+    /**
+     * Writes the donation amount and archive flag of a reservation.
+     *
+     * Used by the Izdavanje opreme save button and the REST API.
+     *
+     * @param int   $reservationId Reservation id.
+     * @param array $fields        `donation_amount` (float or null, as
+     *                             returned by Donation::parse) and
+     *                             `archived` (bool). A key that is absent
+     *                             keeps its stored value.
+     *
+     * @return bool False when the write failed.
+     */
+    public function saveReservationExtras($reservationId, $fields)
+    {
+        global $wpdb;
+        $update = array();
+        if (array_key_exists('donation_amount', $fields)) {
+            $update['donation_amount'] = $fields['donation_amount'];
+        }
+        if (array_key_exists('archived', $fields)) {
+            $update['archived'] = $fields['archived'] ? 1 : 0;
+        }
+        if (empty($update)) {
+            return true;
+        }
+
+        return $wpdb->update(
+            $wpdb->prefix."rkg_excursion_gear",
+            $update,
+            array('id' => intval($reservationId))
+        ) !== false;
     }
 
     public function addCustomReservation() {

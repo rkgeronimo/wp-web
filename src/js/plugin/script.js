@@ -722,13 +722,20 @@ jQuery(document).ready(($) => {
         if (inventoryHasValidationErrors) {
             return;
         }
+        const reservationEl = $(e.target).parent().parent();
+        const donationEl = reservationEl.find('.column-donation input').get(0);
+        const archivedEl = reservationEl.find('.column-archived input').get(0);
+        // An invalid number reads as '', which the server would take as
+        // clearing the donation
+        if (donationEl && !donationEl.reportValidity()) {
+            return;
+        }
         e.target.disabled = true;
 
         const reservationId = e.target.getAttribute("data-id");
         const data = new FormData();
         data.append('reservation', reservationId);
 
-        const reservationEl = $(e.target).parent().parent();
         data.append('user_id', reservationEl.children('.column-user_id').text());
         const definitions = ['mask', 'regulator', 'suit', 'boots', 'gloves', 'fins', 'bcd', 'lead'];
         definitions.forEach(item => {
@@ -746,6 +753,16 @@ jQuery(document).ready(($) => {
         const comment = reservationEl.find('.column-comment textarea');;
         data.append('other', comment.val());
 
+        // Donation and archive flag are sent only when changed, so a stale
+        // page does not overwrite values set elsewhere in the meantime.
+        // Empty donation clears it; the server treats '' as no donation
+        if (donationEl && donationEl.value !== donationEl.defaultValue) {
+            data.append('donation_amount', donationEl.value);
+        }
+        if (archivedEl && archivedEl.checked !== archivedEl.defaultChecked) {
+            data.append('archived', archivedEl.checked ? '1' : '0');
+        }
+
         data.append('action', 'edit_reservation');
         jQuery.ajax({
             url: rkgScript.ajaxUrl,
@@ -758,12 +775,15 @@ jQuery(document).ready(($) => {
                 location.reload();
             },
             error(response) {
-                if (response != "ok") {
-                    $('#error-message').removeClass("hidden");
-                    $('#error-text').append(response.responseText);
-                    $('#error-text').removeClass("hidden");
-                    $('input.button').attr('disabled', false);   
-                }
+                // wp_send_json_error puts the message under data
+                const json = response.responseJSON;
+                const message = json && json.data && json.data.message
+                    ? json.data.message
+                    : response.responseText;
+                $('#error-message').removeClass("hidden");
+                $('#error-text').text(message);
+                $('#error-text').removeClass("hidden");
+                e.target.disabled = false;
             }
         });
     });
