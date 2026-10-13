@@ -123,7 +123,10 @@ class RKGeronimo
         wp_localize_script(
             'rkg-js',
             'rkgScript',
-            array('ajaxUrl' => admin_url('admin-ajax.php'))
+            array(
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce'   => wp_create_nonce('rkg_admin'),
+            )
         );
         wp_enqueue_script(
             'selct2',

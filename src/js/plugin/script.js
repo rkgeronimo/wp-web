@@ -697,6 +697,7 @@ jQuery(document).ready(($) => {
             url: rkgScript.ajaxUrl,
             data: {
                 action: 'check_inventory',
+                nonce: rkgScript.nonce,
                 id,
                 type,
             },
@@ -764,6 +765,7 @@ jQuery(document).ready(($) => {
         }
 
         data.append('action', 'edit_reservation');
+        data.append('nonce', rkgScript.nonce);
         jQuery.ajax({
             url: rkgScript.ajaxUrl,
             type: 'POST',
@@ -811,6 +813,7 @@ jQuery(document).ready(($) => {
         const data = new FormData();
         data.append('reservation_id', reservationId);
         data.append('action', 'delete_reservation');
+        data.append('nonce', rkgScript.nonce);
 
         jQuery.ajax({
             url: rkgScript.ajaxUrl,
@@ -844,6 +847,7 @@ jQuery(document).ready(($) => {
             const form = (e.currentTarget);
             const formData = new FormData(form);
             formData.append('action', 'add_custom_reservation');
+            formData.append('nonce', rkgScript.nonce);
 
             jQuery.ajax({
                 url: rkgScript.ajaxUrl,
@@ -1004,6 +1008,7 @@ jQuery(document).ready(($) => {
             if (confirm('Jeste li sigurni da želite trajno obrisati odabranu opremu? Ova akcija se ne može poništiti.')) {
                 var formData = new FormData();
                 formData.append('action', 'rkg_inventory_hard_delete');
+                formData.append('nonce', rkgScript.nonce);
                 selectedIds.forEach(id => formData.append('ids[]', id));
 
                 $.ajax({
