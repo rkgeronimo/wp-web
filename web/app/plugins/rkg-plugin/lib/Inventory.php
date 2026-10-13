@@ -445,6 +445,7 @@ class Inventory implements InitInterface
 
     public function editReservation()
     {
+        check_ajax_referer('rkg_admin', 'nonce');
         if (!current_user_can('manage_equipment')) {
             status_header(401);
             wp_die();
@@ -536,6 +537,7 @@ class Inventory implements InitInterface
     }
 
     public function addCustomReservation() {
+        check_ajax_referer('rkg_admin', 'nonce');
         if (!current_user_can('manage_equipment')) {
             status_header(401);
             wp_die();
@@ -576,6 +578,7 @@ class Inventory implements InitInterface
      */
     public function deleteReservation()
     {
+        check_ajax_referer('rkg_admin', 'nonce');
         if (!current_user_can('manage_equipment')) {
             status_header(401);
             wp_send_json_error(array('message' => 'Unauthorized'));
@@ -836,6 +839,11 @@ class Inventory implements InitInterface
 
     public function checkInventory()
     {
+        check_ajax_referer('rkg_admin', 'nonce');
+        if (!current_user_can('manage_equipment')) {
+            status_header(401);
+            wp_die();
+        }
         $id        = sanitize_text_field(wp_unslash($_POST['id']));
         $type      = sanitize_text_field(wp_unslash($_POST['type']));
         
@@ -1146,6 +1154,7 @@ class Inventory implements InitInterface
      */
     public function handleHardDelete()
     {
+        check_ajax_referer('rkg_admin', 'nonce');
         if (!current_user_can('manage_equipment')) {
             wp_die('Insufficient permissions');
         }
