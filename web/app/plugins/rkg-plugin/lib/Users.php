@@ -162,15 +162,12 @@ class Users implements InitInterface
                 'DAN_op'     => get_user_meta($editId, 'DAN_op', true),
             );
         } else {
-            $users = get_users(array(
-                'orderby' => 'display_name',
-                'order'   => 'ASC',
-            ));
-            foreach ($users as $listedUser) {
-                $listedUser->rc      = get_user_meta($listedUser->ID, 'rc', true);
-                $listedUser->editUrl = $listUrl.'&user_id='.$listedUser->ID;
+            if (!class_exists('WP_List_Table')) {
+                require_once ABSPATH.'wp-admin/includes/class-wp-list-table.php';
             }
-            $context['data'] = $users;
+            $table = new \RKGeronimo\Tables\DiverProfiles();
+            $table->prepare_items();
+            $context['table'] = $table;
         }
 
         Timber::render('diverProfiles.twig', $context);

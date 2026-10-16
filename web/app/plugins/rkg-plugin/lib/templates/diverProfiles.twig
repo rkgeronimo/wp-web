@@ -16,24 +16,15 @@
         </form>
     {% else %}
         <h1 class="wp-heading-inline">Ronilački profili</h1>
-        <table class="wp-list-table widefat fixed striped" cellspacing="0">
-            <thead>
-                <tr>
-                    <th scope="col" class="manage-column column-primary"><b>Ime i prezime</b></th>
-                    <th scope="col" class="manage-column"><b>Ronilačka kategorija</b></th>
-                    <th scope="col" class="manage-column"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in data %}
-                <tr>
-                    <td class="column-primary">{{ loop.index }}. {{ item.display_name }}</td>
-                    <td>{{ item.rc }}</td>
-                    <td><a class="button" href="{{ item.editUrl }}">Uredi</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <hr class="wp-header-end">
+        <form method="get">
+            <input type="hidden" name="page" value="rkg_diver_profiles">
+            {{ table.search_box('Pretraga', 'diver_search') }}
+        </form>
+        <form method="get">
+            <input type="hidden" name="page" value="rkg_diver_profiles">
+            {{ table.display() }}
+        </form>
     {% endif %}
 </div>
 {% endblock %}

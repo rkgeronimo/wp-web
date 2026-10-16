@@ -31,9 +31,14 @@ none
 
 - New top-level admin menu item "Ronilački profili" (slug `rkg_diver_profiles`),
   visible to roles with `edit_courses`.
-- The page lists all users; opening a user shows the "Ronilački profil" section
-  and saves the fields above. "Ukupno izleta" and "Izleta u zadnjih 6 mjeseci"
-  stay read-only (they are computed from excursion sign-ups).
+- The page lists all members in a native-style WordPress list table (search +
+  pagination), with columns: Ime i prezime, Ronilačka kategorija, Član od
+  (first membership), Zadnja aktivna godina (latest membership year), and
+  Članarina za <current year> (Da/Ne). Membership data comes from
+  `rkg_member_subscription`.
+- Opening a member shows the "Ronilački profil" section and saves the fields
+  above. "Ukupno izleta" and "Izleta u zadnjih 6 mjeseci" stay read-only
+  (they are computed from excursion sign-ups).
 - The save is nonce-protected (`check_admin_referer`) and capability-checked;
   `rc` is validated against the allowed category list and `cardNumber` is
   sanitized. No email, password, role or other profile data is writable here.
@@ -51,7 +56,9 @@ none
   `excursionCounts()`; `userMeta()` now reuses the two helpers
 - `web/app/plugins/rkg-plugin/lib/templates/diverProfile.twig` (new): shared
   "Ronilački profil" fields
-- `web/app/plugins/rkg-plugin/lib/templates/diverProfiles.twig` (new): list and
-  edit views for the admin page
+- `web/app/plugins/rkg-plugin/lib/Tables/DiverProfiles.php` (new): WP_List_Table
+  for the searchable member list with membership columns
+- `web/app/plugins/rkg-plugin/lib/templates/diverProfiles.twig` (new): list
+  (renders the table) and edit views for the admin page
 - `web/app/plugins/rkg-plugin/lib/templates/userMeta.twig`: includes the shared
   partial instead of inline markup
