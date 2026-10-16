@@ -1,0 +1,39 @@
+{% block content %}
+<div class="wrap">
+    {% if editUser %}
+        <h1 class="wp-heading-inline">Ronilački profil — {{ editUser.display_name }}</h1>
+        <p><a href="{{ listUrl }}">&larr; Natrag na popis</a></p>
+        {% if saved %}
+            <div class="notice notice-success is-dismissible"><p>Spremljeno.</p></div>
+        {% endif %}
+        <form method="post" action="{{ formAction }}">
+            {{ nonceField|raw }}
+            <input type="hidden" name="user_id" value="{{ editUser.ID }}">
+            {% include 'diverProfile.twig' %}
+            <p class="submit">
+                <button type="submit" class="button button-primary">Spremi</button>
+            </p>
+        </form>
+    {% else %}
+        <h1 class="wp-heading-inline">Ronilački profili</h1>
+        <table class="wp-list-table widefat fixed striped" cellspacing="0">
+            <thead>
+                <tr>
+                    <th scope="col" class="manage-column column-primary"><b>Ime i prezime</b></th>
+                    <th scope="col" class="manage-column"><b>Ronilačka kategorija</b></th>
+                    <th scope="col" class="manage-column"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td class="column-primary">{{ loop.index }}. {{ item.display_name }}</td>
+                    <td>{{ item.rc }}</td>
+                    <td><a class="button" href="{{ item.editUrl }}">Uredi</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock %}

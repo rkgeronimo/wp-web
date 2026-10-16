@@ -27,6 +27,7 @@ class Users implements InitInterface
     public function init()
     {
         add_action('admin_menu', array($this, 'createMemberRegistry'));
+        add_action('admin_menu', array($this, 'createDiverProfiles'));
         
         add_action('show_user_profile', array($this, 'userMeta'));
         add_action('edit_user_profile', array($this, 'userMeta'));
@@ -79,6 +80,166 @@ class Users implements InitInterface
                 $this,
                 'memberRegistryPage'
             )
+        );
+    }
+
+    /**
+     * Admin page where instructors edit members' diving profile (rc,
+     * cardNumber, certifications). Gated by edit_courses so it does not
+     * require the broad edit_users capability.
+     *
+     * @return void
+     */
+    public function createDiverProfiles()
+    {
+        add_menu_page(
+            'Ronilački profili',
+            'Ronilački profili',
+            'edit_courses',
+            'rkg_diver_profiles',
+            array($this, 'diverProfilesPage'),
+            'dashicons-id-alt'
+        );
+    }
+
+    /**
+     * Lists all users and, with a user_id, shows the editable
+     * "Ronilački profil" form for that user. Saves on POST.
+     *
+     * @return void
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public function diverProfilesPage()
+    {
+        $context = Timber::get_context();
+        if (!current_user_can('edit_courses')) {
+            Timber::render('single-no-pasaran.twig', $context);
+
+            return;
+        }
+
+        $saved = false;
+        if (!empty($_POST) && isset($_POST['user_id'])) {
+            check_admin_referer('rkg_diver_profile', 'rkg_dp_nonce');
+            $targetId = intval($_POST['user_id']);
+            if ($targetId && get_userdata($targetId)) {
+                $this->saveDiverProfile($targetId);
+                $saved = true;
+            }
+        }
+
+        $listUrl               = admin_url('admin.php?page=rkg_diver_profiles');
+        $context['listUrl']    = $listUrl;
+        $context['formAction'] = $listUrl;
+        $context['categories'] = $this->diverCategories();
+
+        $editId = isset($_GET['user_id'])
+            ? intval($_GET['user_id'])
+            : (isset($_POST['user_id']) ? intval($_POST['user_id']) : 0);
+        $editUser = $editId ? get_userdata($editId) : false;
+
+        if ($editUser) {
+            $counts = $this->excursionCounts($editId);
+            $context['editUser']        = $editUser;
+            $context['saved']           = $saved;
+            $context['expanded']        = true;
+            $context['nonceField']      = wp_nonce_field(
+                'rkg_diver_profile',
+                'rkg_dp_nonce',
+                true,
+                false
+            );
+            $context['excursions_all']  = $counts['all'];
+            $context['excursions_last'] = $counts['last'];
+            $context['profileMeta']     = array(
+                'rc'         => get_user_meta($editId, 'rc', true),
+                'cardNumber' => get_user_meta($editId, 'cardNumber', true),
+                'log'        => get_user_meta($editId, 'log', true),
+                'co'         => get_user_meta($editId, 'co', true),
+                'nitrox'     => get_user_meta($editId, 'nitrox', true),
+                'dry_suit'   => get_user_meta($editId, 'dry_suit', true),
+                'DAN_op'     => get_user_meta($editId, 'DAN_op', true),
+            );
+        } else {
+            $users = get_users(array(
+                'orderby' => 'display_name',
+                'order'   => 'ASC',
+            ));
+            foreach ($users as $listedUser) {
+                $listedUser->rc      = get_user_meta($listedUser->ID, 'rc', true);
+                $listedUser->editUrl = $listUrl.'&user_id='.$listedUser->ID;
+            }
+            $context['data'] = $users;
+        }
+
+        Timber::render('diverProfiles.twig', $context);
+    }
+
+    /**
+     * Saves the editable "Ronilački profil" fields for one user. Reuses
+     * the same meta helpers as the WP profile screen; the two excursion
+     * counts are computed and never written.
+     *
+     * @param int $userId User id.
+     *
+     * @return void
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    private function saveDiverProfile($userId)
+    {
+        $categories = $this->diverCategories();
+        $rc         = isset($_POST['rc']) ? wp_unslash($_POST['rc']) : '';
+        $_POST['rc'] = in_array($rc, $categories, true) ? $rc : '';
+        $_POST['cardNumber'] = isset($_POST['cardNumber'])
+            ? sanitize_text_field(wp_unslash($_POST['cardNumber']))
+            : '';
+
+        $this->updateMetaValue($userId, 'rc');
+        $this->updateMetaValue($userId, 'cardNumber');
+        $this->updateMetaValueCheckbox($userId, 'log');
+        $this->updateMetaValueCheckbox($userId, 'co');
+        $this->updateMetaValueCheckbox($userId, 'nitrox');
+        $this->updateMetaValueCheckbox($userId, 'dry_suit');
+        $this->updateMetaValueCheckbox($userId, 'DAN_op');
+    }
+
+    /**
+     * Allowed diving categories, shared by the dropdown and validation.
+     *
+     * @return array
+     */
+    private function diverCategories()
+    {
+        return array(
+            '', 'R1', 'R2', 'R3', 'R4', 'I1', 'I2', 'I3', 'R1T', 'R2T', 'AOWD',
+        );
+    }
+
+    /**
+     * Total and last-six-months excursion sign-up counts for a user.
+     *
+     * @param int $userId User id.
+     *
+     * @return array {all, last}
+     */
+    private function excursionCounts($userId)
+    {
+        global $wpdb;
+        $tableName = $wpdb->prefix."rkg_excursion_signup";
+
+        return array(
+            'all'  => $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM $tableName WHERE user_id = %d",
+                $userId
+            )),
+            'last' => $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM $tableName
+                WHERE user_id = %d
+                AND created > DATE_SUB(now(), INTERVAL 6 MONTH)",
+                $userId
+            )),
         );
     }
 
@@ -231,19 +392,10 @@ class Users implements InitInterface
         );
 
 
-        global $wpdb;
-        $tableName                     = $wpdb->prefix."rkg_excursion_signup";
-        $context['excursions_all'] = $wpdb->get_var(
-            "SELECT COUNT(*) FROM "
-            .$tableName.
-            " WHERE user_id = ".$user->ID
-        );
-        $context['excursions_last'] = $wpdb->get_var(
-            "SELECT COUNT(*) FROM "
-            .$tableName.
-            " WHERE user_id = ".$user->ID
-            ." AND created > DATE_SUB(now(), INTERVAL 6 MONTH)"
-        );
+        $counts = $this->excursionCounts($user->ID);
+        $context['excursions_all']  = $counts['all'];
+        $context['excursions_last'] = $counts['last'];
+        $context['categories']      = $this->diverCategories();
 
         $templates = array( 'userMeta.twig' );
         Timber::render($templates, $context);
