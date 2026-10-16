@@ -1,0 +1,55 @@
+{# Ronilački profil fields. Shared by the WP user profile screen (userMeta.twig)
+   and the instructor "Ronilački profili" admin page (diverProfiles.twig).
+   Expects: profileMeta, excursions_all, excursions_last, categories. #}
+<h3>
+    Ronilački profil
+    <span class="dashicons {{ expanded ? 'dashicons-arrow-up-alt2' : 'dashicons-arrow-down-alt2' }} rkg-admin-switch" id="rkg-rp"></span>
+</h3>
+<table class="form-table rkg-admin-switch-block" id="rkg-rp-block"{% if expanded %} style="display: table"{% endif %}>
+    <tr>
+        <th><label>Ukupno izleta</label></th>
+        <td>
+            {{ excursions_all }}
+        </td>
+    </tr>
+    <tr>
+        <th><label>Izleta u zadnjih 6 mjeseci</label></th>
+        <td>
+            {{ excursions_last }}
+        </td>
+    </tr>
+    <tr>
+        <th><label for="rc">Ronilačka kategorija</label></th>
+        <td>
+            <select name="rc">
+                {% for i in categories %}
+                    <option value="{{ i }}" {% if i == profileMeta.rc %} selected{% endif %}>{{ i }}</option>
+                {% endfor %}
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <th><label for="cardNumber">Broj breveta</label></th>
+        <td><input type="text" name="cardNumber" value="{{ profileMeta.cardNumber }}"></td>
+    </tr>
+    <tr>
+        <th><label for="log">Klupski dnevnik</label></th>
+        <td><input type="checkbox" name="log"{{ profileMeta.log ? ' checked' }}></td>
+    </tr>
+    <tr>
+        <th><label for="co">Kompresorist</label></th>
+        <td><input type="checkbox" name="co"{{ profileMeta.co ? ' checked' }}></td>
+    </tr>
+    <tr>
+        <th><label for="nitrox">Nitrox</label></th>
+        <td><input type="checkbox" name="nitrox"{{ profileMeta.nitrox ? ' checked' }}></td>
+    </tr>
+    <tr>
+        <th><label for="dry_suit">Suho odijelo</label></th>
+        <td><input type="checkbox" name="dry_suit"{{ profileMeta.dry_suit ? ' checked' }}></td>
+    </tr>
+    <tr>
+        <th><label for="DAN_op">DAN Oxygen provider</label></th>
+        <td><input type="checkbox" name="DAN_op"{{ profileMeta.DAN_op ? ' checked' }}></td>
+    </tr>
+</table>

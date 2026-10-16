@@ -571,6 +571,8 @@ class Activator
                 //RKG capabilities
                 'member_access'           => true,
                 'edit_excursion'          => true,
+                'edit_excursions'         => true,
+                'edit_other_excursions'   => true,
                 'publish_excursions'      => true,
                 'read_excursions'         => true,
                 'read_private_excursions' => true,
