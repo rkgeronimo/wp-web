@@ -22,8 +22,8 @@
  * @since    Timber 0.1
  */
 
-$context = Timber::get_context();
+$context = Timber::context();
 $context['rkg_side'] = Timber::get_widgets('about_right');
-$post = new TimberPost();
+$post = Timber::get_post();
 $context['post'] = $post;
 Timber::render( array( 'page-' . $post->post_name . '.twig', 'page-side.twig' ), $context );

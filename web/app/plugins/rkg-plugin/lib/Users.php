@@ -112,7 +112,7 @@ class Users implements InitInterface
      */
     public function diverProfilesPage()
     {
-        $context = Timber::get_context();
+        $context = Timber::context();
         if (!current_user_can('edit_courses')) {
             Timber::render('single-no-pasaran.twig', $context);
 
@@ -271,7 +271,7 @@ class Users implements InitInterface
      */
     public function userMeta($user)
     {
-        $context                          = Timber::get_context();
+        $context                          = Timber::context();
         $context['profileMeta']['memberNumber']    = get_user_meta($user->ID, "memberNumber", true);
         $context['profileMeta']['dob']    = get_user_meta($user->ID, "dob", true);
         $context['profileMeta']['pob']    = get_user_meta($user->ID, "pob", true);
@@ -1039,7 +1039,7 @@ class Users implements InitInterface
      */
     public function instructorMeta($user)
     {
-        $context = Timber::get_context();
+        $context = Timber::context();
 
         if (current_user_can('promote_users', $user->ID)) {
             global $wpdb;
@@ -1095,7 +1095,7 @@ class Users implements InitInterface
 
     public function memberRegistryPage()
     {
-        $context            = Timber::get_context();
+        $context            = Timber::context();
         if(!current_user_can('edit_users')) {
             Timber::render('single-no-pasaran.twig', $context);
             return;

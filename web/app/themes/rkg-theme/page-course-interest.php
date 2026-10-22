@@ -22,8 +22,8 @@
  * @since    Timber 0.1
  */
 
-$context         = Timber::get_context();
-$post            = new TimberPost();
+$context         = Timber::context();
+$post            = Timber::get_post();
 $context['post'] = $post;
 
 $courseTemplateId = intval($context['request']->get['id']);
@@ -49,7 +49,10 @@ $students = $wpdb->get_col(
 );
 
 foreach ($students as $value) {
-    $context['students'][] = new Timber\User($value);
+    $student = Timber::get_user($value);
+    if ($student) {
+        $context['students'][] = $student;
+    }
 }
 
 

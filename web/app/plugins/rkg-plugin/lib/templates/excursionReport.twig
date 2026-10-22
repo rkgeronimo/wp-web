@@ -6,7 +6,7 @@
         <h3>Prijavljeni na izlet</h3>
         <h4>{{ excursionMeta.starttime|date("d.m.Y.") }} - {{ excursionMeta.endtime|date("d.m.Y.") }}</h4>
         {# {{ table.display_tablenav  }} #}
-        {{ table.display }}
+        {{ table.display() }}
 
         <h3>Gosti</h3>
 

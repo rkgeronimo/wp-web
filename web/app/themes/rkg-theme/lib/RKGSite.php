@@ -20,8 +20,8 @@ class RKGSite extends \Timber\Site
     public function __construct()
     {
         add_action('after_setup_theme', array($this, 'themeSupports'));
-        add_filter('timber_context', array($this, 'addToContext'));
-        add_filter('get_twig', array($this, 'addToTwig'));
+        add_filter('timber/context', array($this, 'addToContext'));
+        add_filter('timber/twig', array($this, 'addToTwig'));
         add_action('init', array($this, 'registerPostTypes'));
         add_action('init', array($this, 'registerTaxonomies'));
         add_action('init', array($this, 'registerMenus'));
@@ -73,20 +73,21 @@ class RKGSite extends \Timber\Site
         $context['actual_excursions_waiting'] = $this->getActualExcursions(
             $context['signups']['excursions_waiting'] ?? null
         );
-        $context['menu']                      = new \Timber\Menu();
-        $context['rkg_user_menu']             = new \Timber\Menu(
+        $context['request']                   = $this->getRequest();
+        $context['menu']                      = Timber::get_menu();
+        $context['rkg_user_menu']             = Timber::get_menu(
             'rkg-user-menu'
         );
         $context['site']                      = $this;
 
         if ($context['user']
-            && !array_key_exists('member', (array) $context['user']->roles)
+            && !array_key_exists('member', (array) $context['user']->roles())
         ) {
             $context['memberDebth'] = date('Y');;
         }
         // Check if membership paid for the next year
         else if ($context['user']
-            && array_key_exists('member', (array) $context['user']->roles)
+            && array_key_exists('member', (array) $context['user']->roles())
         ) {
             $now   = strtotime("now");
             $start = strtotime(date('Y')."-11-01");
@@ -189,10 +190,26 @@ class RKGSite extends \Timber\Site
      */
     public function addToTwig($twig)
     {
-        $twig->addExtension(new \Twig_Extension_StringLoader());
-        $twig->addFilter(new \Twig_SimpleFilter('myfoo', array( $this, 'myfoo' )));
+        $twig->addExtension(new \Twig\Extension\StringLoaderExtension());
 
         return $twig;
+    }
+
+    /**
+     * getRequest
+     *
+     * Timber 2 no longer adds a Timber\Request to the context. Theme and
+     * plugin code still reads request.get / request.post, so expose the same
+     * shape here.
+     *
+     * @return object
+     */
+    private function getRequest()
+    {
+        return (object) array(
+            'get'  => $_GET,
+            'post' => $_POST,
+        );
     }
 
     /**

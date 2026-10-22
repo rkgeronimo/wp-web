@@ -107,7 +107,7 @@ class RKGeronimoExcursion
     {
         global $post;
         wp_nonce_field(basename(__FILE__), 'rkg_excursion_nounce');
-        $context = Timber::get_context();
+        $context = Timber::context();
         if ($post->ID) {
             $tableName       = $this->wpdb->prefix . "rkg_excursion_meta";
             $context['meta'] = $this->wpdb->get_row("SELECT id, leaders, log, ".
@@ -450,7 +450,7 @@ class RKGeronimoExcursion
     {
         global $wpdb;
         $tableName = $wpdb->prefix . "rkg_excursion_meta";
-        $context   = Timber::get_context();
+        $context   = Timber::context();
         $templates = array( 'rkgExcursion.twig' );
 
         $tableName  = $this->wpdb->prefix."rkg_excursion_meta";
@@ -516,7 +516,7 @@ class RKGeronimoExcursion
     {
         global $wpdb;
         $tableName             = $wpdb->prefix . "rkg_excursion";
-        $context               = Timber::get_context();
+        $context               = Timber::context();
         $context['rkgForm']    = null;
         $context['rkgMapEdit'] = null;
         if (isset($this->post['submit']) && $this->post['submit'] == 'Save') {
@@ -609,7 +609,9 @@ class RKGeronimoExcursion
                     ." WHERE id = "
                     .$postId
                 );
-                echo date("d.m.Y", strtotime($date));
+                if ($date) {
+                    echo date("d.m.Y", strtotime($date));
+                }
                 break;
             case 'end' :
                 $date = $this->wpdb->get_var(
@@ -618,7 +620,9 @@ class RKGeronimoExcursion
                     ." WHERE id = "
                     .$postId
                 );
-                echo date("d.m.Y", strtotime($date));
+                if ($date) {
+                    echo date("d.m.Y", strtotime($date));
+                }
                 break;
             case 'participants' :
                 $registered = $this->wpdb->get_var(
@@ -639,7 +643,7 @@ class RKGeronimoExcursion
     public function excursionSearch()
     {
         global $wpdb;
-        $context    = Timber::get_context();
+        $context    = Timber::context();
         $tableName  = $wpdb->prefix."rkg_excursion_meta";
         $firstJoin  = $wpdb->prefix."users";
         $secondJoin = $wpdb->prefix."posts";

@@ -2,7 +2,7 @@
     {% for post in posts %}
         <div class="news-block">
             <div class="col-3">
-                <a class="news-block-item" href="{{ post.guid }}" style="background-image: url('{{ post.get_thumbnail.src }}');">
+                <a class="news-block-item" href="{{ post.guid }}" style="background-image: url('{{ post.thumbnail.src }}');">
                     <div class="news-block-filter"></div>
                     <div class="news-block-category">
                         {% for category in post.categories|slice(0, 3) %}

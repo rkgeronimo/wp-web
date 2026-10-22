@@ -34,10 +34,10 @@ class News implements InitInterface
      */
     public function newsBlock()
     {
-        $context          = Timber::get_context();
+        $context          = Timber::context();
         $context['posts'] = Timber::get_posts(
             array(
-                'numberposts' => 6,
+                'posts_per_page' => 6,
                 'post_status' => 'publish',
                 'post_type' => 'rkg-post'
             )
@@ -50,7 +50,7 @@ class News implements InitInterface
 
             $coverImageId = $context['posts'][$key]->cover_image;
 
-            $context['posts'][$key]->cover_image = new Timber\Image($coverImageId);
+            $context['posts'][$key]->cover_image = Timber::get_image($coverImageId);
         }
 
         $context['categories'] = get_categories();
@@ -62,14 +62,14 @@ class News implements InitInterface
     public function newsBlockUpdate()
     {
         $categorie        = $_POST['id'];
-        $context          = Timber::get_context();
+        $context          = Timber::context();
         $args = array(
-            'numberposts' => 6,
+            'posts_per_page' => 6,
             'post_status' => 'publish',
             'post_type' => 'rkg-post'
         );
         if ($categorie != 'all') {
-            $args['category'] = $categorie;
+            $args['cat'] = $categorie;
         }
         $context['posts'] = Timber::get_posts($args);
 
@@ -80,7 +80,7 @@ class News implements InitInterface
 
             $coverImageId = $context['posts'][$key]->cover_image;
 
-            $context['posts'][$key]->cover_image = new Timber\Image($coverImageId);
+            $context['posts'][$key]->cover_image = Timber::get_image($coverImageId);
         }
 
         $context['categories'] = get_categories();

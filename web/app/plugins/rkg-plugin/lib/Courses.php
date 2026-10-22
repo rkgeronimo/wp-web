@@ -121,10 +121,10 @@ class Courses implements InitInterface
     {
         apply_filters('admin_body_class', 'rkg-printable');
         global $wpdb;
-        $context = Timber::get_context();
+        $context = Timber::context();
 
         $id = intval($context['request']->get['post']);
-        $context['post'] = new Timber\Post($id);
+        $context['post'] = Timber::get_post($id);
 
         if ($context['request']->post && !current_user_can('edit_courses')) {
             wp_die('Nedovoljna prava', 403);
@@ -193,7 +193,10 @@ class Courses implements InitInterface
         $participantsEmails = array();
         $tableName = $wpdb->prefix."rkg_course_signup";
         foreach ($participants as $value) {
-            $user = new Timber\User($value->user_id);
+            $user = Timber::get_user($value->user_id);
+            if (!$user) {
+                continue;
+            }
             $user->payed = $value->payed;
             array_push($participantsEmails, $user->user_email);
             if ($context['request']->post) {
@@ -255,10 +258,10 @@ class Courses implements InitInterface
 
             add_action('wp_enqueue_scripts', array($this, 'enqueueScriptsAdmin'));
             global $wpdb;
-            $context = Timber::get_context();
+            $context = Timber::context();
 
             $id = intval($context['request']->get['post']);
-            $context['post'] = new Timber\Post($id);
+            $context['post'] = Timber::get_post($id);
 
             $where = " WHERE post_id=".$id;
             if ($context['request']->get['user']) {
@@ -275,7 +278,7 @@ class Courses implements InitInterface
             );
 
             foreach ($context['surveys'] as $key => $value) {
-                $context['surveys'][$key]->user = new Timber\User($value->user_id);
+                $context['surveys'][$key]->user = Timber::get_user($value->user_id);
             }
             $templates = array( 'medicalReport.twig' );
             Timber::render($templates, $context);
@@ -303,10 +306,10 @@ class Courses implements InitInterface
 
             add_action('wp_enqueue_scripts', array($this, 'enqueueScriptsAdmin'));
             global $wpdb;
-            $context = Timber::get_context();
+            $context = Timber::context();
 
             $id = intval($context['request']->get['post']);
-            $context['post'] = new Timber\Post($id);
+            $context['post'] = Timber::get_post($id);
 
             $where = " WHERE post_id=".$id;
             if ($context['request']->get['user']) {
@@ -323,7 +326,7 @@ class Courses implements InitInterface
             );
 
             foreach ($context['surveys'] as $key => $value) {
-                $context['surveys'][$key]->user = new Timber\User($value->user_id);
+                $context['surveys'][$key]->user = Timber::get_user($value->user_id);
             }
             $templates = array( 'liabilityReport.twig' );
             Timber::render($templates, $context);
@@ -351,10 +354,10 @@ class Courses implements InitInterface
 
             add_action('wp_enqueue_scripts', array($this, 'enqueueScriptsAdmin'));
             global $wpdb;
-            $context = Timber::get_context();
+            $context = Timber::context();
 
             $id = intval($context['request']->get['post']);
-            $context['post'] = new Timber\Post($id);
+            $context['post'] = Timber::get_post($id);
 
             $and = "";
             if ($context['request']->get['students']) {
@@ -382,7 +385,10 @@ class Courses implements InitInterface
 
             $context['students'] = [];
             foreach ($students as $value) {
-                $context['students'][] = new Timber\User($value);
+                $student = Timber::get_user($value);
+                if ($student) {
+                    $context['students'][] = $student;
+                }
             }
 
 
@@ -406,7 +412,7 @@ class Courses implements InitInterface
                 .$id
             );
 
-            $context['assistant'] = new Timber\User($context['meta']->assistant);
+            $context['assistant'] = Timber::get_user($context['meta']->assistant);
 
             $tableName               = $wpdb->prefix."rkg_course_template";
             $context['metaTemplate'] = $wpdb->get_row(
@@ -416,7 +422,7 @@ class Courses implements InitInterface
                 .$context['meta']->category
             );
 
-            $context['organiser'] = new Timber\User($context['meta']->organiser);
+            $context['organiser'] = Timber::get_user($context['meta']->organiser);
 
             $where = " WHERE post_id=".$id;
             if ($context['request']->get['user']) {
@@ -450,7 +456,7 @@ class Courses implements InitInterface
             }
         );
         add_action('load-'.$hook, function () {
-            $context = Timber::get_context();
+            $context = Timber::context();
             global $wpdb;
 
             $id = intval($context['request']->get['post']);
@@ -603,7 +609,7 @@ class Courses implements InitInterface
     public function courseTemplatePage()
     {
         $tableName          = $this->wpdb->prefix."rkg_course_template";
-        $context            = Timber::get_context();
+        $context            = Timber::context();
         $context['rkgForm'] = null;
         $context['rkgEdit'] = null;
 
@@ -648,7 +654,7 @@ class Courses implements InitInterface
 
     public function courseInterestPage()
     {
-        $context            = Timber::get_context();
+        $context            = Timber::context();
         if(!current_user_can('edit_courses')) {
             Timber::render('single-no-pasaran.twig', $context);
             return;
@@ -735,7 +741,7 @@ class Courses implements InitInterface
         global $post;
         wp_nonce_field(basename(__FILE__), 'rkg_course_nounce');
 
-        $context                    = Timber::get_context();
+        $context                    = Timber::context();
         $tableName                  = $this->wpdb->prefix."rkg_course_template";
         $context['courseTemplates'] = $this->wpdb->get_results(
             "SELECT id, category, priority, name, location, terms, price,"
@@ -752,7 +758,7 @@ class Courses implements InitInterface
         ));
 
         foreach ($instructors as $value) {
-            $context['instructors'][] =  new Timber\User($value);
+            $context['instructors'][] =  Timber::get_user($value);
         }
 
         if ($post->ID) {
@@ -844,7 +850,7 @@ class Courses implements InitInterface
      */
     public function courseBlock()
     {
-        $context = Timber::get_context();
+        $context = Timber::context();
 
         $currentUser = wp_get_current_user();
         $tableName = $this->wpdb->prefix."rkg_course_signup";
@@ -938,7 +944,9 @@ class Courses implements InitInterface
                     ." WHERE id = "
                     .$postId
                 );
-                echo date("d.m.Y", strtotime($date));
+                if ($date) {
+                    echo date("d.m.Y", strtotime($date));
+                }
                 break;
             case 'end' :
                 $date = $this->wpdb->get_var(
@@ -947,7 +955,9 @@ class Courses implements InitInterface
                     ." WHERE id = "
                     .$postId
                 );
-                echo date("d.m.Y", strtotime($date));
+                if ($date) {
+                    echo date("d.m.Y", strtotime($date));
+                }
                 break;
             case 'participants' :
                 $registered = $this->wpdb->get_var(
@@ -1080,8 +1090,10 @@ class Courses implements InitInterface
         );
 
         foreach ($participants as $value) {
-            $user = new Timber\User($value);
-            $emails[] = $user->user_email;
+            $user = Timber::get_user($value);
+            if ($user) {
+                $emails[] = $user->user_email;
+            }
         }
 
         return "<a href='mailto:".implode(';', $emails).

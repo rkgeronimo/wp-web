@@ -22,17 +22,17 @@
  * @since    Timber 0.1
  */
 
-$context         = Timber::get_context();
-$post            = new TimberPost();
+$context         = Timber::context();
+$post            = Timber::get_post();
 $context['post'] = $post;
 
 $category = isset($_GET['cat']) ? $_GET['cat'] : null;
 
-$args['numberposts'] = 30;
+$args['posts_per_page'] = 30;
 $args['post_type']   = 'rkg-post';
 $args['post_status']   = array('publish', 'private');
 if ($category) {
-    $args['category'] = $category;
+    $args['cat'] = $category;
 }
 
 $context['news'] = Timber::get_posts($args);
@@ -44,7 +44,7 @@ foreach ($context['news'] as $key => $value) {
 
     $coverImageId = $context['news'][$key]->cover_image;
 
-    $context['news'][$key]->cover_image = new Timber\Image($coverImageId);
+    $context['news'][$key]->cover_image = Timber::get_image($coverImageId);
 }
 
 $context['categories']   = get_categories();

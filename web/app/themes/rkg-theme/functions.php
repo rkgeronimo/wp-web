@@ -25,7 +25,9 @@ spl_autoload_register(function ($className) {
     }
 });
 
-$timber = new Timber();
+if (class_exists('Timber\Timber')) {
+    Timber::init();
+}
 
 if (!class_exists('Timber')) {
     add_action('admin_notices', function () {
@@ -60,9 +62,13 @@ Timber::$dirname = array( 'templates', 'views' );
 
 /**
  * By default, Timber does NOT autoescape values. Want to enable Twig's autoescape?
- * No prob! Just set this value to true
+ * No prob! Just set this value to 'html'
  */
-Timber::$autoescape = false;
+add_filter('timber/twig/environment/options', function ($options) {
+    $options['autoescape'] = false;
+
+    return $options;
+});
 
 new RKGTheme\RKGSite();
 $functions = new RKGTheme\RKGTheme();
@@ -752,7 +758,7 @@ add_action('init','prevent_wp_default_registration_pages');
 
 function prevent_wp_default_registration_pages(){
  global $pagenow;
- if( 'wp-login.php' === $pagenow && $_GET['action'] === "register") {
+ if( 'wp-login.php' === $pagenow && ($_GET['action'] ?? null) === "register") {
   wp_redirect('/');
   exit();
  }

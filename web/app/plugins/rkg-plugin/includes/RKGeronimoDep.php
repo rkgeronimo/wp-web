@@ -26,7 +26,7 @@ class RkGeronimoDep
      */
     function rkg_admin_page()
     {
-        $context   = Timber::get_context();
+        $context   = Timber::context();
         $templates = array( 'rkg-admin-menu.twig' );
         Timber::render($templates, $context);
     }

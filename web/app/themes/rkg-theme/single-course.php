@@ -12,8 +12,8 @@
  */
 
 global $wpdb;
-$context         = Timber::get_context();
-$post            = Timber::query_post();
+$context         = Timber::context();
+$post            = Timber::get_post();
 $context['post'] = $post;
 $tableName       = $wpdb->prefix."rkg_course_meta";
 $context['meta'] = $wpdb->get_row(
@@ -25,7 +25,7 @@ $context['meta'] = $wpdb->get_row(
     .$post->ID
 );
 
-$context['organiser'] = new Timber\User($context['meta']->organiser);
+$context['organiser'] = Timber::get_user($context['meta']->organiser);
 
 // Drugi termini
 $context['courseTerms'] = $wpdb->get_results(
@@ -70,9 +70,12 @@ $students = $wpdb->get_results(
 );
 
 foreach ($students as $value) {
-    $student = new Timber\User($value->user_id);
+    $student = Timber::get_user($value->user_id);
+    if (!$student) {
+        continue;
+    }
     $context['students'][] = $student;
-    if ($student->id === $context['user']->id) {
+    if ($context['user'] && $student->id === $context['user']->id) {
         $context['user']->payed = !!$value->payed;
     }
 }

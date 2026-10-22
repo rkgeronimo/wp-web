@@ -66,8 +66,10 @@ class Excursions implements InitInterface
         );
 
         foreach ($participants as $value) {
-            $user = new Timber\User($value);
-            $emails[] = $user->user_email;
+            $user = Timber::get_user($value);
+            if ($user) {
+                $emails[] = $user->user_email;
+            }
         }
 
         return $emails;
@@ -89,10 +91,10 @@ class Excursions implements InitInterface
     {
         apply_filters('admin_body_class', 'rkg-printable');
         global $wpdb;
-        $context = Timber::get_context();
+        $context = Timber::context();
 
         $id = intval($context['request']->get['post']);
-        $context['post'] = new Timber\Post($id);
+        $context['post'] = Timber::get_post($id);
 
         $tableName = $wpdb->prefix."rkg_excursion_meta";
         $context['excursionMeta'] = $wpdb->get_row(
@@ -114,8 +116,8 @@ class Excursions implements InitInterface
             ." ORDER BY created"
         );
         foreach ($guests as $key => $value) {
-            $user      = new Timber\User($value->user_id);
-            $guests[$key]->invited_by =  $user->display_name;
+            $user      = Timber::get_user($value->user_id);
+            $guests[$key]->invited_by =  $user?->display_name;
         }
         $context['guests'] = $guests;
 
@@ -132,7 +134,10 @@ class Excursions implements InitInterface
         );
 
         foreach ($participants as $value) {
-            $user      = new Timber\User($value);
+            $user      = Timber::get_user($value);
+            if (!$user) {
+                continue;
+            }
             $tableName = $wpdb->prefix."rkg_excursion_signup";
             $join = $wpdb->prefix."rkg_excursion_meta";
             $user->excursionsLast = $wpdb->get_var(

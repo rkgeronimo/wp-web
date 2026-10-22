@@ -1,7 +1,7 @@
 services:
   db:
-    image: mysql:5.7
-    command: --sql-mode="" --innodb-buffer-pool-size=256M --innodb-log-file-size=64M
+    image: mysql:8.4
+    command: --sql-mode="" --innodb-buffer-pool-size=256M --innodb-redo-log-capacity=128M
     environment:
       MYSQL_DATABASE: bedrock
       MYSQL_USER: bedrock
@@ -49,7 +49,7 @@ services:
     stdin_open: true
 
   wpcli:
-    image: wordpress:cli-php7.4
+    image: wordpress:cli-php8.5
     user: "33:33"
     working_dir: /var/www/html
     environment:

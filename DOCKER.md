@@ -45,7 +45,14 @@ docker compose run --rm node sh -lc "yarn install && ./node_modules/.bin/gulp"
 docker compose run --rm wpcli wp search-replace 'http://local.rkgeronimo' 'http://localhost:8080' --all-tables --skip-columns=guid
 ```
 
-# 7. (Optional) Install SMTP plugin
+# 7. Update the database schema
+The seed dump comes from an older WordPress version and predates the project migrations.
+```bash
+docker compose run --rm wpcli wp core update-db
+docker compose run --rm php php database/migrate.php migrate
+```
+
+# 8. (Optional) Install SMTP plugin
 ```bash
 docker compose run --rm wpcli wp plugin install wp-mail-smtp --activate
 ```
@@ -89,6 +96,22 @@ NONCE_SALT='dev'
 ---
 
 ## Troubleshooting
+
+- **Upgrading from the MySQL 5.7 setup**
+  The `db` service now uses MySQL 8.4, which cannot open a data volume created by MySQL 5.7.
+  Remove the old volume so it is recreated from `geronimo_basic.sql` (this deletes local database changes),
+  then repeat steps 6 and 7:
+  ```bash
+  docker compose down -v
+  docker compose up -d --build
+  ```
+
+- **`wp db ...` commands fail with `TLS/SSL error: self-signed certificate`**
+  The MariaDB client in the wp-cli image does not accept the MySQL container's self-signed certificate.
+  Other wp-cli commands work. For direct database access use the `db` container instead:
+  ```bash
+  docker compose exec db mysql -ubedrock -pbedrock bedrock
+  ```
 
 - **CSS/JS not loading (404)**  
   Run the asset build command again:

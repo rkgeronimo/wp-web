@@ -19,7 +19,7 @@
                                     data-categories="{% for category in new.categories %}{{ category.slug }}{% if not loop.last %} {% endif %}{% endfor %}"
                                     data-category-ids="{% for category in new.categories %}{{ category.term_id }}{% if not loop.last %},{% endif %}{% endfor %}">
                                     <div class="col-2-news">
-                                        <a class="news-block-item" href="{{ new.guid }}" style="background-image: url('{{ new.get_thumbnail.src }}');">
+                                        <a class="news-block-item" href="{{ new.guid }}" style="background-image: url('{{ new.thumbnail.src }}');">
                                             <div class="news-block-category">
                                                 {% for category in new.categories|slice(0, 3) %}
                                                     {{ category.name }}{% if not loop.last %}, {% endif %}
