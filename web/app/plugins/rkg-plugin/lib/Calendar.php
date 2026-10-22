@@ -21,6 +21,15 @@ class Calendar
     private $dayLabels = array("Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned");
 
     /**
+     * currentYear
+     *
+     * @var int
+     *
+     * trenutna godina koja se prikazuje
+     */
+    private $currentYear = 0;
+
+    /**
      * currentMonth
      *
      * @var int

@@ -16,7 +16,7 @@
             </div>
             <a class="rkg-meni-title" href="{{site.url}}" rel="home">RK Geronimo</a>
             <nav id="nav-main" class="nav-main" role="navigation">
-                {% include "menu.twig" with {'menu': menu.get_items} %}
+                {% include "menu.twig" with {'menu': menu.items} %}
             </nav><!-- #nav -->
             <div class="rkg-meni-external">
                 <a href="mailto:rkgeronimo@rkgeronimo.hr"><i class="fas fa-envelope"></i></a>
@@ -78,7 +78,7 @@
                         {#<a class="hdr-logo-link" href="{{site.url}}" rel="home">{{site.name}}</a>#}
                     {#</h1>#}
                     {#<nav id="nav-main" class="nav-main" role="navigation">#}
-                        {#{% include "menu.twig" with {'menu': menu.get_items} %}#}
+                        {#{% include "menu.twig" with {'menu': menu.items} %}#}
                     {#</nav><!-- #nav -->#}
                 {#</div>#}
             {#{% endblock %}#}
@@ -114,7 +114,7 @@
 						{#<a class="hdr-logo-link" href="{{site.url}}" rel="home">{{site.name}}</a>#}
 					{#</h1>#}
 					{#<nav id="nav-main" class="nav-main" role="navigation">#}
-						{#{% include "menu.twig" with {'menu': menu.get_items} %}#}
+						{#{% include "menu.twig" with {'menu': menu.items} %}#}
 					{#</nav><!-- #nav -->#}
 				{#</div>#}
 			{#{% endblock %}#}

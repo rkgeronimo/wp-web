@@ -39,7 +39,13 @@ Run Gulp after changing source assets in `src/`. The generated files in this the
   Twig template to render.
 - Keep reusable theme setup and hooks in `lib/` classes under the `RKGTheme\` namespace.
 - Business rules for courses, excursions, inventory, reports, roles, and users should stay in `rkg-plugin`.
-- Preserve Timber 1.x conventions used by this codebase.
+- Use the Timber 2.x API: `Timber::context()`, `Timber::get_post()`,
+  `Timber::get_posts()`, `Timber::get_user()`, `Timber::get_image()` and
+  `Timber::get_menu()`. Timber classes can no longer be created with `new`.
+  `get_user()`/`get_post()` return `null` for missing IDs, so check before
+  using the result.
+- `request.get` / `request.post` in the context come from
+  `RKGSite::getRequest()`, not from Timber.
 - Timber autoescape is disabled in `functions.php`; escape values deliberately
   in PHP/Twig when output may include user-controlled data.
 - Be careful when editing `functions.php`: it contains bootstrap code plus legacy AJAX handlers, so unrelated changes can have wide effects.

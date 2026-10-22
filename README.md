@@ -5,7 +5,7 @@ It depends on multiple other repositories like plugins and theme that are added 
 
 ## Requirements
 
-- PHP >= 7.4
+- PHP >= 8.5
 - MySQL
 - Composer - [Install](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx)
 - Yarn - [Install](https://classic.yarnpkg.com/lang/en/docs/install/)
@@ -31,7 +31,7 @@ To install and setup everything, run the following commands:
 7. Install plugin `wp-mail-smtp`, manually or using WP CLI `wp plugin install wp-mail-smtp --activate`
 8. Setup Apache virtual host `http://local.rkgeronimo` the document root on the webserver to the `web` folder: `/path/to/site/web/`
 9. Map the hostname by editing your local `/etc/hosts` file and adding entry for the domain (http://local.rkgeronimo) next to localhost.
-10. (optional) Make sure `php-zip` extension is enabled if you want to use feature to download all photos from applicants in a course. Extension can be installed using `sudo apt-get install php7.4-zip`. This is not necessary for anything else and app will work without it, just not the part with ZipArchive.
+10. (optional) Make sure `php-zip` extension is enabled if you want to use feature to download all photos from applicants in a course. Extension can be installed using `sudo apt-get install php8.5-zip`. This is not necessary for anything else and app will work without it, just not the part with ZipArchive.
 
 
 Note: If you are using other virual host and other domain, then domain replacements in the database should be made. This can be easily done through [WP-CLI](https://wp-cli.org): `wp search-replace 'http://local.rkgeronimo' 'new'`. WP-CLI plugin can be used for similar data updates e.g. user password changing.

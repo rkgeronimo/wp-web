@@ -23,8 +23,8 @@
  */
 
 global $wpdb;
-$context               = Timber::get_context();
-$post                  = new TimberPost();
+$context               = Timber::context();
+$post                  = Timber::get_post();
 $tableName             = $wpdb->prefix."rkg_excursion_meta";
 $firstJoin             = $wpdb->prefix."users";
 $secondJoin            = $wpdb->prefix."posts";
@@ -36,8 +36,8 @@ $group = null;
 
 if (!empty($_GET['godina'])
     || !empty($_GET['naziv'])
-    || !empty($_GET{'organizator'})
-    || !empty($_GET{'prijavljeni'})
+    || !empty($_GET['organizator'])
+    || !empty($_GET['prijavljeni'])
 ) {
     $where = array();
     if (!empty($_GET['godina'])) {

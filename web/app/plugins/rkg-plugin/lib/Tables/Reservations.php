@@ -210,8 +210,8 @@ class Reservations extends WP_List_Table
         $reservations = $this->fetchData();
 
         foreach ($reservations as $key => $value) {
-            $user      = new Timber\User($value->user_id);
-            $excursion = new Timber\Post($value->post_id);
+            $user      = Timber::get_user($value->user_id);
+            $excursion = Timber::get_post($value->post_id);
 
             // Get status label
             $definitions = new Definitions();
@@ -219,8 +219,8 @@ class Reservations extends WP_List_Table
             $statusLabel = isset($statusLabels[$value->state]) ? $statusLabels[$value->state] : 'Nepoznato';
 
             $dataSingle =  array(
-                'rkg_name'       => $user->display_name,
-                'excursion'      => $excursion->post_title,
+                'rkg_name'       => $user?->display_name,
+                'excursion'      => $excursion?->post_title,
                 'status'         => $statusLabel,
             );
             $dataSingle['user_id'] = $value->user_id;
@@ -228,7 +228,8 @@ class Reservations extends WP_List_Table
             foreach ($this->typeTranslation as $keyItem => $valueItem) {
                 $status = $keyItem.'_returned';
                 $hidden = 0;
-                if (property_exists($user, $keyItem)) {
+                // Timber 2 no longer copies user meta onto the object
+                if (metadata_exists('user', $value->user_id, $keyItem)) {
                     $hidden = 1;
                 }
                 $size = '&nbsp;';
@@ -242,8 +243,8 @@ class Reservations extends WP_List_Table
                         $size = $leadSize;
                     }
                 } elseif (is_array($valueItem['size'])
-                    && property_exists($user, $keyItem.'_size')) {
-                    $size = $user->{$keyItem.'_size'};
+                    && metadata_exists('user', $value->user_id, $keyItem.'_size')) {
+                    $size = get_user_meta($value->user_id, $keyItem.'_size', true);
                 }
                 $item = array(
                     'item'       => $keyItem,

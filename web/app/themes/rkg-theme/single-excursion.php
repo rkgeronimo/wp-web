@@ -12,8 +12,8 @@
  */
 
 global $wpdb;
-$context         = Timber::get_context();
-$post            = Timber::query_post();
+$context         = Timber::context();
+$post            = Timber::get_post();
 $context['post'] = $post;
 $current_user_id = !empty($context['user']->id) ? (int) $context['user']->id : 0;
 $tableName       = $wpdb->prefix."rkg_excursion_meta";
@@ -95,7 +95,7 @@ $same = $wpdb->get_col(
 $currentKey = array_search($post->ID, $same);
 
 if (isset($same[$currentKey-1])) {
-    $context['prev'] = new Timber\Post($same[$currentKey-1]);
+    $context['prev'] = Timber::get_post($same[$currentKey-1]);
 }
 
 if (empty($context['prev'])) {
@@ -111,12 +111,12 @@ if (empty($context['prev'])) {
         )
     );
     if ($ex) {
-        $context['prev'] = new Timber\Post($ex);
+        $context['prev'] = Timber::get_post($ex);
     }
 }
 
 if (isset($same[$currentKey+1])) {
-    $context['next'] = new Timber\Post($same[$currentKey+1]);
+    $context['next'] = Timber::get_post($same[$currentKey+1]);
 }
 
 if (empty($context['next'])) {
@@ -132,7 +132,7 @@ if (empty($context['next'])) {
         )
     );
     if ($ex) {
-        $context['next'] = new Timber\Post($ex);
+        $context['next'] = Timber::get_post($ex);
     }
 }
 
@@ -148,7 +148,10 @@ $participants = $wpdb->get_col(
 
 foreach ($participants as $value) {
     // Load participants data with complete user info
-    $user = new Timber\User($value);
+    $user = Timber::get_user($value);
+    if (!$user) {
+        continue;
+    }
     $context['participants'][] = $user;
 
     // Check if still needs reserved spots for leaders (dive masters)
@@ -192,7 +195,10 @@ if ($current_user_id) {
 }
 
 foreach ($replacements as $value) {
-    $context['replacements'][] = new Timber\User($value);
+    $replacement = Timber::get_user($value);
+    if ($replacement) {
+        $context['replacements'][] = $replacement;
+    }
 }
 
 $tableName = $wpdb->prefix."rkg_excursion_guest";

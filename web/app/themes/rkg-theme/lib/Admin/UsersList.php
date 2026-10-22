@@ -347,7 +347,7 @@ class UsersList
 
         global $wp_roles;
 
-        $context = Timber::get_context();
+        $context = Timber::context();
         $context['which'] = $which;
 
         if (!empty($context['request']->get['rkg_add_role_submit_'.$which])
@@ -377,7 +377,7 @@ class UsersList
 
     public function changeRolesSave()
     {
-        $context = Timber::get_context();
+        $context = Timber::context();
         $url = get_admin_url();
 
         if (!empty($context['request']->get['rkg_add_role_submit_top'])

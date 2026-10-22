@@ -43,7 +43,7 @@ class MembersList
             wp_die();
         }
 
-        $context            = Timber::get_context();
+        $context            = Timber::context();
         $context['members'] = get_users(array(
             'role__not_in' => array('user'),
             'orderby'      => 'display_name',

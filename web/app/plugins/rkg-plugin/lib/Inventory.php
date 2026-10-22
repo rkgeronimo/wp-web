@@ -62,7 +62,7 @@ class Inventory implements InitInterface
      */
     public function showInventoryPage()
     {
-        $context = Timber::get_context();
+        $context = Timber::context();
         if (array_key_exists("edit", $context['request']->get)) {
             $this->showInventoryEdit();
 
@@ -96,7 +96,7 @@ class Inventory implements InitInterface
      */
     public function showInventoryNew()
     {
-        $context                    = Timber::get_context();
+        $context                    = Timber::context();
         $context['typeTranslation'] = $this->translateTypes();
         $context['error'] = false;
 
@@ -378,7 +378,7 @@ class Inventory implements InitInterface
     {
         global $wpdb;
         $definitions                 = new Definitions();
-        $context                     = Timber::get_context();
+        $context                     = Timber::context();
         $tableName                   = $wpdb->prefix."rkg_excursion_gear";
         $context['equipment']        = $definitions->defineEquipment();
         $context['typeTranslation']  = $this->translateTypes();
@@ -452,7 +452,7 @@ class Inventory implements InitInterface
         }
 
         global $wpdb;
-        $context                     = Timber::get_context();
+        $context                     = Timber::context();
         $context['typeTranslation']  = $this->translateTypes();
 
         $post          = $context['request']->post;
@@ -544,7 +544,7 @@ class Inventory implements InitInterface
         }
 
         global $wpdb;
-        $context                     = Timber::get_context();
+        $context                     = Timber::context();
         $context['typeTranslation']  = $this->translateTypes();
         $tableName                   = $wpdb->prefix."rkg_excursion_gear";
 
@@ -806,7 +806,7 @@ class Inventory implements InitInterface
     {
         global $wpdb;
         $definitions                 = new Definitions();
-        $context                     = Timber::get_context();
+        $context                     = Timber::context();
         $context['equipment']        = $definitions->defineEquipment();
         $context['typeTranslation']  = $this->translateTypes();
         $context['stateTranslation'] = $this->translateState();
@@ -934,7 +934,7 @@ class Inventory implements InitInterface
         }
 
         global $wpdb;
-        $context                     = Timber::get_context();
+        $context                     = Timber::context();
         $tableName                   = $wpdb->prefix."rkg_inventory";
         $context['typeTranslation']  = $this->translateTypes();
         $context['stateTranslation'] = $this->translateState();
@@ -986,8 +986,8 @@ class Inventory implements InitInterface
         }
 
         foreach ($users as $k => $value) {
-            $user = new Timber\User($value->user_id);
-            $context['lenters'][] = ['display_name' => $user->display_name, 'date_updated' => $value->updated];
+            $user = Timber::get_user($value->user_id);
+            $context['lenters'][] = ['display_name' => $user?->display_name, 'date_updated' => $value->updated];
         }
 
         $templates = array('inventoryEdit.twig');
@@ -1007,7 +1007,7 @@ class Inventory implements InitInterface
         }
 
         global $wpdb;
-        $context                     = Timber::get_context();
+        $context                     = Timber::context();
         $tableName                   = $wpdb->prefix."rkg_inventory";
         $context['typeTranslation']  = $this->translateTypes();
         $context['stateTranslation'] = $this->translateState();
@@ -1098,7 +1098,7 @@ class Inventory implements InitInterface
 
         foreach ($context['inventoryItems'] as $key => $value) {
             $context['inventoryItems'][$key]->user =
-                new Timber\User($value->user_id);
+                Timber::get_user($value->user_id);
         }
 
         $templates = array('inventory.twig');
