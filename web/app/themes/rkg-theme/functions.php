@@ -98,8 +98,19 @@ function rkg_user_additional_details()
     }
     check_ajax_referer('rkg', 'nonce');
 
+    $dob = DateTime::createFromFormat(
+        '!d.m.Y',
+        preg_replace('/^(\d{1,2})\D+(\d{1,2})\D+(\d{4})\D*$/', '$1.$2.$3', trim($_POST['dob']))
+    );
+    $dobErrors = DateTime::getLastErrors();
+    if (!$dob || ($dobErrors && $dobErrors['warning_count'] + $dobErrors['error_count'] > 0)
+        || $dob->format('Y') < 1900 || $dob > new DateTime()) {
+        echo json_encode(array('status' => 1, 'message' => __('Neispravan datum rođenja. Upiši ga kao dan.mjesec.godina, npr. 03.12.1990.')));
+        wp_die();
+    }
+
     $info              = array();
-    $info['dob']       = date('Y-m-d', strtotime($_POST['dob']));
+    $info['dob']       = $dob->format('Y-m-d');
     $info['pob']       = sanitize_text_field($_POST['pob']);
     $info['oib']       = sanitize_text_field($_POST['oib']);
     $info['tel']       = sanitize_text_field($_POST['tel']);

@@ -316,10 +316,52 @@ $('form#registration').on('submit', (e) => {
     e.preventDefault();
 });
 
+// Accepts "3.12.1990", "03.12.1990.", "03/12/1990", "03-12-1990", "03,12,1990", "03121990".
+// Returns the date as "dd.mm.yyyy" or null if it is not a real past date.
+function parseDob(input) {
+    const value = input.trim();
+    const match = value.match(/^(\d{1,2})\D+(\d{1,2})\D+(\d{4})\D*$/)
+        || value.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (match === null) {
+        return null;
+    }
+
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day
+        || year < 1900 || date > new Date()) {
+        return null;
+    }
+
+    return `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
+}
+
+$('form#additional-details-form #dob').on('blur', (e) => {
+    const dob = parseDob(e.target.value);
+    if (dob !== null) {
+        e.target.value = dob;
+    }
+});
+
+$('form#additional-details-form input').on('input', () => {
+    $('form#additional-details-form .input-error').text('');
+});
+
 function isValidCourseRegistration() {
+    const $dob = $('form#additional-details-form #dob');
+    const dob = parseDob($dob.val());
+    if (dob === null) {
+        $('#dob-error').text("Neispravan datum rođenja. Upiši ga kao dan.mjesec.godina, npr. 03.12.1990.");
+        $dob.attr('aria-invalid', 'true').trigger('focus');
+        return false;
+    }
+    $dob.val(dob).removeAttr('aria-invalid');
+
     const oib = $('form#additional-details-form #oib').val();
     if (!isOibValid(oib)) {
-        $('.input-error').text("Nevažeći OIB.");
+        $('.input-error').not('#dob-error').text("Nevažeći OIB.");
         return false;
     }
     return true;
@@ -352,6 +394,11 @@ $('form#additional-details-form').on('submit', (e) => {
         },
         success: (data) => {
             modalStatusClass(data.status);
+            if (data.status === 1) {
+                $('.rkg-modal-status').text('');
+                $('#dob-error').text(data.message);
+                return;
+            }
             $('form#additional-details-form p.status').text(data.message);
             modalOpen('#course-signup-ok');
         },
