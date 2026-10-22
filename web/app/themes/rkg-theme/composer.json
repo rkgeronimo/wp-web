@@ -1,29 +1,5 @@
 {
-  "name": "upstatement/timber-starter-theme",
-  "description": "Starter theme to build a Timber theme",
-  "type":"wordpress-theme",
-  "minimum-stability" : "stable",
-  "authors": [
-      {
-          "name": "jarednova",
-          "email": "jared@upstatement.com"
-      }
-  ],
-  "repositories": [
-    {
-      "type": "composer",
-      "url": "https://wpackagist.org"
-    }
-  ],
-  "extra": {
-  	"installer-paths": {
-      "../../plugins/{$name}/": [
-        "wpackagist-plugin/*",
-        "type:wordpress-plugin"
-      ]
-  	}
-	},
-  "require": {
-	  "wpackagist-plugin/timber-library": "1.*"
-  }
+  "name": "rkgeronimo/rkg-theme",
+  "description": "RK Geronimo Timber theme. Timber 2 is installed by the Bedrock root composer.json.",
+  "type": "wordpress-theme"
 }

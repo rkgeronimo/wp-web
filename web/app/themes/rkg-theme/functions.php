@@ -25,6 +25,24 @@ spl_autoload_register(function ($className) {
     }
 });
 
+// An old timber-library (Timber 1) plugin would shadow the Composer Timber 2
+// and make Timber::init() fatal, which also locks out wp-admin.
+if (class_exists('Timber\Timber')
+    && version_compare(Timber::$version, '2.0.0', '<')
+) {
+    add_action('admin_notices', function () {
+        echo '<div class="error"><p>This theme needs Timber 2, but Timber '
+            .esc_html(Timber::$version).' is loaded. Deactivate the Timber '
+            .'(timber-library) plugin and run composer install.</p></div>';
+    });
+
+    add_filter('template_include', function ($template) {
+        return get_stylesheet_directory().'/static/no-timber.html';
+    });
+
+    return;
+}
+
 if (class_exists('Timber\Timber')) {
     Timber::init();
 }
