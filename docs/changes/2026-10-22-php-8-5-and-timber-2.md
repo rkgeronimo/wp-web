@@ -44,8 +44,8 @@ docker compose run --rm php php database/migrate.php migrate
   (nothing used them).
 - `roots/wp-password-bcrypt` stays at 1.1.0. Version 1.3.0 conflicts with
   WordPress >= 6.8, which hashes passwords with bcrypt itself.
-- Docker: PHP image `php:8.5.12-fpm-bookworm` (opcache is built in, no longer
-  installed as an extension), wp-cli image `wordpress:cli-php8.5`, database
+- Docker: PHP image `php:8.5.12-fpm` (Debian 13; opcache is built in, no
+  longer installed as an extension), wp-cli image `wordpress:cli-php8.5`, database
   image `mysql:8.4` (`--innodb-log-file-size` replaced by
   `--innodb-redo-log-capacity`). An existing MySQL 5.7 `db_data` volume must be
   removed with `docker compose down -v`.
@@ -82,7 +82,8 @@ docker compose run --rm php php database/migrate.php migrate
 ## Files
 
 - `composer.json`, `composer.lock`: PHP 8.5 and dependency updates
-- `Dockerfile`: `php:8.5.12-fpm-bookworm`, opcache removed from extension list
+- `Dockerfile`: `php:8.5.12-fpm`, packages installed with
+  `--no-install-recommends`, opcache removed from extension list
 - `docker-compose.yml`: `mysql:8.4`, `wordpress:cli-php8.5`
 - `README.md`, `DOCKER.md`: PHP 8.5 requirement, schema update steps,
   MySQL volume upgrade and `wp db` notes
