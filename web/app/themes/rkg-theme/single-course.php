@@ -75,7 +75,7 @@ foreach ($students as $value) {
         continue;
     }
     $context['students'][] = $student;
-    if ($student->id === $context['user']->id) {
+    if ($context['user'] && $student->id === $context['user']->id) {
         $context['user']->payed = !!$value->payed;
     }
 }

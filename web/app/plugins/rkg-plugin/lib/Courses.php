@@ -944,7 +944,9 @@ class Courses implements InitInterface
                     ." WHERE id = "
                     .$postId
                 );
-                echo date("d.m.Y", strtotime($date));
+                if ($date) {
+                    echo date("d.m.Y", strtotime($date));
+                }
                 break;
             case 'end' :
                 $date = $this->wpdb->get_var(
@@ -953,7 +955,9 @@ class Courses implements InitInterface
                     ." WHERE id = "
                     .$postId
                 );
-                echo date("d.m.Y", strtotime($date));
+                if ($date) {
+                    echo date("d.m.Y", strtotime($date));
+                }
                 break;
             case 'participants' :
                 $registered = $this->wpdb->get_var(
