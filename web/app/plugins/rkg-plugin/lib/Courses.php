@@ -1147,7 +1147,8 @@ class Courses implements InitInterface
             return;
         }
 
-        // Check if current user is the instructor for this course
+        // Check if current user is the instructor for this course,
+        // admins can unregister users from any course
         global $wpdb;
         $currentUserId = get_current_user_id();
         $tableName = $wpdb->prefix . 'rkg_course_meta';
@@ -1157,7 +1158,7 @@ class Courses implements InitInterface
             $courseId
         ));
 
-        if ($courseOrganiser != $currentUserId) {
+        if ($courseOrganiser != $currentUserId && !current_user_can('edit_others_courses')) {
             wp_send_json_error('Nemaš ovlasti za odjavu, nisi instruktor ovog tečaja.');
             return;
         }
