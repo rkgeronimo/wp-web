@@ -841,15 +841,38 @@ button
             margin-bottom: 4vw
 
 .article-body > p,
-.article-body > ul li
+.article-body > ul,
+.article-body > ol
     color: $color-reading-font
     margin-bottom: 1vw !important
     font-size: 0.8em
     line-height: 1.6em
     @media (--mobile)
-        font-size: 1.35em 
+        font-size: 1.35em
         line-height: 1.6em
         margin-bottom: 3vw !important
+
+.article-body > p:empty
+    display: none
+
+// font-size is set on the list, so nested items inherit it instead of
+// shrinking by 0.8em on every level
+.article-body > ul,
+.article-body > ol
+    box-sizing: border-box
+    padding-left: 1.5em
+    li
+        margin-bottom: 0.5em
+    ul,
+    ol
+        margin: 0.5em 0 0
+        padding-left: 1.5em
+    // TinyMCE wraps an indented list in an item without a bullet;
+    // indent it once, not twice
+    li[style*="list-style-type: none"] > ul,
+    li[style*="list-style-type: none"] > ol
+        margin-top: 0
+        padding-left: 0
 
 .article-body > figure
     display: inline-block
