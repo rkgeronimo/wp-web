@@ -127,7 +127,6 @@ class RKGTheme
             'Admin\\UsersList',
             'Ajax\\MembersList',
             'Ajax\\Login',
-            'ContentFilter',
         );
         foreach ($components as $component) {
             $namespaceComponent = 'RKGTheme\\'.$component;
