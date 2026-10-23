@@ -53,8 +53,8 @@ class CourseStatus extends WP_List_Table
         $hidden   = $this->get_hidden_columns();
         $sortable = $this->get_sortable_columns();
 
+        // Already ordered by signup date in table_data()
         $data = $this->table_data();
-        usort($data, array(&$this, "sort_data"));
 
         $perPage     = 100;
         $currentPage = $this->get_pagenum();
@@ -313,22 +313,5 @@ class CourseStatus extends WP_List_Table
         }
 
         return $data;
-    }
-
-    /**
-     * sort_data
-     *
-     * @param mixed $aIn
-     * @param mixed $bIn
-     *
-     * @return int
-     */
-    private function sort_data($a, $b)
-    {
-        if ($a === $b) {
-            return 0;
-        }
-
-        return ($a < $b) ? 1 : -1;
     }
 }
