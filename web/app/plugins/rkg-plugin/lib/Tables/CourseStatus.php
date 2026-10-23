@@ -140,7 +140,6 @@ class CourseStatus extends WP_List_Table
     {
         switch ($column_name) {
             // User-controlled plain-text columns — escape to prevent stored XSS.
-            case 'rkg_name':
             case 'rkg_gsm':
             // case 'questionaire':
             case 'email':
@@ -164,6 +163,27 @@ class CourseStatus extends WP_List_Table
             default:
                 return print_r($item, true);
         }
+    }
+
+    /**
+     * Name links to the user's diver profile for users who can open it.
+     *
+     * @param array $item Row.
+     *
+     * @return string
+     */
+    public function column_rkg_name($item)
+    {
+        $name = esc_html($item['rkg_name']);
+        if (!current_user_can('edit_courses')) {
+            return $name;
+        }
+
+        $url = admin_url(
+            'admin.php?page=rkg_diver_profiles&user_id='.intval($item['user_id'])
+        );
+
+        return '<a href="'.esc_url($url).'">'.$name.'</a>';
     }
 
     /**
@@ -274,6 +294,7 @@ class CourseStatus extends WP_List_Table
             </button>';
 
             $data[] = array(
+                'user_id'       => $value->user_id,
                 'rkg_name'      => $user->data->display_name,
                 'email'         => $user->data->user_email,
                 'rkg_gsm'       => $userData->showData('tel'),
