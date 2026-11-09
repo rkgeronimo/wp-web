@@ -90,7 +90,7 @@ class RKGSite extends \Timber\Site
             && array_key_exists('member', (array) $context['user']->roles())
         ) {
             $now   = strtotime("now");
-            $start = strtotime(date('Y')."-11-01");
+            $start = strtotime((date('Y')+1)."-01-31");
             $end   = strtotime((date('Y')+1)."-03-01");
 
             if (($now >= $start) && ($now < $end)) {
