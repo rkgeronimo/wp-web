@@ -96,6 +96,11 @@ class RKGSite extends \Timber\Site
             if (($now >= $start) && ($now < $end)) {
                 $context['memberDebth'] = $this->checkMembership($context['user']);
             }
+
+            $context['memberCard'] = array(
+                'validUntil' => $this->getMembershipValidUntil($context['user']),
+                'dob'        => $this->formatDate($context['user']->meta('dob')),
+            );
         }
 
         return $context;
@@ -351,5 +356,55 @@ class RKGSite extends \Timber\Site
         }
 
         return $year;
+    }
+
+    /**
+     * getMembershipValidUntil
+     *
+     * Last paid membership year, if the current year or a later one is paid.
+     *
+     * @param mixed $user
+     *
+     * @return int|null
+     */
+    private function getMembershipValidUntil($user)
+    {
+        global $wpdb;
+        $tableName = $wpdb->prefix."rkg_member_subscription";
+        $year      = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT MAX(year) FROM ".$tableName
+                ." WHERE user = %d AND year >= %d",
+                $user->id,
+                (int) date('Y')
+            )
+        );
+
+        return $year ? (int) $year : null;
+    }
+
+    /**
+     * formatDate
+     *
+     * Formats a stored date as j.n.Y. Values that cannot be parsed are
+     * returned unchanged, so legacy data does not break the page.
+     *
+     * @param string $date
+     *
+     * @return string
+     */
+    private function formatDate($date)
+    {
+        if (empty($date)) {
+            return '';
+        }
+
+        try {
+            $parsed = new \DateTime($date);
+        } catch (\Exception $e) {
+            return $date;
+        }
+
+        return $parsed->format('j.n.Y.');
     }
 }

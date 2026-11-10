@@ -81,6 +81,9 @@ HR67
                 {% endfor %}
             </ul>
         {%endif %}
+        {% if memberCard is defined %}
+            <a href="#" id="rkg-member-card-button" class="dashicons-before dashicons-id rkg-profile-meni-item">Članska iskaznica</a>
+        {% endif %}
         <a href="{{ http_host }}/wp/wp-admin/profile.php" class="dashicons-before dashicons-admin-tools rkg-profile-meni-item">Postavke profila</a>
         {% if user.can('edit_rkgPosts') %}
             <a href="{{ http_host }}/wp/wp-admin/edit.php?post_type=rkg-post" class="dashicons-before dashicons-edit rkg-profile-meni-item">Pisanje objava</a>
