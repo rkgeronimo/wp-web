@@ -25,6 +25,12 @@ class RKGSite extends \Timber\Site
         add_action('init', array($this, 'registerPostTypes'));
         add_action('init', array($this, 'registerTaxonomies'));
         add_action('init', array($this, 'registerMenus'));
+        add_filter(
+            'shortcode_atts_gallery',
+            array($this, 'galleryAttributes'),
+            10,
+            3
+        );
         parent::__construct();
     }
 
@@ -37,6 +43,29 @@ class RKGSite extends \Timber\Site
      */
     public function registerPostTypes()
     {
+    }
+
+    /**
+     * galleryAttributes
+     *
+     * Images in a [gallery] open in the theme slider, so they always link to
+     * the full-size file. The grid uses the medium size unless the shortcode
+     * sets one.
+     *
+     * @param array $out   Combined shortcode attributes.
+     * @param array $pairs Default attributes.
+     * @param array $atts  Attributes given in the shortcode.
+     *
+     * @return array
+     */
+    public function galleryAttributes($out, $pairs, $atts)
+    {
+        $out['link'] = 'file';
+        if (empty($atts['size'])) {
+            $out['size'] = 'medium';
+        }
+
+        return $out;
     }
 
     /**
