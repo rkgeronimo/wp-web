@@ -55,7 +55,7 @@ class UserData
                 $output = $this->excursionsAll();
                 break;
             default:
-                $output = $this->userMeta[$data][0];
+                $output = $this->userMeta[$data][0] ?? null;
                 break;
         }
 
