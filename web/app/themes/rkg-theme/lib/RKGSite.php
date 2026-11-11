@@ -128,7 +128,6 @@ class RKGSite extends \Timber\Site
 
             $context['memberCard'] = array(
                 'validUntil' => $this->getMembershipValidUntil($context['user']),
-                'dob'        => $this->formatDate($context['user']->meta('dob')),
             );
         }
 
@@ -410,30 +409,5 @@ class RKGSite extends \Timber\Site
         );
 
         return $year ? (int) $year : null;
-    }
-
-    /**
-     * formatDate
-     *
-     * Formats a stored date as j.n.Y. Values that cannot be parsed are
-     * returned unchanged, so legacy data does not break the page.
-     *
-     * @param string $date
-     *
-     * @return string
-     */
-    private function formatDate($date)
-    {
-        if (empty($date)) {
-            return '';
-        }
-
-        try {
-            $parsed = new \DateTime($date);
-        } catch (\Exception $e) {
-            return $date;
-        }
-
-        return $parsed->format('j.n.Y.');
     }
 }

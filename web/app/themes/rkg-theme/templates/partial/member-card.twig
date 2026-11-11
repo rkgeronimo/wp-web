@@ -62,12 +62,6 @@
                 <div>
                     <div class="member-card-name">{{ cardName|e }}</div>
                     <div class="member-card-fields">
-                        {% if memberCard.dob %}
-                            <div>
-                                <div class="member-card-label">Datum rođenja</div>
-                                <div class="member-card-value">{{ memberCard.dob|e }}</div>
-                            </div>
-                        {% endif %}
                         {% if user.rc %}
                             <div>
                                 <div class="member-card-label">Kategorija</div>
