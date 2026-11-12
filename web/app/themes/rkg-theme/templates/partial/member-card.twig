@@ -4,6 +4,11 @@
         {% set cardName = user.display_name %}
     {% endif %}
     {% set cardPicture = function('get_user_meta', user.ID, 'brevet', true) %}
+    {% set cardPictureRound = false %}
+    {% if cardPicture is empty %}
+        {% set cardPicture = function('get_user_meta', user.ID, 'profile_picture', true) %}
+        {% set cardPictureRound = cardPicture is not empty %}
+    {% endif %}
     <div class="member-card">
         <svg class="member-card-bg" viewBox="0 0 856 540" preserveAspectRatio="xMidYMid slice" fill="#fff" aria-hidden="true">
             <defs>
@@ -55,7 +60,7 @@
             </div>
             <div class="member-card-body">
                 {% if cardPicture %}
-                    <img class="member-card-photo" src="{{ cardPicture|e('html_attr') }}" alt="{{ cardName|e('html_attr') }}" />
+                    <img class="member-card-photo{% if cardPictureRound %} member-card-photo-round{% endif %}" src="{{ cardPicture|e('html_attr') }}" alt="{{ cardName|e('html_attr') }}" />
                 {% else %}
                     <span class="member-card-photo member-card-photo-placeholder"><i class="fas fa-user"></i></span>
                 {% endif %}
