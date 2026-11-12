@@ -26,7 +26,11 @@
                                                 {% endfor %}
                                             </div>
                                             <h4 class="news-block-title">{{ new.post_title }}</h4>
-                                            <div class="news-block-date">{{ new.post_date|date("j.n.Y H:s") }}</div>
+                                            {% set authorName = "#{new.author.first_name} #{new.author.last_name}"|trim %}
+                                            {% if authorName is empty %}
+                                                {% set authorName = new.author.display_name %}
+                                            {% endif %}
+                                            <div class="news-block-date">{{ new.post_date|date("j.n.Y H:i") }}{% if authorName %} · {{ authorName|e }}{% endif %}</div>
                                         </a>
                                     </div>
                                 </div>

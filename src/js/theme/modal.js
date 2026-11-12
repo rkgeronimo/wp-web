@@ -6,6 +6,10 @@ const modalOpen = (modal, callback) => {
     modalStatusClass();
     $('.rkg-modal-status').text('');
     $('body').addClass('modal-open');
+    $('.rkg-modal').toggleClass(
+        'rkg-modal-card',
+        modal === '#rkg-modal-member-card',
+    );
 
     if (modalShow) {
         $('.rkg-modal form, .modal-div').fadeOut('fast').promise().done(() => {
@@ -200,6 +204,43 @@ $('#rkg-members-button').on('click', () => {
         .promise()
         .done(() => {
             modalOpen('#rkg-moddal-members');
+        });
+});
+
+let memberCardClock = null;
+
+const updateMemberCardClock = () => {
+    const now = new Date();
+    const pad = value => String(value).padStart(2, '0');
+
+    $('.member-card-clock').text(
+        `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear()}. `
+        + `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
+    );
+};
+
+$('#rkg-member-card-button').on('click', (e) => {
+    e.preventDefault();
+    updateMemberCardClock();
+    if (!memberCardClock) {
+        memberCardClock = setInterval(updateMemberCardClock, 1000);
+    }
+
+    if (($(window).width() <= 1080) && (window.devicePixelRatio > 1.5)) {
+        $('.rkg-profile-meni').css('left', '-90vw')
+            .promise()
+            .done(() => {
+                modalOpen('#rkg-modal-member-card');
+            });
+        return;
+    }
+    $('.rkg-profile-meni').animate({
+        height: 'toggle',
+        opacity: 'toggle',
+    }, 'fast')
+        .promise()
+        .done(() => {
+            modalOpen('#rkg-modal-member-card');
         });
 });
 

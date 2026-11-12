@@ -250,7 +250,7 @@ jQuery(document).ready(($) => {
         nextArrow: $('.rkg-moddal-gallery-chevron-right'),
     });
 
-    $('.gallery-item').on('click', (e) => {
+    $('.gallery-grid .gallery-item').on('click', (e) => {
         const gallery = $(e.currentTarget).parent();
         $('.rkg-meni-background').fadeIn('fast').promise().done(() => {
             $('.rkg-moddal-gallery')
@@ -264,6 +264,28 @@ jQuery(document).ready(($) => {
                     + '</div>',
                 );
             });
+        });
+    });
+
+    // WordPress [gallery] shortcode: open the same slider, starting at the
+    // clicked image. Gallery links point to the full-size file.
+    $('.gallery .gallery-item').on('click', (e) => {
+        e.preventDefault();
+        const items = $(e.currentTarget).closest('.gallery').find('.gallery-item');
+        const start = items.index(e.currentTarget);
+        $('.rkg-meni-background').fadeIn('fast').promise().done(() => {
+            $('.rkg-moddal-gallery')
+                .fadeIn({queue: false, duration: 'fast'});
+            items.each((index, item) => {
+                const src = $(item).find('a').attr('href')
+                    || $(item).find('img').attr('src');
+                $('.rkg-moddal-gallery-slick').slick(
+                    'slickAdd',
+                    $('<div class="rkg-moddal-gallery-slide"></div>')
+                        .append($('<img>').attr('src', src)),
+                );
+            });
+            $('.rkg-moddal-gallery-slick').slick('slickGoTo', start, true);
         });
     });
 

@@ -188,6 +188,11 @@
             <input class="form-control" id="rkg-users-input" type="text" placeholder="Pretraži...">
             <div id="rkg-members-table-container"></div>
         </div>
+        {% if memberCard is defined %}
+            <div class="modal-div" id="rkg-modal-member-card">
+                {% include 'partial/member-card.twig' %}
+            </div>
+        {% endif %}
         <div class="modal-div" id="rkg-moddal-brevet">
             <p>Upload slike za brevet</p>
             <div class="rkg-croppie-container">

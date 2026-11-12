@@ -25,6 +25,12 @@ class RKGSite extends \Timber\Site
         add_action('init', array($this, 'registerPostTypes'));
         add_action('init', array($this, 'registerTaxonomies'));
         add_action('init', array($this, 'registerMenus'));
+        add_filter(
+            'shortcode_atts_gallery',
+            array($this, 'galleryAttributes'),
+            10,
+            3
+        );
         parent::__construct();
     }
 
@@ -37,6 +43,29 @@ class RKGSite extends \Timber\Site
      */
     public function registerPostTypes()
     {
+    }
+
+    /**
+     * galleryAttributes
+     *
+     * Images in a [gallery] open in the theme slider, so they always link to
+     * the full-size file. The grid uses the medium size unless the shortcode
+     * sets one.
+     *
+     * @param array $out   Combined shortcode attributes.
+     * @param array $pairs Default attributes.
+     * @param array $atts  Attributes given in the shortcode.
+     *
+     * @return array
+     */
+    public function galleryAttributes($out, $pairs, $atts)
+    {
+        $out['link'] = 'file';
+        if (empty($atts['size'])) {
+            $out['size'] = 'medium';
+        }
+
+        return $out;
     }
 
     /**
@@ -96,6 +125,10 @@ class RKGSite extends \Timber\Site
             if (($now >= $start) && ($now < $end)) {
                 $context['memberDebth'] = $this->checkMembership($context['user']);
             }
+
+            $context['memberCard'] = array(
+                'validUntil' => $this->getMembershipValidUntil($context['user']),
+            );
         }
 
         return $context;
@@ -351,5 +384,30 @@ class RKGSite extends \Timber\Site
         }
 
         return $year;
+    }
+
+    /**
+     * getMembershipValidUntil
+     *
+     * Last paid membership year, if the current year or a later one is paid.
+     *
+     * @param mixed $user
+     *
+     * @return int|null
+     */
+    private function getMembershipValidUntil($user)
+    {
+        global $wpdb;
+        $tableName = $wpdb->prefix."rkg_member_subscription";
+        $year      = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT MAX(year) FROM ".$tableName
+                ." WHERE user = %d AND year >= %d",
+                $user->id,
+                (int) date('Y')
+            )
+        );
+
+        return $year ? (int) $year : null;
     }
 }

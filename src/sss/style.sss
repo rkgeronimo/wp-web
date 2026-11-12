@@ -1593,6 +1593,145 @@ button
     text-transform: none
     color: black
 
+.article-post-meta
+    margin-bottom: 1.5vw !important
+    color: $color-main
+    font-size: 0.95rem
+    @media (--mobile)
+        margin-top: 8vw !important
+        margin-bottom: 2vw !important
+        font-size: 15px
+
+// Sizes inside the card use cqw (percent of the card width), so the card
+// scales as a whole and keeps the ID-1 proportions on every screen.
+.rkg-modal.rkg-modal-card
+    min-width: 0
+    padding: 3.5vw 2.5vw 2.5vw
+    .rkg-modal-status
+        display: none
+    @media (--mobile)
+        padding: 0
+
+#rkg-modal-member-card
+    width: 500px
+    @media (--mobile)
+        width: 92vw
+
+.member-card
+    position: relative
+    container-type: inline-size
+    margin: 0 auto
+    width: 100%
+    aspect-ratio: 85.6 / 53.98
+    overflow: hidden
+    border-radius: 14px
+    background: linear-gradient(150deg, $color-title 0%, #00285f 100%)
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25)
+    color: white
+    text-align: left
+
+.member-card-bg
+    @util position(absolute, 0 null null 0)
+    width: 100%
+    height: 100%
+    pointer-events: none
+
+.member-card-content
+    position: relative
+    display: flex
+    flex-direction: column
+    box-sizing: border-box
+    padding: 3.9cqw 4.4cqw
+    height: 100%
+
+.member-card-header
+    display: flex
+    align-items: center
+    gap: 2.8cqw
+    font-weight: $bold
+    font-size: 3.6cqw
+    letter-spacing: 0.06em
+    img
+        width: 13.3cqw
+        height: 13.3cqw
+    small
+        display: block
+        margin-top: 0.55cqw
+        font-weight: $regular
+        font-size: 3.05cqw
+        letter-spacing: 0.03em
+        opacity: 0.85
+
+.member-card-body
+    flex: 1
+    display: flex
+    align-items: center
+    gap: 3.9cqw
+
+.member-card-photo
+    flex: none
+    box-sizing: border-box
+    width: 17.8cqw
+    height: 22.8cqw
+    border: 0.83cqw solid white
+    border-radius: 1.1cqw
+    object-fit: cover
+
+.member-card-photo-placeholder
+    display: flex
+    align-items: center
+    justify-content: center
+    background: #9fb3d6
+    font-size: 7.8cqw
+
+.member-card-name
+    font-weight: $bold
+    font-size: 4.45cqw
+    line-height: 1.2
+    text-transform: uppercase
+
+.member-card-fields
+    display: flex
+    gap: 5cqw
+    margin-top: 1.4cqw
+
+.member-card-label
+    font-size: 2.5cqw
+    letter-spacing: 0.1em
+    text-transform: uppercase
+    white-space: nowrap
+    opacity: 0.7
+
+.member-card-value
+    font-weight: $medium
+    font-size: 3.6cqw
+    white-space: nowrap
+
+.member-card-footer
+    display: flex
+    justify-content: space-between
+    gap: 2.2cqw
+    padding-top: 1.95cqw
+    border-top: 1px solid rgba(255, 255, 255, 0.2)
+    font-size: 3.05cqw
+    white-space: nowrap
+
+.member-card-clock
+    font-variant-numeric: tabular-nums
+
+.member-card-dot
+    display: inline-block
+    margin-right: 1.4cqw
+    width: 1.95cqw
+    height: 1.95cqw
+    border-radius: 50%
+    background: #2fbf5b
+    animation: member-card-pulse 1.2s infinite
+
+@keyframes member-card-pulse
+    50%
+        opacity: 0.25
+
 .course-disabled-button
     margin-bottom: 2vw !important
     padding: 1.5vw
@@ -1882,6 +2021,41 @@ h2.courses-terms-control
 .rkg-nopas
     text-align: center
     margin-top: 5vw
+
+// WordPress [gallery] shortcode. The Album block (rkg-gallery) hides every
+// .gallery-item except the first, so show them again inside core galleries.
+.gallery
+    display: grid
+    grid-template-columns: repeat(3, 1fr)
+    gap: 1vw
+    @for $i from 1 to 9
+        &.gallery-columns-$i
+            grid-template-columns: repeat($i, 1fr)
+    @media (--mobile)
+        gap: 2vw
+        &[class*="gallery-columns-"]
+            grid-template-columns: repeat(2, 1fr)
+        &.gallery-columns-1
+            grid-template-columns: 1fr
+    .gallery-item,
+    .gallery-item:not(:first-child)
+        display: block
+        margin: 0
+    img
+        display: block
+        width: 100%
+        height: auto
+        aspect-ratio: 1
+        object-fit: cover
+        cursor: pointer
+        transition: opacity 0.5s ease-in-out
+        &:hover
+            opacity: 0.5
+    .gallery-caption
+        margin-top: 0.3vw
+        font-size: 0.7em
+        @media (--mobile)
+            margin-top: 1vw
 
 .rkg-moddal-gallery
     @util position(fixed, 0 0 0 0)
