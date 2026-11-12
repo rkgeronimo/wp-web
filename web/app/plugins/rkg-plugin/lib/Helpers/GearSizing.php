@@ -5,78 +5,63 @@ namespace RKGeronimo\Helpers;
  * Equipment sizes for course trainees, computed from body measurements.
  *
  * Trainees enter height (cm), weight (kg) and EU shoe size when they sign
- * up for an R1 course. The rules below replace the spreadsheet the club
- * used to size their rental equipment.
+ * up for an R1 course. Suit ranges are the Mares men's chart (columns
+ * 2-8). Signup has no sex, so the lady columns are not used. Sizes 1 and
+ * 9 are not printed: 1 is below the chart and 9 is above it.
  *
  * @author Josip Razov <joso.razov@gmail.com>
  */
 class GearSizing
 {
     /**
-     * Mares suit number (1 XS, 2 S, 3 M, 4 ML, 5 L, 6 XL, 7 2XL, 8 3XL,
-     * 9 4XL) by height: the tallest height (cm) each size fits, from the
-     * Mares men's chart. 9 continues the chart's 3 cm steps. Anyone below
-     * 175 cm can fit size 1, so their suit is set by weight.
+     * Mares men's length, cm, as [min, max] per suit number.
      */
-    const SUIT_HEIGHT_MAX = array(
-        1 => 174.99,
-        2 => 175,
-        3 => 178,
-        4 => 181,
-        5 => 184,
-        6 => 187,
-        7 => 190,
-        8 => 193,
-        9 => 196,
+    const SUIT_HEIGHT = array(
+        2 => array(167, 175),
+        3 => array(172, 180),
+        4 => array(177, 185),
+        5 => array(182, 190),
+        6 => array(185, 195),
+        7 => array(188, 200),
+        8 => array(193, 205),
     );
 
     /**
-     * Suit number by weight: the lightest weight (kg) of each size. A weight
-     * on a boundary takes the larger size. The Mares chart has no weights;
-     * these are the club's ranges, with M and L split into M, ML and L.
+     * Mares men's weight, kg, as [min, max]. Null max means no upper bound
+     * (the chart's 96+ and 112+).
      */
-    const SUIT_WEIGHT_MIN = array(
-        1 => 45,
-        2 => 55,
-        3 => 65,
-        4 => 71,
-        5 => 78,
-        6 => 85,
-        7 => 95,
-        8 => 105,
-        9 => 115,
+    const SUIT_WEIGHT = array(
+        2 => array(54, 70),
+        3 => array(61, 79),
+        4 => array(70, 88),
+        5 => array(79, 97),
+        6 => array(88, 107),
+        7 => array(96, null),
+        8 => array(112, null),
     );
 
     /**
-     * Upper end of the weight chart (kg).
-     */
-    const SUIT_WEIGHT_MAX = 125;
-
-    /**
-     * Heights (cm) below this are probably typos and get a warning.
-     */
-    const SUIT_HEIGHT_MIN = 140;
-
-    /**
-     * EU shoe size to US boot size. Where the chart overlaps, the smaller
-     * boot is used.
+     * Dive boot chart: EU shoe size of each US size. A shoe between two
+     * rows takes the larger US size. 35 is US 4; 35.5 stays US 4.
      */
     const BOOTS = array(
-        34 => 3,
-        35 => 3,
-        36 => 4,
-        37 => 5,
-        38 => 6,
-        39 => 7,
-        40 => 7,
-        41 => 8,
-        42 => 9,
-        43 => 10,
-        44 => 11,
-        45 => 11,
-        46 => 12,
-        47 => 13,
+        array(34, 3),
+        array(35.5, 4),
+        array(37, 5),
+        array(38, 6),
+        array(39, 7),
+        array(41, 8),
+        array(43, 9),
+        array(44.5, 10),
+        array(45.5, 11),
+        array(46, 12),
+        array(47, 13),
     );
+
+    /**
+     * Float slack when comparing a measurement with a chart value.
+     */
+    const TOLERANCE = 0.001;
 
     /**
      * Sizes for one trainee.
@@ -138,9 +123,13 @@ class GearSizing
     }
 
     /**
-     * Suit number from height and weight: the larger of the size by height
-     * and the size by weight. Outside the charts the size is 1 or 9, with a
-     * warning.
+     * Suit number from height and weight.
+     *
+     * Sizes whose height and weight ranges both hold the trainee win; of
+     * those, the one whose range centres are closest. Without a common size,
+     * each measure takes its smallest fitting size and the larger of the two
+     * is used.
+     * Outside a chart the size is 1 or 9, with a warning.
      *
      * @param float $height   Height in cm.
      * @param float $weight   Weight in kg.
@@ -150,32 +139,124 @@ class GearSizing
      */
     public static function suitSize($height, $weight, array &$warnings = array())
     {
-        $byHeight = 9;
-        foreach (self::SUIT_HEIGHT_MAX as $size => $max) {
-            if ($height <= $max) {
-                $byHeight = $size;
-                break;
-            }
-        }
-        if ($height < self::SUIT_HEIGHT_MIN
-            || $height > self::SUIT_HEIGHT_MAX[9]
-        ) {
+        $heightSizes = self::fittingSizes($height, self::SUIT_HEIGHT);
+        $weightSizes = self::fittingSizes($weight, self::SUIT_WEIGHT);
+        if (!$heightSizes) {
             $warnings[] = 'visina izvan tablice odijela';
         }
-
-        $byWeight = 1;
-        foreach (self::SUIT_WEIGHT_MIN as $size => $min) {
-            if ($weight >= $min) {
-                $byWeight = $size;
-            }
-        }
-        if ($weight < self::SUIT_WEIGHT_MIN[1]
-            || $weight > self::SUIT_WEIGHT_MAX
-        ) {
+        if (!$weightSizes) {
             $warnings[] = 'težina izvan tablice odijela';
         }
 
-        return max($byHeight, $byWeight);
+        $both = array_intersect($heightSizes, $weightSizes);
+        if ($both) {
+            return self::closestSize(
+                $both,
+                array(
+                    array($height, self::SUIT_HEIGHT),
+                    array($weight, self::SUIT_WEIGHT),
+                )
+            );
+        }
+
+        // No common size: the measure that needs the larger suit sets it,
+        // with the smallest size that still fits that measure.
+        return max(
+            self::smallestSize($heightSizes, $height, self::SUIT_HEIGHT),
+            self::smallestSize($weightSizes, $weight, self::SUIT_WEIGHT)
+        );
+    }
+
+    /**
+     * Smallest fitting size, or 1 below the chart and 9 above it.
+     *
+     * @param int[] $sizes  Fitting sizes, ascending.
+     * @param float $value  Measurement.
+     * @param array $ranges Size => [min, max|null], in ascending size.
+     *
+     * @return int
+     */
+    private static function smallestSize(array $sizes, $value, array $ranges)
+    {
+        if ($sizes) {
+            return $sizes[0];
+        }
+        $first = reset($ranges);
+
+        return $value < $first[0] ? 1 : 9;
+    }
+
+    /**
+     * Chart sizes whose range holds the value, in ascending order.
+     *
+     * @param float $value  Measurement.
+     * @param array $ranges Size => [min, max|null], in ascending size.
+     *
+     * @return int[]
+     */
+    private static function fittingSizes($value, array $ranges)
+    {
+        $sizes = array();
+        foreach ($ranges as $size => $range) {
+            if ($value + self::TOLERANCE < $range[0]) {
+                continue;
+            }
+            if ($range[1] !== null && $value > $range[1] + self::TOLERANCE) {
+                continue;
+            }
+            $sizes[] = (int) $size;
+        }
+
+        return $sizes;
+    }
+
+    /**
+     * Size whose range centres are closest to the measurements. Distance is
+     * counted in range widths so cm and kg can be added. A tie takes the
+     * larger size.
+     *
+     * @param int[] $sizes    Candidate sizes, ascending, not empty.
+     * @param array $measures List of [value, ranges].
+     *
+     * @return int
+     */
+    private static function closestSize(array $sizes, array $measures)
+    {
+        $best        = null;
+        $bestDistance = null;
+        foreach ($sizes as $size) {
+            $distance = 0;
+            foreach ($measures as $measure) {
+                list($value, $ranges) = $measure;
+                list($min, $max)      = self::rangeBounds($ranges, $size);
+                $distance += abs($value - ($min + $max) / 2) / ($max - $min);
+            }
+            if ($best === null || $distance <= $bestDistance + self::TOLERANCE) {
+                $best         = $size;
+                $bestDistance = $distance;
+            }
+        }
+
+        return $best;
+    }
+
+    /**
+     * Range of one size. An open range (96+) is as wide as the size below.
+     *
+     * @param array $ranges Size => [min, max|null].
+     * @param int   $size   Suit number.
+     *
+     * @return array [min, max]
+     */
+    private static function rangeBounds(array $ranges, $size)
+    {
+        list($min, $max) = $ranges[$size];
+        if ($max === null) {
+            list($prevMin, $prevMax) = self::rangeBounds($ranges, $size - 1);
+            $max = $min + ($prevMax - $prevMin);
+        }
+
+        return array($min, $max);
     }
 
     /**
@@ -223,7 +304,8 @@ class GearSizing
     }
 
     /**
-     * US boot size from an EU shoe size. Half sizes round down.
+     * US boot size from an EU shoe size. Half sizes stay (35.5 is US 4).
+     * Between two chart rows the larger US size is used.
      *
      * @param float $shoe     EU shoe size.
      * @param array $warnings Out-of-chart notes are appended here.
@@ -232,13 +314,20 @@ class GearSizing
      */
     public static function bootsSize($shoe, array &$warnings = array())
     {
-        $shoe = (int) floor($shoe);
         if ($shoe < 34 || $shoe > 47) {
             $warnings[] = 'broj obuće izvan tablice čizmica';
             $shoe       = $shoe < 34 ? 34 : 47;
         }
 
-        return self::BOOTS[$shoe];
+        $boot = self::BOOTS[count(self::BOOTS) - 1][1];
+        foreach (self::BOOTS as $row) {
+            if ($shoe <= $row[0] + self::TOLERANCE) {
+                $boot = $row[1];
+                break;
+            }
+        }
+
+        return $boot;
     }
 
     /**

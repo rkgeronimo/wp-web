@@ -38,29 +38,32 @@ function check($label, $expected, $actual)
     }
 }
 
-// Suit: height (cm), weight (kg), expected size, expects a warning
+// Suit: height (cm), weight (kg), expected size, expects a warning.
+// A size that fits both measures wins; of several, the closest to the
+// range centres. Otherwise the larger of the smallest fitting sizes. 1 is
+// below the chart, 9 above it.
 $suits = array(
-    array(165, 50, 1, false),   // below 175 cm, XS weight
-    array(165, 60, 2, false),   // below 175 cm, sized by weight
-    array(175, 60, 2, false),
+    array(165, 50, 1, true),    // both below the men's chart
+    array(165, 60, 2, true),    // height below, weight is size 2
+    array(167, 54, 2, false),   // both on the size 2 minimum
+    array(175, 60, 2, false),   // only size 2 fits both
     array(176, 68, 3, false),
-    array(178, 68, 3, false),   // height on the M limit
-    array(178.5, 68, 4, false),
-    array(180, 68, 4, false),   // ML by height
-    array(172, 71, 4, false),   // ML by weight, boundary
-    array(172, 74, 4, false),
-    array(175, 70, 3, false),
-    array(172, 78, 5, false),   // L by weight, boundary
-    array(183, 80, 5, false),
-    array(186, 80, 6, false),
-    array(182, 90, 6, false),   // weight wins
-    array(189, 100, 7, false),
-    array(192, 110, 8, false),
-    array(195, 118, 9, false),
-    array(200, 90, 9, true),    // taller than the chart
-    array(170, 40, 1, true),    // lighter than the chart
-    array(170, 130, 9, true),   // heavier than the chart
-    array(130, 60, 2, true),    // implausible height
+    array(178, 68, 3, false),   // 178 cm is in 3 and 4, 68 kg in 2 and 3
+    array(180, 68, 3, false),
+    array(172, 71, 3, false),   // only size 3 fits both
+    array(175, 70, 3, false),   // 2 and 3 fit; 3 is closer to the centres
+    array(172, 78, 3, false),
+    array(183, 80, 4, false),   // 4 and 5 fit; 4 is closer
+    array(185, 80, 4, false),   // 4 and 5 fit; 4 is closer
+    array(182, 90, 5, false),   // only size 5 fits both
+    array(188, 100, 6, false),  // 6 and 7 fit; 6 is closer
+    array(193, 112, 7, false),  // 7 and 8 fit; 7 is closer
+    array(205, 130, 8, false),  // 112+ has no upper weight
+    array(168, 78, 3, false),   // no common size: smallest weight size
+    array(165, 75, 3, true),    // height below, smallest weight size
+    array(206, 90, 9, true),    // taller than 205 cm
+    array(170, 40, 2, true),    // lighter than 54 kg
+    array(130, 60, 2, true),    // height below the chart
 );
 foreach ($suits as $case) {
     list($height, $weight, $expected, $warns) = $case;
@@ -82,15 +85,22 @@ foreach ($bcd as $suit => $expected) {
     );
 }
 
-// Boots: EU shoe size, expected US boot, expects a warning
+// Boots: EU shoe size, expected US boot, expects a warning.
+// Between two chart rows the larger US size is used.
 $boots = array(
     array(34, 3, false),
-    array(35, 3, false),
-    array(36, 4, false),
-    array(37.5, 5, false),      // half size rounds down
-    array(40, 7, false),
+    array(35, 4, false),
+    array(35.5, 4, false),
+    array(36, 5, false),
+    array(37.5, 6, false),
+    array(40, 8, false),
     array(41, 8, false),
+    array(42.5, 9, false),
+    array(43, 9, false),
+    array(44.5, 10, false),
     array(45, 11, false),
+    array(45.5, 11, false),
+    array(46, 12, false),
     array(47, 13, false),
     array(33, 3, true),
     array(48, 13, true),
