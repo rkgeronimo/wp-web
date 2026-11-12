@@ -49,7 +49,7 @@
             <td>
                 <select name="suit_size">
                     <option value="" {% if profileMeta.suit_size is empty %} selected{% endif %}></option>
-                    {% for i in 2..8 %}
+                    {% for i in 1..9 %}
                         <option value="{{ i }}" {% if i == profileMeta.suit_size %} selected{% endif %}>{{ i }}</option>
                     {% endfor %}
                 </select>

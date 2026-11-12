@@ -26,7 +26,7 @@
                 <td>
                     <select name="suit_size">
                         <option value="" {% if user.suit_size is empty %} selected{% endif %}></option>
-                        {% for i in 2..7 %}
+                        {% for i in 1..9 %}
                             <option value="{{ i }}" {% if i == user.suit_size %} selected{% endif %}>{{ i }}</option>
                         {% endfor %}
                     </select>
