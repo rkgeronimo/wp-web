@@ -1,6 +1,8 @@
 <?php
 namespace RKGeronimo;
 
+use RKGeronimo\Helpers\Definitions;
+use RKGeronimo\Helpers\GearSizing;
 use RKGeronimo\Interfaces\InitInterface;
 use RKGeronimo\Tables\CourseStatus;
 use RKGeronimo\UserData;
@@ -85,6 +87,10 @@ class Courses implements InitInterface
         add_filter('bulk_actions-edit-course', '__return_empty_array', 100);
 
         add_action('wp_ajax_rkg_unregister_user', array($this, 'handleUnregisterUser'));
+        add_action(
+            'wp_ajax_rkg_course_reserve_gear',
+            array($this, 'handleReserveGear')
+        );
     }
 
     function my_remove_date_filter( $months ) {
@@ -1197,4 +1203,140 @@ class Courses implements InitInterface
         wp_send_json_success('User successfully unregistered');
     }
 
+    /**
+     * Creates pending gear reservations for every trainee of a course.
+     *
+     * R1 trainees get their sizes computed from the measurements entered at
+     * sign-up and need every piece of equipment. Other courses work like an
+     * excursion: the reservation uses the sizes already in the profile.
+     * Trainees who already have a reservation for the course are skipped,
+     * so the button can be used again for late sign-ups.
+     *
+     * @return void
+     */
+    public function handleReserveGear()
+    {
+        check_ajax_referer('rkg_admin', 'nonce');
+        if (!current_user_can('edit_courses')) {
+            wp_send_json_error('Nemaš ovlasti.');
+        }
+
+        global $wpdb;
+        $courseId = isset($_POST['course_id']) ? absint($_POST['course_id']) : 0;
+        $meta     = $wpdb->get_row($wpdb->prepare(
+            "SELECT organiser, category FROM {$wpdb->prefix}rkg_course_meta
+            WHERE id = %d",
+            $courseId
+        ));
+        if (!$meta) {
+            wp_send_json_error('Tečaj nije pronađen.');
+        }
+        if ((int) $meta->organiser !== get_current_user_id()
+            && !current_user_can('edit_others_courses')
+        ) {
+            wp_send_json_error('Nemaš ovlasti, nisi instruktor ovog tečaja.');
+        }
+
+        $isR1        = (int) $meta->category === 1;
+        $gearTable   = $wpdb->prefix.'rkg_excursion_gear';
+        $definitions = new Definitions();
+        $types       = array_keys($definitions->defineEquipment());
+        $signups     = $wpdb->get_results($wpdb->prepare(
+            "SELECT user_id, height, weight, shoe_size
+            FROM {$wpdb->prefix}rkg_course_signup
+            WHERE course_id = %d ORDER BY created",
+            $courseId
+        ));
+
+        $result = array(
+            'created' => array(),
+            'skipped' => array(),
+            'failed'  => array(),
+        );
+        foreach ($signups as $signup) {
+            $user = get_userdata($signup->user_id);
+            if (!$user) {
+                continue;
+            }
+            $name = trim($user->first_name.' '.$user->last_name);
+            if ($name === '') {
+                $name = $user->display_name;
+            }
+
+            $existing = $wpdb->get_var($wpdb->prepare(
+                "SELECT id FROM $gearTable
+                WHERE user_id = %d AND post_id = %d AND state != %d
+                LIMIT 1",
+                $signup->user_id,
+                $courseId,
+                Definitions::RESERVATION_STATUS_DELETED
+            ));
+            if ($existing) {
+                $result['skipped'][] = $name;
+                continue;
+            }
+
+            $warnings = array();
+            $computed = null;
+            if ($isR1) {
+                $computed = GearSizing::compute(
+                    $signup->height,
+                    $signup->weight,
+                    $signup->shoe_size
+                );
+                $warnings = $computed['warnings'];
+                $leadSize = isset($computed['sizes']['lead_size'])
+                    ? $computed['sizes']['lead_size']
+                    : null;
+            } else {
+                $leadSize = get_user_meta($signup->user_id, 'lead_size', true);
+                if (!get_user_meta($signup->user_id, 'suit_size', true)) {
+                    $warnings[] = 'nema spremljene veličine opreme';
+                }
+            }
+
+            $inserted = $wpdb->insert(
+                $gearTable,
+                array(
+                    'user_id'   => $signup->user_id,
+                    'post_id'   => $courseId,
+                    // The reservations list escapes it, so not NULL
+                    'other'     => '',
+                    'lead_size' => $leadSize !== '' ? $leadSize : null,
+                    'state'     => Definitions::RESERVATION_STATUS_PENDING,
+                )
+            );
+            if (!$inserted) {
+                $result['failed'][] = $name;
+                continue;
+            }
+
+            if ($computed !== null) {
+                // The reservation pages read sizes from the profile. A size
+                // that can't be computed is cleared, so an old one isn't
+                // shown as if it came from the measurements.
+                foreach ($types as $type) {
+                    if (isset($computed['sizes'][$type.'_size'])) {
+                        update_user_meta(
+                            $signup->user_id,
+                            $type.'_size',
+                            $computed['sizes'][$type.'_size']
+                        );
+                    } else {
+                        delete_user_meta($signup->user_id, $type.'_size');
+                    }
+                    // A stored flag means "doesn't need it"; R1 trainees
+                    // need every piece.
+                    delete_user_meta($signup->user_id, $type);
+                }
+            }
+
+            $result['created'][] = array(
+                'name'     => $name,
+                'warnings' => $warnings,
+            );
+        }
+
+        wp_send_json_success($result);
+    }
 }

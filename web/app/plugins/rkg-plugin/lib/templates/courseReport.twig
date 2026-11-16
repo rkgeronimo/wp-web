@@ -51,7 +51,15 @@
                     <td>{{ allBrevet }}</td>
                     <td><b>{{ hrsReport }}</b></td>
                 </tr>
-                
+                {% if user.can('edit_courses') %}
+                <tr>
+                    <td colspan="4">
+                        <button type="button" class="button" id="rkg-course-reserve-gear" data-course-id="{{ post.ID }}">Rezerviraj opremu za polaznike</button>
+                        <div id="rkg-course-reserve-gear-result"></div>
+                    </td>
+                </tr>
+                {% endif %}
+
             </table>
             {{ table.display() }}
         <input type="submit" value="spremi">

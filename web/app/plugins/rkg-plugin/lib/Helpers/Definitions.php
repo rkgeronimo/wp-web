@@ -91,7 +91,7 @@ class Definitions
             ),
             'suit'      => array(
                 'name'  => 'Odijelo',
-                'size' => array(2, 3, 4, 5, 6, 7, 8),
+                'size' => array(1, 2, 3, 4, 5, 6, 7, 8, 9),
                 'prefix' => array('', 'A'),
             ),
             'boots'     => array(

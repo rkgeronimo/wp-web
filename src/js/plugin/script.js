@@ -988,6 +988,61 @@ jQuery(document).ready(($) => {
         hideUnregisterDialog();
     });
 
+    // Course report: create pending gear reservations for the trainees
+    $('#rkg-course-reserve-gear').on('click', (e) => {
+        const button = $(e.currentTarget);
+        const output = $('#rkg-course-reserve-gear-result');
+        // eslint-disable-next-line no-alert
+        if (!window.confirm('Kreirati rezervacije opreme za polaznike?')) {
+            return;
+        }
+
+        button.prop('disabled', true);
+        $.ajax({
+            url: rkgScript.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'rkg_course_reserve_gear',
+                nonce: rkgScript.nonce,
+                course_id: button.data('course-id'),
+            },
+            success(response) {
+                output.empty();
+                if (!response.success) {
+                    output.text(`Greška: ${response.data}`);
+                    return;
+                }
+
+                const {created, skipped, failed} = response.data;
+                output.append($('<p>').text(`Kreirano rezervacija: ${created.length}`));
+                const list = $('<ul>');
+                created.forEach((item) => {
+                    const text = item.warnings.length
+                        ? `${item.name}: provjeri (${item.warnings.join(', ')})`
+                        : item.name;
+                    list.append($('<li>').text(text));
+                });
+                output.append(list);
+                if (skipped.length) {
+                    output.append($('<p>').text(
+                        `Već imaju rezervaciju: ${skipped.join(', ')}`,
+                    ));
+                }
+                if (failed.length) {
+                    output.append($('<p>').text(
+                        `Greška pri spremanju za: ${failed.join(', ')}`,
+                    ));
+                }
+            },
+            error() {
+                output.text('Dogodila se greška prilikom kreiranja rezervacija.');
+            },
+            complete() {
+                button.prop('disabled', false);
+            },
+        });
+    });
+
     $(document).on('click', '#apply-trash-actions', function(e) {
         var form = $(this).closest('form');
         var select = form.find('select[name="action"]');
