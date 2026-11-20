@@ -674,6 +674,88 @@ class EquipmentReservation extends ApiEndpoint implements InitInterface
                 : (float) $row->donation_amount,
             'comment'       => $row->other,
             'equipment'     => $equipment,
+            'excursions_while_out' => $this->excursionsWhileOut($row),
         );
+    }
+
+    /**
+     * Excursions the member signed up for while the equipment is out:
+     * not canceled, published, starting between the earliest issue date of
+     * a piece still out and today. Null unless the reservation is active
+     * and not archived.
+     *
+     * @param object $row Gear row.
+     *
+     * @return int|null
+     */
+    private function excursionsWhileOut($row)
+    {
+        global $wpdb;
+        if ((int) $row->state !== Definitions::RESERVATION_STATUS_ACTIVE
+            || (int) $row->archived === 1
+        ) {
+            return null;
+        }
+
+        $codes = array();
+        foreach (array_keys($this->equipmentMeta) as $type) {
+            $returnedKey = $type.'_returned';
+            $returned    = $row->$returnedKey;
+            $stillOut    = $returned === null
+                || (int) $returned === Definitions::EQUIPMENT_STATUS_ISSUED;
+            if ($stillOut && $row->$type !== null && $row->$type !== '') {
+                $codes[] = (string) $row->$type;
+            }
+        }
+        if (empty($codes)) {
+            return null;
+        }
+
+        // Inventory keeps the issue date only while the piece is out.
+        // Rows saved before the holder was kept have no user.
+        $inventory    = $this->inventoryTable();
+        $placeholders = implode(', ', array_fill(0, count($codes), '%s'));
+        $issuedAt     = $wpdb->get_var($wpdb->prepare(
+            "SELECT MIN(issue_date) FROM $inventory
+            WHERE id IN ($placeholders)
+            AND state = %d
+            AND (user_id = %d OR user_id IS NULL)",
+            array_merge(
+                $codes,
+                array(
+                    Definitions::EQUIPMENT_STATUS_ISSUED,
+                    (int) $row->user_id,
+                )
+            )
+        ));
+        if (!$issuedAt) {
+            return null;
+        }
+
+        $signup = $wpdb->prefix.'rkg_excursion_signup';
+        $meta   = $wpdb->prefix.'rkg_excursion_meta';
+        $posts  = $wpdb->posts;
+
+        $today = current_time('Y-m-d');
+
+        // The reservation's own excursion counts once it has started, even
+        // when the gear was recorded as issued after its start. It does not
+        // move the range, so earlier excursions stay out.
+        return intval($wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT signup.post_id)
+            FROM $signup AS signup
+            INNER JOIN $meta AS meta ON meta.id = signup.post_id
+            INNER JOIN $posts AS posts ON posts.ID = signup.post_id
+            WHERE signup.user_id = %d
+            AND COALESCE(meta.canceled, 0) = 0
+            AND posts.post_status = 'publish'
+            AND meta.starttime <= %s
+            AND (meta.starttime >= %s OR signup.post_id = %d)",
+            (int) $row->user_id,
+            $today,
+            // issue_date is written with date(), which is UTC in WordPress
+            get_date_from_gmt($issuedAt, 'Y-m-d'),
+            (int) $row->post_id
+        )));
     }
 }
