@@ -91,10 +91,10 @@
                         {{ metaTemplate.name }}
                     </td>
                     <td contenteditable="true">
-                        {{ organiser.display_name }}, {{ organiser.cardNumber }}
+                        {% if organiser %}{{ organiser.display_name }}, {{ organiser.cardNumber }}{% endif %}
                     </td>
                     <td contenteditable="true">
-                        {{ assistant.display_name }}, {{ assistant.cardNumber }}
+                        {% if assistant %}{{ assistant.display_name }}, {{ assistant.cardNumber }}{% endif %}
                     </td>
                 </tr>
                 <tr>

@@ -418,7 +418,9 @@ class Courses implements InitInterface
                 .$id
             );
 
-            $context['assistant'] = Timber::get_user($context['meta']->assistant);
+            // Timber::get_user() falls back to the current user for empty IDs.
+            $context['assistant'] = $context['meta']->assistant
+                ? Timber::get_user((int) $context['meta']->assistant) : null;
 
             $tableName               = $wpdb->prefix."rkg_course_template";
             $context['metaTemplate'] = $wpdb->get_row(
@@ -428,7 +430,8 @@ class Courses implements InitInterface
                 .$context['meta']->category
             );
 
-            $context['organiser'] = Timber::get_user($context['meta']->organiser);
+            $context['organiser'] = $context['meta']->organiser
+                ? Timber::get_user((int) $context['meta']->organiser) : null;
 
             $where = " WHERE post_id=".$id;
             if ($context['request']->get['user']) {
