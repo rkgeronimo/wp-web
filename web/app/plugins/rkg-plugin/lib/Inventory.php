@@ -986,7 +986,9 @@ class Inventory implements InitInterface
         }
 
         foreach ($users as $k => $value) {
-            $user = Timber::get_user($value->user_id);
+            // Timber::get_user() falls back to the current user for empty IDs.
+            $user = $value->user_id
+                ? Timber::get_user((int) $value->user_id) : null;
             $context['lenters'][] = ['display_name' => $user?->display_name, 'date_updated' => $value->updated];
         }
 
@@ -1097,8 +1099,9 @@ class Inventory implements InitInterface
 
 
         foreach ($context['inventoryItems'] as $key => $value) {
-            $context['inventoryItems'][$key]->user =
-                Timber::get_user($value->user_id);
+            // Timber::get_user() falls back to the current user for empty IDs.
+            $context['inventoryItems'][$key]->user = $value->user_id
+                ? Timber::get_user((int) $value->user_id) : null;
         }
 
         $templates = array('inventory.twig');

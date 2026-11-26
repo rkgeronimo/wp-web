@@ -25,7 +25,9 @@ $context['meta'] = $wpdb->get_row(
     .$post->ID
 );
 
-$context['organiser'] = Timber::get_user($context['meta']->organiser);
+// Timber::get_user() falls back to the current user for empty IDs.
+$context['organiser'] = $context['meta']?->organiser
+    ? Timber::get_user((int) $context['meta']->organiser) : null;
 
 // Drugi termini
 $context['courseTerms'] = $wpdb->get_results(

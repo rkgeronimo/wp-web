@@ -43,7 +43,8 @@ Run Gulp after changing source assets in `src/`. The generated files in this the
   `Timber::get_posts()`, `Timber::get_user()`, `Timber::get_image()` and
   `Timber::get_menu()`. Timber classes can no longer be created with `new`.
   `get_user()`/`get_post()` return `null` for missing IDs, so check before
-  using the result.
+  using the result. `get_user()` with an empty ID (`null`, `0`, `''`)
+  returns the current user, so guard nullable IDs before calling it.
 - `request.get` / `request.post` in the context come from
   `RKGSite::getRequest()`, not from Timber.
 - Timber autoescape is disabled in `functions.php`; escape values deliberately
